@@ -10,22 +10,20 @@ EXPOSE 8080
 # This stage is used to build the service project
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
-ARG TARGETPLATFORM
-ARG BUILDPLATFORM
+ARG DOTNET_BUILD_PLATFORM=linux-x64
 WORKDIR /src
 COPY ["SimpleCDN/SimpleCDN.csproj", "SimpleCDN/"]
 RUN dotnet restore "./SimpleCDN/SimpleCDN.csproj"
 COPY . .
 WORKDIR "/src/SimpleCDN"
 RUN apt update && apt install -y clang zlib1g-dev
-RUN dotnet build "./SimpleCDN.csproj" -c $BUILD_CONFIGURATION -r $TARGETPLATFORM -o /app/build
+RUN dotnet build "./SimpleCDN.csproj" -c $BUILD_CONFIGURATION -r $DOTNET_BUILD_PLATFORM -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-ARG TARGETPLATFORM
-ARG BUILDPLATFORM
-RUN dotnet publish "./SimpleCDN.csproj" -c $BUILD_CONFIGURATION -r $TARGETPLATFORM -o /app/publish /p:UseAppHost=false
+ARG DOTNET_BUILD_PLATFORM=linux-x64
+RUN dotnet publish "./SimpleCDN.csproj" -c $BUILD_CONFIGURATION -r $DOTNET_BUILD_PLATFORM -o /app/publish /p:UseAppHost=false
 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
