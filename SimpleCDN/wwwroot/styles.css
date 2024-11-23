@@ -1,0 +1,26 @@
+﻿@font-face {
+    font-family: Code;
+    font-display: swap;
+    src: local("Cascadia Code"),url(/CascadiaCode/woff2/CascadiaCode.woff2) format("woff2"),url(/CascadiaCode/ttf/CascadiaCode.ttf) format("truetype"),url(/CascadiaCode/CascadiaCode.ttf) format("truetype"),url(/CascadiaCode/otf/static/CascadiaCodeNF-Regular.otf) format("opentype"),local("Cascadia Mono"),monospace
+}
+
+:root {
+	font-family: Code;
+}
+
+table {
+	margin: auto;
+}
+
+h1 {
+	text-align: center;
+}
+
+th, td {
+	padding: .2em 1em;
+}
+
+table > thead > tr > th {
+	font-size: 1.2rem;
+	border-bottom: 1px solid black;
+}
