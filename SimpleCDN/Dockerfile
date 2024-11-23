@@ -1,7 +1,7 @@
 # See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
 # This stage is used when running from VS in fast mode (Default for Debug configuration)
-FROM --platform=$TARGETPLATFORM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
@@ -16,7 +16,7 @@ COPY ["SimpleCDN/SimpleCDN.csproj", "SimpleCDN/"]
 RUN dotnet restore "./SimpleCDN/SimpleCDN.csproj"
 COPY . .
 WORKDIR "/src/SimpleCDN"
-RUN apt update && apt install -y clang zlib1g-dev
+RUN apt update && apt install -y clang zlib1g-dev binutils-aarch64-linux-gnu
 RUN dotnet build "./SimpleCDN.csproj" -c $BUILD_CONFIGURATION -r $DOTNET_BUILD_PLATFORM -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
