@@ -26,7 +26,7 @@ RUN dotnet build "./SimpleCDN.csproj" --no-restore -c $BUILD_CONFIGURATION -r $D
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 ARG DOTNET_BUILD_PLATFORM=linux-x64
-RUN dotnet publish "./SimpleCDN.csproj" --no-restore -c $BUILD_CONFIGURATION -r $DOTNET_BUILD_PLATFORM -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./SimpleCDN.csproj" -c $BUILD_CONFIGURATION -r $DOTNET_BUILD_PLATFORM -o /app/publish /p:UseAppHost=false
 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
