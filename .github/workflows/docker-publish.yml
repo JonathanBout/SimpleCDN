@@ -55,10 +55,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           
-      - name: Setup Buildx
-        uses: docker/setup-buildx-action@v3.7.1
-        with:
-          platforms: linux/amd64
+#      - name: Setup Buildx
+#        uses: docker/setup-buildx-action@v3.7.1
+#        with:
+#          platforms: linux/amd64
       # Extract metadata (tags, labels) for Docker
       # https://github.com/docker/metadata-action
       - name: Extract Docker metadata
