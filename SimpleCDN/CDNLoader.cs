@@ -41,7 +41,7 @@ namespace SimpleCDN
 					return LoadFile(fullPath, "/" + path);
 				}
 
-				return new CDNFile(cachedFile.Content, MimeTypeToString(cachedFile.MimeType), cachedFile.LastModified);
+				return new CDNFile(cachedFile.Content, cachedFile.MimeType.ToContentTypeString(), cachedFile.LastModified);
 			}
 
 			return LoadFile(fullPath, "/" + path);
@@ -59,7 +59,7 @@ namespace SimpleCDN
 
 			if (_cache.TryGetValue(info.PhysicalPath, out CachedFile? cached) && cached is not null && cached.LastModified >= info.LastModified)
 			{
-				return new CDNFile(cached.Content, MimeTypeToString(cached.MimeType), cached.LastModified);
+				return new CDNFile(cached.Content, cached.MimeType.ToContentTypeString(), cached.LastModified);
 			}
 
 			if (!info.Exists)
@@ -71,7 +71,7 @@ namespace SimpleCDN
 			var bytes = new byte[stream.Length];
 			stream.ReadExactly(bytes);
 
-			var mime = MimeTypeFromFileName(info.PhysicalPath);
+			var mime = MimeTypeHelpers.MimeTypeFromFileName(info.PhysicalPath);
 
 			_cache[info.PhysicalPath] = new CachedFile
 			{
@@ -80,7 +80,7 @@ namespace SimpleCDN
 				MimeType = mime
 			};
 
-			return new CDNFile(bytes, MimeTypeToString(mime), info.LastModified);
+			return new CDNFile(bytes, mime.ToContentTypeString(), info.LastModified);
 		}
 
 		private CDNFile? LoadFile(string absolutePath, string rootRelativePath)
@@ -121,19 +121,21 @@ namespace SimpleCDN
 				MimeType = content.type
 			};
 
-			return new CDNFile(file.Content, MimeTypeToString(file.MimeType), file.LastModified);
+			return new CDNFile(file.Content, file.MimeType.ToContentTypeString(), file.LastModified);
 		}
 
 
 		private static (MimeType type, byte[]? content) TryLoadIndex(string absolutePath, string rootRelativePath)
 		{
-			if (!Directory.Exists(absolutePath)) return empty;
+			if (!Directory.Exists(absolutePath)) return MimeTypeHelpers.Empty;
 
-			var indexes = Directory.GetFiles(absolutePath, "index.*");
+			var indexes = Directory.EnumerateFiles(absolutePath, "index.htm?");
 
 			foreach (var indexFile in indexes)
 			{
-				if (indexFile[^4..] == "html" || indexFile[^3..] == "htm")
+				var substring = indexFile.AsSpan()[indexFile.LastIndexOf('.')..];
+
+				if (substring == "html" || substring == "htm")
 				{
 					var loaded = LoadFileFromDisk(indexFile);
 
@@ -154,14 +156,25 @@ namespace SimpleCDN
 
 			var directory = new DirectoryInfo(absolutePath);
 
-			StringBuilder index = new StringBuilder();
+			var index = new StringBuilder();
 
-			index.AppendFormat("""
+			index.AppendFormat(
+				"""
 				<html>
-				<head><meta name="robots" content="noindex,nofollow"><link rel="stylesheet" href="/_cdn/styles.css"></head><meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0">
-				<body><h1>Index of {0}</h1><table>
-				<thead><tr><th>Name</th><th>Size</th><th>Last Modified</th></tr></thead>
-				<tbody>
+				<head>
+					<meta name="robots" content="noindex,nofollow">
+					<link rel="stylesheet" href="/_cdn/styles.css">
+					<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0">
+				</head>
+				<body>
+					<h1>Index of {0}</h1>
+					<table>
+						<thead><tr>
+							<th>Name</th>
+							<th>Size</th>
+							<th>Last Modified</th>
+						</tr></thead>
+						<tbody>
 				""", rootRelativePath);
 
 			if (rootRelativePath is not "/" and not "" && directory.Parent is DirectoryInfo parent)
@@ -183,6 +196,8 @@ namespace SimpleCDN
 				AppendRow(index, Path.Combine(rootRelativePath, name), name, file.Length, file.LastWriteTimeUtc);
 			}
 
+			index.Append("</tbody></table></body></html>");
+
 			var bytes = Encoding.UTF8.GetBytes(index.ToString());
 
 			return bytes;
@@ -198,11 +213,11 @@ namespace SimpleCDN
 		private static (MimeType type, byte[]? content) LoadFileFromDisk(string absolutePath)
 		{
 			if (!Path.IsPathRooted(absolutePath))
-				return empty;
+				return MimeTypeHelpers.Empty;
 
-			if (!File.Exists(absolutePath)) return empty;
+			if (!File.Exists(absolutePath)) return MimeTypeHelpers.Empty;
 
-			return (MimeTypeFromFileName(absolutePath), File.ReadAllBytes(absolutePath));
+			return (MimeTypeHelpers.MimeTypeFromFileName(absolutePath), File.ReadAllBytes(absolutePath));
 		}
 
 		private string? GetFullPath(string relativePath)
@@ -225,75 +240,5 @@ namespace SimpleCDN
 
 			return resolved;
 		}
-
-		private class CachedFile
-		{
-			public required byte[] Content { get; set; }
-			public required MimeType MimeType { get; set; }
-			public virtual DateTimeOffset LastModified { get; set; }
-		}
-
-		private class CachedIndexFile : CachedFile
-		{
-			public required string DirectoryName { get; set; }
-			public override DateTimeOffset LastModified
-			{
-				get => Directory.GetLastWriteTimeUtc(DirectoryName);
-				set { }
-			}
-		}
-
-		private enum MimeType
-		{
-			HTML, TEXT, PNG, JPEG, GIF, WOFF, WOFF2, TTF, OTF, CSS, EOT, SVG, WEBP, JSON, UNKNOWN
-		}
-
-		private static MimeType MimeTypeFromFileName(string name)
-		{
-			var extension = name[(name.LastIndexOf('.') + 1)..];
-
-			return extension.ToLower() switch
-			{
-				"html" or "htm" => MimeType.HTML,
-				"txt" => MimeType.TEXT,
-				"png" => MimeType.PNG,
-				"json" => MimeType.JSON,
-				"jpeg" or "jpg" => MimeType.JPEG,
-				"gif" => MimeType.GIF,
-				"woff" => MimeType.WOFF,
-				"woff2" => MimeType.WOFF2,
-				"ttf" => MimeType.TTF,
-				"otf" => MimeType.OTF,
-				"css" => MimeType.CSS,
-				"eot" => MimeType.EOT,
-				"svg" => MimeType.SVG,
-				"webp" => MimeType.WEBP,
-				_ => MimeType.UNKNOWN
-			};
-		}
-
-		private static string MimeTypeToString(MimeType type)
-		{
-			return type switch
-			{
-				MimeType.HTML => MediaTypeNames.Text.Html,
-				MimeType.CSS => MediaTypeNames.Text.Css,
-				MimeType.TEXT => MediaTypeNames.Text.Plain,
-				MimeType.JSON => MediaTypeNames.Application.Json,
-				MimeType.PNG => MediaTypeNames.Image.Png,
-				MimeType.JPEG => MediaTypeNames.Image.Jpeg,
-				MimeType.SVG => MediaTypeNames.Image.Svg,
-				MimeType.WEBP => MediaTypeNames.Image.Webp,
-				MimeType.GIF => MediaTypeNames.Image.Gif,
-				MimeType.WOFF => MediaTypeNames.Font.Woff,
-				MimeType.WOFF2 => MediaTypeNames.Font.Woff2,
-				MimeType.TTF => MediaTypeNames.Font.Ttf,
-				MimeType.OTF => MediaTypeNames.Font.Otf,
-				MimeType.EOT => "application/vnd.ms-fontobject",
-				_ => MediaTypeNames.Application.Octet,
-			};
-		}
-
-		private static readonly (MimeType, byte[]?) empty = (MimeType.UNKNOWN, null);
 	}
 }
