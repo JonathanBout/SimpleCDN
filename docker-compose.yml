@@ -1,0 +1,6 @@
+services:
+  simplecdn:
+    image: ${DOCKER_REGISTRY-}simplecdn
+    build:
+      context: .
+      dockerfile: SimpleCDN/Dockerfile

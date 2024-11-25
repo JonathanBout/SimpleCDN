@@ -4,25 +4,6 @@ namespace SimpleCDN
 {
 	public static class Extensions
 	{
-		public static WebApplication MapCDNEndpoints(this WebApplication builder)
-		{
-			builder.MapGet("/{*route}", (CDNLoader loader, string route = "") =>
-			{
-				if (loader.GetFile(route) is CDNFile file)
-				{
-					return Results.File(file.Content, file.MediaType, lastModified: file.LastModified);
-				}
-
-				return Results.NotFound();
-			}).CacheOutput(policy =>
-			{
-				policy.Cache()
-					.Expire(TimeSpan.FromMinutes(1));
-			});
-
-			return builder;
-		}
-
 		static readonly string[] sizeNames = ["", "k", "M", "G", "T"];
 
 		public static string FormatByteCount(this long number)
