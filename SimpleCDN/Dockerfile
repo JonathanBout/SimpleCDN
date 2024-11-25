@@ -16,7 +16,7 @@ COPY ["SimpleCDN/SimpleCDN.csproj", "SimpleCDN/"]
 RUN dotnet restore "./SimpleCDN/SimpleCDN.csproj"
 COPY . .
 WORKDIR "/src/SimpleCDN"
-RUN apt update && apt install -y clang zlib1g-dev binutils-aarch64-linux-gnu
+# RUN apt update && apt install -y clang zlib1g-dev binutils-aarch64-linux-gnu
 RUN dotnet build "./SimpleCDN.csproj" -c $BUILD_CONFIGURATION -r $DOTNET_BUILD_PLATFORM -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
