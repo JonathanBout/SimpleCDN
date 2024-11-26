@@ -1,4 +1,4 @@
-﻿namespace SimpleCDN
+﻿namespace SimpleCDN.Cache
 {
 	class CachedIndexFile : CachedFile
 	{

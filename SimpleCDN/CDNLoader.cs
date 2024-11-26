@@ -2,17 +2,21 @@
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
+using SimpleCDN.Cache;
+using SimpleCDN.Configuration;
+using SimpleCDN.Helpers;
+using System.IO.Compression;
 using System.Net.Mime;
 using System.Text;
 
 namespace SimpleCDN
 {
-	public record CDNFile(byte[] Content, string MediaType, DateTimeOffset LastModified);
+	public record CDNFile(byte[] Content, string MediaType, DateTimeOffset LastModified, bool IsCompressed);
 	public class CDNLoader(IWebHostEnvironment environment, IOptionsMonitor<CDNConfiguration> options)
 	{
 		private readonly IWebHostEnvironment _environment = environment;
 
-		private readonly Dictionary<string, CachedFile> _cache = new(StringComparer.OrdinalIgnoreCase);
+		private readonly SizeLimitedCache _cache = new(options.CurrentValue.MaxMemoryCacheSize * 1000, StringComparer.OrdinalIgnoreCase);
 
 		private readonly IOptionsMonitor<CDNConfiguration> _options = options;
 
@@ -41,7 +45,7 @@ namespace SimpleCDN
 					return LoadFile(fullPath, "/" + path);
 				}
 
-				return new CDNFile(cachedFile.Content, cachedFile.MimeType.ToContentTypeString(), cachedFile.LastModified);
+				return new CDNFile(cachedFile.Content, cachedFile.MimeType.ToContentTypeString(), cachedFile.LastModified, cachedFile.IsCompressed);
 			}
 
 			return LoadFile(fullPath, "/" + path);
@@ -59,7 +63,7 @@ namespace SimpleCDN
 
 			if (_cache.TryGetValue(info.PhysicalPath, out CachedFile? cached) && cached is not null && cached.LastModified >= info.LastModified)
 			{
-				return new CDNFile(cached.Content, cached.MimeType.ToContentTypeString(), cached.LastModified);
+				return new CDNFile(cached.Content, cached.MimeType.ToContentTypeString(), cached.LastModified, cached.IsCompressed);
 			}
 
 			if (!info.Exists)
@@ -77,10 +81,11 @@ namespace SimpleCDN
 			{
 				Content = bytes,
 				LastModified = info.LastModified,
-				MimeType = mime
+				MimeType = mime,
+				IsCompressed = false
 			};
 
-			return new CDNFile(bytes, mime.ToContentTypeString(), info.LastModified);
+			return new CDNFile(bytes, mime.ToContentTypeString(), info.LastModified, false);
 		}
 
 		private CDNFile? LoadFile(string absolutePath, string rootRelativePath)
@@ -102,11 +107,9 @@ namespace SimpleCDN
 					{
 						Content = bytes,
 						DirectoryName = absolutePath,
-						LastModified = lastModified,
 						MimeType = MimeType.HTML
 					};
 				}
-
 			} else
 			{
 				lastModified = new DateTimeOffset(File.GetLastWriteTimeUtc(absolutePath));
@@ -114,14 +117,26 @@ namespace SimpleCDN
 
 			if (content.content is null) return null;
 
-			_cache[absolutePath] = file ??= new CachedFile
+
+			file ??= new CachedFile
 			{
 				Content = content.content,
 				LastModified = lastModified,
 				MimeType = content.type
 			};
 
-			return new CDNFile(file.Content, file.MimeType.ToContentTypeString(), file.LastModified);
+			// attempt to compress the file if it's not already compressed
+			/*if (!file.IsCompressed)
+			{
+				var contentSpan = content.content.AsSpan();
+				bool compressed = GZipHelpers.TryCompress(ref contentSpan);
+				file.Content = contentSpan.ToArray();
+				file.IsCompressed = compressed;
+			}*/
+
+			_cache[absolutePath] = file;
+
+			return new CDNFile(file.Content, file.MimeType.ToContentTypeString(), file.LastModified, file.IsCompressed);
 		}
 
 
@@ -133,9 +148,9 @@ namespace SimpleCDN
 
 			foreach (var indexFile in indexes)
 			{
-				var substring = indexFile.AsSpan()[indexFile.LastIndexOf('.')..];
+				var substring = indexFile.AsSpan()[(indexFile.LastIndexOf('.') + 1)..];
 
-				if (substring == "html" || substring == "htm")
+				if (substring.SequenceEqual("html") || substring.SequenceEqual("htm"))
 				{
 					var loaded = LoadFileFromDisk(indexFile);
 
@@ -179,7 +194,19 @@ namespace SimpleCDN
 
 			if (rootRelativePath is not "/" and not "" && directory.Parent is DirectoryInfo parent)
 			{
-				AppendRow(index, "..", "Parent Directory", -1, parent.LastWriteTimeUtc);
+				var lastSlashIndex = rootRelativePath.LastIndexOf('/');
+
+				string parentRootRelativePath;
+
+				if (lastSlashIndex is < 1)
+				{
+					parentRootRelativePath = "/";
+				} else
+				{
+					parentRootRelativePath = rootRelativePath[..lastSlashIndex];
+				}
+
+				AppendRow(index, parentRootRelativePath, "Parent Directory", -1, parent.LastWriteTimeUtc);
 			}
 
 			foreach (var subDirectory in directory.EnumerateDirectories())
@@ -226,13 +253,12 @@ namespace SimpleCDN
 
 			relativePath = relativePath.TrimStart('/');
 
-
-
 			var combined = Path.Combine(DataRoot, relativePath);
 
 			var resolved = Path.GetFullPath(combined);
 
-			// if the path contained for example ../file, we obviously don't allow access
+			// if the path contained for example ../file and it resolves to a parent or sibling directory
+			// of the data root, we obviously don't allow access
 			if (!resolved.StartsWith(DataRoot))
 			{
 				return null;

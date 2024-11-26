@@ -4,3 +4,7 @@ services:
     build:
       context: .
       dockerfile: SimpleCDN/Dockerfile
+    volumes:
+    - ../:/data
+    environment:
+    - CDN_DATA_ROOT=/data

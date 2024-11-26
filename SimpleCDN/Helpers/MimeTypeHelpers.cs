@@ -1,6 +1,6 @@
 ﻿using System.Net.Mime;
 
-namespace SimpleCDN
+namespace SimpleCDN.Helpers
 {
 	internal static class MimeTypeHelpers
 	{
