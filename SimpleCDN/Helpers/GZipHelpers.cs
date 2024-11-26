@@ -12,13 +12,15 @@ namespace SimpleCDN.Helpers
 		public static bool TryCompress(ref Span<byte> data)
 		{
 			using var memoryStream = new MemoryStream();
-			using var gzipStream = new GZipStream(memoryStream, CompressionMode.Compress);
-			gzipStream.Write(data);
-			gzipStream.Flush();
+			using (var gzipStream = new GZipStream(memoryStream, CompressionMode.Compress, true))
+			{
+				gzipStream.Write(data);
+			}
 
 			if (memoryStream.Length >= data.Length)
 				return false;
 
+			memoryStream.Position = 0;
 			var read = memoryStream.Read(data);
 
 			data = data[..read];

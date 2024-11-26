@@ -1,5 +1,6 @@
 using SimpleCDN;
 using SimpleCDN.Configuration;
+using System.IO.Compression;
 
 var builder = WebApplication.CreateSlimBuilder(args);
 

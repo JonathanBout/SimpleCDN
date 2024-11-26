@@ -126,13 +126,13 @@ namespace SimpleCDN
 			};
 
 			// attempt to compress the file if it's not already compressed
-			/*if (!file.IsCompressed)
+			if (!file.IsCompressed)
 			{
 				var contentSpan = content.content.AsSpan();
 				bool compressed = GZipHelpers.TryCompress(ref contentSpan);
 				file.Content = contentSpan.ToArray();
 				file.IsCompressed = compressed;
-			}*/
+			}
 
 			_cache[absolutePath] = file;
 
