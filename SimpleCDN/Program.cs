@@ -1,5 +1,6 @@
 using SimpleCDN;
 using SimpleCDN.Configuration;
+using SimpleCDN.Helpers;
 using System.IO.Compression;
 
 var builder = WebApplication.CreateSlimBuilder(args);
@@ -21,6 +22,7 @@ builder.Services.AddOptions<CDNConfiguration>()
 	.BindConfiguration("CDN");
 
 builder.Services.AddSingleton<CDNLoader>();
+builder.Services.AddSingleton<IndexGenerator>();
 
 builder.Services.AddMemoryCache();
 

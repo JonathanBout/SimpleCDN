@@ -5,7 +5,7 @@ namespace SimpleCDN.Helpers
 	public class GZipHelpers
 	{
 		/// <summary>
-		/// Compresses the data using GZip.
+		/// Compresses the data using GZip, in-place. If the compressed data is not smaller than the original data, the original data is left unchanged.
 		/// </summary>
 		/// <param name="data">The data to compress</param>
 		/// <returns><see langword="false"/> if the compressed data is not smaller than the original data. Otherwise, <see langword="true"/></returns>

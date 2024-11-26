@@ -1,26 +1,54 @@
 ﻿@font-face {
     font-family: Code;
     font-display: swap;
-    src: local("Cascadia Code"),url(/CascadiaCode/woff2/CascadiaCode.woff2) format("woff2"),url(/CascadiaCode/ttf/CascadiaCode.ttf) format("truetype"),url(/CascadiaCode/CascadiaCode.ttf) format("truetype"),url(/CascadiaCode/otf/static/CascadiaCodeNF-Regular.otf) format("opentype"),local("Cascadia Mono"),monospace
+    src: local("Cascadia Code"),url(/CascadiaCode/woff2/CascadiaCode.woff2) format("woff2"),url(/CascadiaCode/ttf/CascadiaCode.ttf) format("truetype"),url(/CascadiaCode/CascadiaCode.ttf) format("truetype"),url(/CascadiaCode/otf/static/CascadiaCodeNF-Regular.otf) format("opentype"),local("Cascadia Mono"),monospace;
 }
 
 :root {
 	font-family: Code;
 }
 
+* {
+	box-sizing: border-box;
+}
+
+body {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	min-height: 100vh;
+	margin: 0;
+	padding: 0;
+	padding-block: 5px;
+	max-width: 100vw;
+	overflow-x: hidden;
+}
+
+main {
+	overflow: auto;
+}
+
 table {
 	margin: auto;
+	overflow: auto;
 }
 
 h1 {
 	text-align: center;
+	overflow: auto;
+	padding-inline: 5px;
+
 }
 
 th, td {
 	padding: .2em 1em;
 }
 
-table > thead > tr > th {
+thead th {
 	font-size: 1.2rem;
 	border-bottom: 1px solid black;
+}
+
+footer {
+	text-align: center;
 }
