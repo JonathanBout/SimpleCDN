@@ -84,7 +84,7 @@ jobs:
           build-args: |
             DOTNET_BUILD_PLATFORM=linux-arm64
             # set version number to the version in the tag name if this is a release
-            VERSION_NUMBER=${BRANCH_NAME}
+            # VERSION_NUMBER=$BRANCH_NAME
 
       # Sign the resulting Docker image digest except on PRs.
       # This will only write to the public Rekor transparency log when the Docker
