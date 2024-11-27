@@ -12,5 +12,6 @@
 		public uint MaxMemoryCacheSize { get; set; } = 500;
 
 		public string Footer { get; set; } = """<a href="https://github.com/jonathanbout/simplecdn">Powered by SimpleCDN</a>""";
+		public string PageTitle { get; set; } = "SimpleCDN";
 	}
 }

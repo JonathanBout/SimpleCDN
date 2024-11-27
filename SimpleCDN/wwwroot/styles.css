@@ -53,3 +53,12 @@ thead th {
 footer {
 	text-align: center;
 }
+
+img {
+	transform: translateY(0);
+}
+
+td:has(img) {
+	display: inline-flex;
+	align-items: center;
+}

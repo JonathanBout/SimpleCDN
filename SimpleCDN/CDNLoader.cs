@@ -72,22 +72,45 @@ namespace SimpleCDN
 			{
 				return null;
 			}
-
-			using var stream = info.CreateReadStream();
-			var bytes = new byte[stream.Length];
-			stream.ReadExactly(bytes);
-
 			var mime = MimeTypeHelpers.MimeTypeFromFileName(info.PhysicalPath);
 
-			_cache[info.PhysicalPath] = new CachedFile
-			{
-				Content = bytes,
-				LastModified = info.LastModified,
-				MimeType = mime,
-				IsCompressed = false
-			};
+			var preCompressedPath = path + ".gz";
 
-			return new CDNFile(bytes, mime.ToContentTypeString(), info.LastModified, false);
+			if (_environment.WebRootFileProvider.GetFileInfo(preCompressedPath) is { Exists: true } compressedFileInfo)
+			{
+				// file is pre-compressed using gzip
+
+				using var stream = compressedFileInfo.CreateReadStream();
+				var bytes = new byte[stream.Length];
+				stream.ReadExactly(bytes);
+
+				_cache[info.PhysicalPath] = new CachedFile
+				{
+					Content = bytes,
+					LastModified = info.LastModified,
+					Size = info.Length, // still use the length and mime type from the original file, not the compressed one
+					MimeType = mime, 
+					IsCompressed = true
+				};
+
+				return new CDNFile(bytes, mime.ToContentTypeString(), info.LastModified, false);
+			} else
+			{
+				using var stream = info.CreateReadStream();
+				var bytes = new byte[stream.Length];
+				stream.ReadExactly(bytes);
+
+				_cache[info.PhysicalPath] = new CachedFile
+				{
+					Content = bytes,
+					LastModified = info.LastModified,
+					MimeType = mime,
+					Size = info.Length,
+					IsCompressed = false
+				};
+
+				return new CDNFile(bytes, mime.ToContentTypeString(), info.LastModified, false);
+			}
 		}
 
 		private CDNFile? LoadFile(string absolutePath, string rootRelativePath)
@@ -109,7 +132,8 @@ namespace SimpleCDN
 					{
 						Content = bytes,
 						DirectoryName = absolutePath,
-						MimeType = MimeType.HTML
+						MimeType = MimeType.HTML,
+						Size = content.content.Length
 					};
 				}
 			} else
@@ -124,7 +148,8 @@ namespace SimpleCDN
 			{
 				Content = content.content,
 				LastModified = lastModified,
-				MimeType = content.type
+				MimeType = content.type,
+				Size = content.content.Length
 			};
 
 			// attempt to compress the file if it's not already compressed
@@ -141,7 +166,12 @@ namespace SimpleCDN
 			return new CDNFile(file.Content, file.MimeType.ToContentTypeString(), file.LastModified, file.IsCompressed);
 		}
 
-
+		/// <summary>
+		/// Attempts to load an index file from the directory at <paramref name="absolutePath"/>. If no index file is found, generates one.
+		/// </summary>
+		/// <param name="absolutePath">The absolute path to the directory</param>
+		/// <param name="rootRelativePath">The path to the directory, how it was requested</param>
+		/// <returns></returns>
 		private (MimeType type, byte[]? content) TryLoadIndex(string absolutePath, string rootRelativePath)
 		{
 			if (!Directory.Exists(absolutePath)) return MimeTypeHelpers.Empty;
@@ -150,10 +180,12 @@ namespace SimpleCDN
 
 			foreach (var indexFile in indexes)
 			{
-				var substring = indexFile.AsSpan()[(indexFile.LastIndexOf('.') + 1)..];
+				// efficiently check if the file is an htm(l) file
+				var substring = indexFile.AsSpan()[(indexFile.LastIndexOf('.') + 1)..]; // + 1 to skip the dot
 
 				if (substring.SequenceEqual("html") || substring.SequenceEqual("htm"))
 				{
+					// if the file is an index file, load it
 					var loaded = LoadFileFromDisk(indexFile);
 
 					// check after loading to make sure the file wasn't deleted in the mean time

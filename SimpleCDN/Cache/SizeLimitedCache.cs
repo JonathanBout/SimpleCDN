@@ -1,5 +1,6 @@
 ﻿using SimpleCDN.Helpers;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
@@ -15,7 +16,7 @@ namespace SimpleCDN.Cache
 	{
 		public SizeLimitedCache(long maxSize) : this(maxSize, null) { }
 
-		private readonly Dictionary<string, ValueWrapper> _dictionary = new(comparer);
+		private readonly ConcurrentDictionary<string, ValueWrapper> _dictionary = new(comparer);
 		private readonly long _maxSize = maxSize;
 
 		public CachedFile this[string key]
@@ -51,7 +52,7 @@ namespace SimpleCDN.Cache
 			{
 				(var oldest, byOldest) = byOldest.RemoveFirst();
 
-				_dictionary.Remove(oldest.Key);
+				_dictionary.TryRemove(oldest.Key, out _);
 			}
 		}
 
