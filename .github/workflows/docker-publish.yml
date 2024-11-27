@@ -71,6 +71,8 @@ jobs:
       # https://github.com/docker/build-push-action
       - name: Build and push Docker image
         id: build-and-push
+        env:
+          BRANCH_NAME: ${{ env.BRANCH_NAME }}
         uses: docker/build-push-action@v5.0.0
         with:
           context: .
@@ -82,7 +84,7 @@ jobs:
           build-args: |
             DOTNET_BUILD_PLATFORM=linux-arm64
             # set version number to the version in the tag name if this is a release
-            VERSION_NUMBER=$BRANCH_NAME
+            VERSION_NUMBER=${BRANCH_NAME}
 
       # Sign the resulting Docker image digest except on PRs.
       # This will only write to the public Rekor transparency log when the Docker
