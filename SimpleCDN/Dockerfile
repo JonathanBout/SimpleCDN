@@ -31,11 +31,7 @@ RUN dotnet build "./SimpleCDN.csproj" -c $BUILD_CONFIGURATION -r $DOTNET_BUILD_P
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 ARG DOTNET_BUILD_PLATFORM=linux-x64
-ARG VERSION_NUMBER=0.0.1
-ARG VERSION_SUFFIX=dev
-RUN dotnet publish "./SimpleCDN.csproj" -c $BUILD_CONFIGURATION  -r $DOTNET_BUILD_PLATFORM -o /app/publish \
-        /p:UseAppHost=true /p:Version=$VERSION_NUMBER /p:AssemblyVersion=$VERSION_NUMBER \
-        /p:InformationalVersion=$VERSION_NUMBER /p:VersionSuffix=$VERSION_SUFFIX
+RUN dotnet publish "./SimpleCDN.csproj" -c $BUILD_CONFIGURATION  -r $DOTNET_BUILD_PLATFORM -o /app/publish /p:UseAppHost=true
 
 # This stage is used as the base for the final stage when launching from VS to support debugging in regular mode (Default when not using the Debug configuration)
 FROM base AS aotdebug
@@ -50,9 +46,6 @@ USER app
 FROM ${FINAL_BASE_IMAGE:-mcr.microsoft.com/dotnet/runtime-deps:9.0} AS final
 WORKDIR /app
 EXPOSE 8080
-ARG VERSION_NUMBER=0.0.1
-ARG VERSION_SUFFIX=dev
 COPY --from=publish /app/publish .
-RUN echo "$VERSION_NUMBER-$VERSION_SUFFIX" > .version
 
 ENTRYPOINT ["./SimpleCDN"]
