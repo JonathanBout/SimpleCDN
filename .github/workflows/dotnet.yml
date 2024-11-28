@@ -25,4 +25,4 @@ jobs:
     - name: Build
       run: dotnet build SimpleCDN.sln --no-restore
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test SimpleCDN.sln --no-build --verbosity normal
