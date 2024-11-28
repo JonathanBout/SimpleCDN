@@ -34,7 +34,7 @@ namespace SimpleCDN.Cache
 	public readonly struct CompressionAlgorithm : IEquatable<CompressionAlgorithm>
 	{
 		public static readonly CompressionAlgorithm GZip = new("gzip");
-		public static readonly CompressionAlgorithm None = default;
+		public static readonly CompressionAlgorithm None = new("");
 		public readonly string Name { get; } = "";
 		private CompressionAlgorithm(string name)
 		{

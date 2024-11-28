@@ -30,9 +30,9 @@ namespace SimpleCDN.Helpers
 
 		public static byte[] Decompress(byte[] data)
 		{
-			using var memoryStream = new MemoryStream();
+			using var memoryStream = new MemoryStream(data);
+
 			using var gzipStream = new GZipStream(memoryStream, CompressionMode.Decompress);
-			memoryStream.Write(data);
 
 			using var decompressedStream = new MemoryStream();
 

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace SimpleCDN.Tests
 {
+	[TestFixture(TestName = "CDN Loader Tests")]
 	public class CDNLoaderTests
 	{
 		const string JSON_FILENAME = "file.json";

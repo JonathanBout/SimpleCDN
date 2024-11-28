@@ -3,6 +3,7 @@ using System.Net.Sockets;
 
 namespace SimpleCDN.Tests
 {
+	[TestFixture(TestName = "Byte Count Formatter Tests")]
 	public class ByteCountFormatterTests
 	{
 		[TestCase(0, "0B")]
