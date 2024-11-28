@@ -1,5 +1,6 @@
 ﻿using SimpleCDN.Configuration;
 using SimpleCDN.Helpers;
+using SimpleCDN.Tests.Mocks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,7 +32,7 @@ namespace SimpleCDN.Tests
 		{
 			var options = new OptionsMock<CDNConfiguration>(new() { DataRoot = TempFolder });
 
-			return new CDNLoader(new MockWebHostEnvironment(), options, new IndexGenerator(options));
+			return new CDNLoader(new MockWebHostEnvironment(), options, new IndexGenerator(options), new MockLogger<CDNLoader>());
 		}
 
 		[SetUp]
