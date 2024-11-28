@@ -93,8 +93,9 @@ namespace SimpleCDN
 					IsCompressed = true
 				};
 
-				return new CDNFile(bytes, mime.ToContentTypeString(), info.LastModified, false);
-			} else
+				return new CDNFile(bytes, mime.ToContentTypeString(), info.LastModified, true);
+			} 
+			else
 			{
 				using var stream = info.CreateReadStream();
 				var bytes = new byte[stream.Length];
