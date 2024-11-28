@@ -27,5 +27,18 @@ namespace SimpleCDN.Helpers
 
 			return true;
 		}
+
+		public static byte[] Decompress(byte[] data)
+		{
+			using var memoryStream = new MemoryStream();
+			using var gzipStream = new GZipStream(memoryStream, CompressionMode.Decompress);
+			memoryStream.Write(data);
+
+			using var decompressedStream = new MemoryStream();
+
+			gzipStream.CopyTo(decompressedStream);
+
+			return decompressedStream.ToArray();
+		}
 	}
 }
