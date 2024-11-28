@@ -16,15 +16,15 @@ namespace SimpleCDN.Endpoints
 
 					byte[] bytes = file.Content;
 
-					if (file.IsCompressed && acceptsGzip)
-					{
-						ctx.Response.Headers.ContentEncoding = new(["gzip", .. ctx.Response.Headers.ContentEncoding.AsEnumerable()]);
-					} else if (file.IsCompressed) // file is compressed but client doesn't accept gzip
-					{
-						Logger.LogWarning("Client does not accept gzip encoding.");
-						// decompress the file
-						bytes = GZipHelpers.Decompress(bytes);
-					}
+					//if (file.IsCompressed && acceptsGzip)
+					//{
+					//	ctx.Response.Headers.ContentEncoding = new(["gzip", .. ctx.Response.Headers.ContentEncoding.AsEnumerable()]);
+					//} else if (file.IsCompressed) // file is compressed but client doesn't accept gzip
+					//{
+					//	Logger.LogWarning("Client does not accept gzip encoding.");
+					//	// decompress the file
+					//	bytes = GZipHelpers.Decompress(bytes);
+					//}
 
 					return Results.File(bytes, file.MediaType, lastModified: file.LastModified);
 				}

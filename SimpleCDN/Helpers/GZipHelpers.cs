@@ -11,6 +11,8 @@ namespace SimpleCDN.Helpers
 		/// <returns><see langword="false"/> if the compressed data is not smaller than the original data. Otherwise, <see langword="true"/></returns>
 		public static bool TryCompress(ref Span<byte> data)
 		{
+			return false;
+#pragma warning disable CS0162 // Unreachable code detected. Caching is disabled for now, but the code is left here for future reference.
 			using var memoryStream = new MemoryStream();
 			using (var gzipStream = new GZipStream(memoryStream, CompressionMode.Compress, true))
 			{
@@ -26,6 +28,7 @@ namespace SimpleCDN.Helpers
 			data = data[..read];
 
 			return true;
+#pragma warning restore CS0162 // Unreachable code detected
 		}
 
 		public static byte[] Decompress(byte[] data)
