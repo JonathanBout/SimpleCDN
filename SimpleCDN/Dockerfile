@@ -47,5 +47,6 @@ FROM ${FINAL_BASE_IMAGE:-mcr.microsoft.com/dotnet/runtime-deps:9.0} AS final
 WORKDIR /app
 EXPOSE 8080
 COPY --from=publish /app/publish .
+ENV CDN_DATA_ROOT=/data
 
 ENTRYPOINT ["./SimpleCDN"]

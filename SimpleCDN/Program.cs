@@ -6,6 +6,14 @@ using System.IO.Compression;
 
 var builder = WebApplication.CreateSlimBuilder(args);
 
+builder.Configuration.Sources.Clear();
+
+builder.Configuration
+	.AddEnvironmentVariables()
+	.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+	.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+	.AddCommandLine(args);
+
 builder.Services.MapConfiguration();
 
 builder.Services.AddSingleton<CDNLoader>();

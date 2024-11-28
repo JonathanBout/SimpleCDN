@@ -8,21 +8,23 @@ using SimpleCDN.Helpers;
 using System.IO.Compression;
 using System.Net.Mime;
 using System.Runtime.CompilerServices;
+using System.Security;
 using System.Text;
 
 namespace SimpleCDN
 {
 	public record CDNFile(byte[] Content, string MediaType, DateTimeOffset LastModified, CompressionAlgorithm Compression);
-	public class CDNLoader(IWebHostEnvironment environment, IOptionsMonitor<CDNConfiguration> options, IndexGenerator generator)
+	public class CDNLoader(IWebHostEnvironment environment, IOptionsMonitor<CDNConfiguration> options, IndexGenerator generator, ILogger<CDNLoader> logger)
 	{
 		private readonly IWebHostEnvironment _environment = environment;
 		private readonly IndexGenerator _indexGenerator = generator;
+		private readonly ILogger<CDNLoader> _logger = logger;
 
 		private readonly SizeLimitedCache _cache = new(options.CurrentValue.MaxMemoryCacheSize * 1000, StringComparer.OrdinalIgnoreCase);
 
 		private readonly IOptionsMonitor<CDNConfiguration> _options = options;
 
-		string DataRoot => _options.CurrentValue.DataRoot ?? _environment.WebRootPath;
+		string DataRoot => _options.CurrentValue.DataRoot;
 
 		public CDNFile? GetFile(string path)
 		{
@@ -89,13 +91,12 @@ namespace SimpleCDN
 					Content = bytes,
 					LastModified = info.LastModified,
 					Size = info.Length, // still use the length and mime type from the original file, not the compressed one
-					MimeType = mime, 
+					MimeType = mime,
 					Compression = CompressionAlgorithm.GZip
 				};
 
 				return new CDNFile(bytes, mime.ToContentTypeString(), info.LastModified, CompressionAlgorithm.GZip);
-			} 
-			else
+			} else
 			{
 				using var stream = info.CreateReadStream();
 				var bytes = new byte[stream.Length];
@@ -157,9 +158,11 @@ namespace SimpleCDN
 			if (file.Compression == CompressionAlgorithm.None)
 			{
 				var contentSpan = content.content.AsSpan();
-				bool compressed = GZipHelpers.TryCompress(ref contentSpan);
-				file.Content = contentSpan.ToArray();
-				file.Compression = compressed ? CompressionAlgorithm.GZip : CompressionAlgorithm.None;
+				if (GZipHelpers.TryCompress(ref contentSpan))
+				{
+					file.Content = contentSpan.ToArray();
+					file.Compression = CompressionAlgorithm.GZip;
+				}
 			}
 
 			_cache[absolutePath] = file;
@@ -177,24 +180,36 @@ namespace SimpleCDN
 		{
 			if (!Directory.Exists(absolutePath)) return MimeTypeHelpers.Empty;
 
-			var indexes = Directory.EnumerateFiles(absolutePath, "index.htm?");
-
-			foreach (var indexFile in indexes)
+			try
 			{
-				// efficiently check if the file is an htm(l) file
-				var substring = indexFile.AsSpan()[(indexFile.LastIndexOf('.') + 1)..]; // + 1 to skip the dot
+				var indexes = Directory.EnumerateFiles(absolutePath, "index.htm?");
 
-				if (substring.SequenceEqual("html") || substring.SequenceEqual("htm"))
+				foreach (var indexFile in indexes)
 				{
-					// if the file is an index file, load it
-					var loaded = LoadFileFromDisk(indexFile);
+					// efficiently check if the file is an htm(l) file
+					var substring = indexFile.AsSpan()[(indexFile.LastIndexOf('.') + 1)..]; // + 1 to skip the dot
 
-					// check after loading to make sure the file wasn't deleted in the mean time
-					if (loaded is (MimeType, byte[])) return loaded;
+					if (substring.SequenceEqual("html") || substring.SequenceEqual("htm"))
+					{
+						// if the file is an index file, load it
+						var loaded = LoadFileFromDisk(indexFile);
+
+						// check after loading to make sure the file wasn't deleted in the mean time
+						if (loaded is (MimeType, byte[])) return loaded;
+					}
 				}
-			}
 
-			return (MimeType.HTML, GenerateIndex(absolutePath, rootRelativePath));
+				return (MimeType.HTML, GenerateIndex(absolutePath, rootRelativePath));
+			} catch (Exception ex)
+				when (ex is UnauthorizedAccessException or SecurityException)
+			{
+				// if we can't access the directory, we can't generate an index
+				_logger.LogError(ex, "Access denied to a publicly available folder ({path})", absolutePath);
+			} catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error while trying to load index file for {path}", absolutePath);
+			}
+			return MimeTypeHelpers.Empty;
 		}
 
 		private byte[]? GenerateIndex(string absolutePath, string rootRelativePath) => _indexGenerator.GenerateIndex(absolutePath, rootRelativePath);
