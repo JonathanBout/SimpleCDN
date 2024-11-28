@@ -12,7 +12,7 @@ using System.Text;
 
 namespace SimpleCDN
 {
-	public record CDNFile(byte[] Content, string MediaType, DateTimeOffset LastModified, bool IsCompressed);
+	public record CDNFile(byte[] Content, string MediaType, DateTimeOffset LastModified, CompressionAlgorithm Compression);
 	public class CDNLoader(IWebHostEnvironment environment, IOptionsMonitor<CDNConfiguration> options, IndexGenerator generator)
 	{
 		private readonly IWebHostEnvironment _environment = environment;
@@ -47,7 +47,7 @@ namespace SimpleCDN
 					return LoadFile(fullPath, "/" + path);
 				}
 
-				return new CDNFile(cachedFile.Content, cachedFile.MimeType.ToContentTypeString(), cachedFile.LastModified, cachedFile.IsCompressed);
+				return new CDNFile(cachedFile.Content, cachedFile.MimeType.ToContentTypeString(), cachedFile.LastModified, cachedFile.Compression);
 			}
 
 			return LoadFile(fullPath, "/" + path);
@@ -65,7 +65,7 @@ namespace SimpleCDN
 
 			if (_cache.TryGetValue(info.PhysicalPath, out CachedFile? cached) && cached is not null && cached.LastModified >= info.LastModified)
 			{
-				return new CDNFile(cached.Content, cached.MimeType.ToContentTypeString(), cached.LastModified, cached.IsCompressed);
+				return new CDNFile(cached.Content, cached.MimeType.ToContentTypeString(), cached.LastModified, cached.Compression);
 			}
 
 			if (!info.Exists)
@@ -90,10 +90,10 @@ namespace SimpleCDN
 					LastModified = info.LastModified,
 					Size = info.Length, // still use the length and mime type from the original file, not the compressed one
 					MimeType = mime, 
-					IsCompressed = true
+					Compression = CompressionAlgorithm.GZip
 				};
 
-				return new CDNFile(bytes, mime.ToContentTypeString(), info.LastModified, true);
+				return new CDNFile(bytes, mime.ToContentTypeString(), info.LastModified, CompressionAlgorithm.GZip);
 			} 
 			else
 			{
@@ -107,10 +107,10 @@ namespace SimpleCDN
 					LastModified = info.LastModified,
 					MimeType = mime,
 					Size = info.Length,
-					IsCompressed = false
+					Compression = CompressionAlgorithm.None
 				};
 
-				return new CDNFile(bytes, mime.ToContentTypeString(), info.LastModified, false);
+				return new CDNFile(bytes, mime.ToContentTypeString(), info.LastModified, CompressionAlgorithm.None);
 			}
 		}
 
@@ -154,17 +154,17 @@ namespace SimpleCDN
 			};
 
 			// attempt to compress the file if it's not already compressed
-			if (!file.IsCompressed)
+			if (file.Compression == CompressionAlgorithm.None)
 			{
 				var contentSpan = content.content.AsSpan();
 				bool compressed = GZipHelpers.TryCompress(ref contentSpan);
 				file.Content = contentSpan.ToArray();
-				file.IsCompressed = compressed;
+				file.Compression = compressed ? CompressionAlgorithm.GZip : CompressionAlgorithm.None;
 			}
 
 			_cache[absolutePath] = file;
 
-			return new CDNFile(file.Content, file.MimeType.ToContentTypeString(), file.LastModified, file.IsCompressed);
+			return new CDNFile(file.Content, file.MimeType.ToContentTypeString(), file.LastModified, file.Compression);
 		}
 
 		/// <summary>

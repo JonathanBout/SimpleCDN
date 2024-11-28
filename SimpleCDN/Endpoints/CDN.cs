@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SimpleCDN.Cache;
 using SimpleCDN.Helpers;
 
 namespace SimpleCDN.Endpoints
@@ -16,11 +17,14 @@ namespace SimpleCDN.Endpoints
 
 					byte[] bytes = file.Content;
 
-					if (file.IsCompressed && acceptsGzip)
+					if (file.Compression == CompressionAlgorithm.GZip && acceptsGzip)
 					{
 						ctx.Response.Headers.ContentEncoding = new(["gzip", .. ctx.Response.Headers.ContentEncoding.AsEnumerable()]);
-					} else if (file.IsCompressed) // file is compressed but client doesn't accept gzip
+					} else if (file.Compression == CompressionAlgorithm.GZip)
 					{
+						// file is compressed but client doesn't accept gzip
+						// As basically all systems support gzip, this should rarely happen
+						// and that's why we are ok with some performance loss here
 						Logger.LogWarning("Client does not accept gzip encoding.");
 						// decompress the file
 						bytes = GZipHelpers.Decompress(bytes);
