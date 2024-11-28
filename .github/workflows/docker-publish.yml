@@ -6,14 +6,13 @@ name: Build & Publish Docker Image
 # documentation.
 
 on:
-  schedule:
-    - cron: '47 9 * * 1'
   push:
     branches: [ "main" ]
     # Publish semver tags as releases.
     tags: [ 'v*.*.*' ]
   pull_request:
-    branches: [ "main" ]
+    # branches: [ "main" ]
+  workflow_dispatch:
 
 env:
   # Use docker.io for Docker Hub if empty
