@@ -7,9 +7,9 @@ distributed caching, meaning both servers will build their own cache.
 ### Using Docker
 
 **Tags:**
-`latest`: the latest stable release
-`vX.X.X`: pin to a specific version. Recommended for production scenarios. Supported versions can be found in the [tags listing](https://github.com/JonathanBout/SimpleCDN/tags).
-`dev`: the latest build of the `main` branch. Not recommended for production as it may contain bugs.
+- `latest`: the latest stable release
+- `vX.X.X`: pin to a specific version. Recommended for production scenarios. Supported versions can be found in the [tags listing](https://github.com/JonathanBout/SimpleCDN/tags).
+- `dev`: the latest build of the `main` branch. Not recommended for production as it may contain bugs.
 
 #### `docker run`
 ```
