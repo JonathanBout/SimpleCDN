@@ -204,10 +204,10 @@ namespace SimpleCDN
 				when (ex is UnauthorizedAccessException or SecurityException)
 			{
 				// if we can't access the directory, we can't generate an index
-				_logger.LogError(ex, "Access denied to a publicly available folder ({path})", absolutePath);
+				_logger.LogError(ex, "Access denied to a publicly available folder ({path})", absolutePath.Replace(Environment.NewLine, "").Replace("\n", "").Replace("\r", ""));
 			} catch (Exception ex)
 			{
-				_logger.LogError(ex, "Error while trying to load index file for {path}", absolutePath);
+				_logger.LogError(ex, "Error while trying to load index file for {path}", absolutePath.Replace(Environment.NewLine, "").Replace("\n", "").Replace("\r", ""));
 			}
 			return MimeTypeHelpers.Empty;
 		}
