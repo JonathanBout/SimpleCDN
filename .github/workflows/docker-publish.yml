@@ -74,7 +74,7 @@ jobs:
         id: build-and-push
         env:
           BRANCH_NAME: ${{ env.BRANCH_NAME }}
-        uses: docker/build-push-action@v5.0.0
+        uses: docker/build-push-action@v6.10.0
         with:
           context: .
           file: ./SimpleCDN/Dockerfile
