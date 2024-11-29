@@ -24,6 +24,9 @@ env:
 
 jobs:
   build:
+    concurrency:
+      group: ${{ github.workflow }}-${{ env.BRANCH_NAME }}
+      cancel-in-progress: true
     runs-on: buildjet-2vcpu-ubuntu-2204-arm
     permissions:
       contents: read
