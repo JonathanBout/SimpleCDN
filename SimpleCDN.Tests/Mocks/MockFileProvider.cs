@@ -16,6 +16,9 @@ namespace SimpleCDN.Tests.Mocks
 
 			return new MockFileInfo(Path.Combine(path, subfolder), filename);
 		}
-		public IChangeToken Watch(string filter) => throw new NotImplementedException();
+		public IChangeToken Watch(string filter)
+		{
+			return new MockChangeToken();
+		}
 	}
 }

@@ -1,8 +1,9 @@
 ﻿using Microsoft.Extensions.Options;
 using SimpleCDN.Configuration;
+using SimpleCDN.Helpers;
 using System.Text;
 
-namespace SimpleCDN.Helpers
+namespace SimpleCDN.Services
 {
 	public class IndexGenerator(IOptionsMonitor<CDNConfiguration> options)
 	{
@@ -11,9 +12,7 @@ namespace SimpleCDN.Helpers
 		public byte[]? GenerateIndex(string absolutePath, string rootRelativePath)
 		{
 			if (!Directory.Exists(absolutePath))
-			{
 				return null;
-			}
 
 			var directory = new DirectoryInfo(absolutePath);
 
@@ -50,9 +49,8 @@ namespace SimpleCDN.Helpers
 				string parentRootRelativePath;
 
 				if (lastSlashIndex is < 1)
-				{
 					parentRootRelativePath = "/";
-				} else
+else
 				{
 					parentRootRelativePath = rootRelativePath[..lastSlashIndex];
 				}
