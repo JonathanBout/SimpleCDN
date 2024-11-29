@@ -46,11 +46,7 @@ th, td {
 	padding: .2em 1em;
 }
 
-.col-size {
-	text-align: center;
-}
-
-.col-date {
+.col-size, .col-date {
 	text-align: center;
 }
 
@@ -73,7 +69,6 @@ tr:has(a):hover {
 	content: '';
 	position: absolute;
 	inset: 0;
-	inset-block-start: 5px;
 }
 
 footer {
