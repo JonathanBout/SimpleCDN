@@ -11,13 +11,13 @@ distributed caching, meaning both servers will build their own cache.
 - `vX.X.X`: pin to a specific version. Recommended for production scenarios. Supported versions can be found in the [tags listing](https://github.com/JonathanBout/SimpleCDN/tags).
 - `dev`: the latest build of the `main` branch. Not recommended for production as it may contain bugs.
 
-#### `docker run`
+#### with `docker run`
 ```
 docker run -p "<your_port>:8080" -v "<your_cdn_data>:/data:ro" ghcr.io/jonathanbout/simplecdn
 ```
 This will pull and run the latest stable build of SimpleCDN.
 
-#### `docker compose`
+#### with `docker compose`
 ```yml
 services:
   server:
@@ -30,6 +30,7 @@ services:
 
 ### Using dotnet
 ```
+# PublishAOT is not supported with dotnet run
 dotnet run --property:PublishAot=false -- --data-root <your_cdn_data>
 ```
 
