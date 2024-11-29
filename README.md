@@ -26,6 +26,8 @@ services:
     - <your_cdn_data>:/data:ro # :ro to make the bind mount read-only
     ports:
     - <your_port>:8080
+    environment:
+    - ASPNETCORE_URLS=http://+:8080
 ```
 
 ### Using dotnet
