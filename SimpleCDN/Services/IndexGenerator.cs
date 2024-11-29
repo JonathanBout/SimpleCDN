@@ -26,7 +26,7 @@ namespace SimpleCDN.Services
 					<link rel="stylesheet" href="/_cdn/styles.css">
 					<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0">
 					<link rel="icon" href="/_cdn/logo.svg" type="image/svg+xml">
-						<title>{1} &middot; Index of {2}</title>
+					<title>{1} &middot; Index of {2}</title>
 				</head>
 				<body>
 				<header>
