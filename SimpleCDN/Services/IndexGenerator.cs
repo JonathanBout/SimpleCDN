@@ -35,10 +35,10 @@ namespace SimpleCDN.Services
 				<main>
 					<table>
 						<thead><tr>
-							<th></th>
-							<th>Name</th>
-							<th>Size</th>
-							<th>Last Modified (UTC)</th>
+							<th class="col-icon"></th>
+							<th class="col-name">Name</th>
+							<th class="col-size">Size</th>
+							<th class="col-date">Last Change (UTC)</th>
 						</tr></thead>
 						<tbody>
 				""", rootRelativePath.Replace("/", "<wbr>/"), _options.CurrentValue.PageTitle, rootRelativePath);
@@ -83,10 +83,10 @@ namespace SimpleCDN.Services
 		private static void AppendRow(StringBuilder index, string href, string name, string icon, long size, DateTimeOffset lastModified)
 		{
 			index.Append("<tr>");
-			index.AppendFormat("""<td><img src="/_cdn/{0}.svg" alt="{0}"></img></td>""", icon);
-			index.AppendFormat("""<td><a href="{0}">{1}</a></td>""", href, name);
-			index.AppendFormat("""<td>{0}</td>""", size < 0 ? "-" : size.FormatByteCount());
-			index.AppendFormat("""<td>{0}</td>""", lastModified.ToString("dd/MM/yyyy HH:mm"));
+			index.AppendFormat("""<td class="col-icon"><img src="/_cdn/{0}.svg" alt="{0}"></img></td>""", icon);
+			index.AppendFormat("""<td class="col-name"><a href="{0}">{1}</a></td>""", href, name);
+			index.AppendFormat("""<td class="col-size">{0}</td>""", size < 0 ? "-" : size.FormatByteCount());
+			index.AppendFormat("""<td class="col-date">{0}</td>""", lastModified.ToString("dd/MM/yyyy HH:mm"));
 			index.Append("</tr>");
 		}
 	}
