@@ -4,9 +4,6 @@ services:
     build:
       context: .
       dockerfile: SimpleCDN/Dockerfile
-      # args:
-      # - VERSION_NUMBER=1.0.0
-      # - VERSION_SUFFIX=rc1
     volumes:
     - ../:/data
     environment:

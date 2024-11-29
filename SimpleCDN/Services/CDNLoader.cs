@@ -11,13 +11,13 @@ using System.Runtime.CompilerServices;
 using System.Security;
 using System.Text;
 
-namespace SimpleCDN
+namespace SimpleCDN.Services
 {
 	public record CDNFile(byte[] Content, string MediaType, DateTimeOffset LastModified, CompressionAlgorithm Compression);
-	public class CDNLoader(IWebHostEnvironment environment, IOptionsMonitor<CDNConfiguration> options, IndexGenerator generator, ILogger<CDNLoader> logger)
+	public class CDNLoader(IWebHostEnvironment environment, IOptionsMonitor<CDNConfiguration> options, IIndexGenerator generator, ILogger<CDNLoader> logger) : ICDNLoader
 	{
 		private readonly IWebHostEnvironment _environment = environment;
-		private readonly IndexGenerator _indexGenerator = generator;
+		private readonly IIndexGenerator _indexGenerator = generator;
 		private readonly ILogger<CDNLoader> _logger = logger;
 
 		private readonly SizeLimitedCache _cache = new(options.CurrentValue.MaxMemoryCacheSize * 1000, StringComparer.OrdinalIgnoreCase);
@@ -31,9 +31,10 @@ namespace SimpleCDN
 			// separate logic for cdn files
 
 			if (path.StartsWith("_cdn"))
-			{
 				return LoadCDNFile(path[5..]); // remove _cdn/ from path
-			}
+
+			if (path.Contains("favicon.ico"))
+				return LoadCDNFile("logo.ico");
 
 			var fullPath = GetFullPath(path);
 
@@ -45,9 +46,7 @@ namespace SimpleCDN
 
 				// if the stored file is older than the one on disk, reload it
 				if (lastWrittenTime > cachedFile.LastModified)
-				{
 					return LoadFile(fullPath, "/" + path);
-				}
 
 				return new CDNFile(cachedFile.Content, cachedFile.MimeType.ToContentTypeString(), cachedFile.LastModified, cachedFile.Compression);
 			}
@@ -61,19 +60,13 @@ namespace SimpleCDN
 
 			// don't generate indexes for CDN folder
 			if (info.IsDirectory || info.PhysicalPath is null)
-			{
 				return null;
-			}
 
 			if (_cache.TryGetValue(info.PhysicalPath, out CachedFile? cached) && cached is not null && cached.LastModified >= info.LastModified)
-			{
 				return new CDNFile(cached.Content, cached.MimeType.ToContentTypeString(), cached.LastModified, cached.Compression);
-			}
 
 			if (!info.Exists)
-			{
 				return null;
-			}
 			var mime = MimeTypeHelpers.MimeTypeFromFileName(info.PhysicalPath);
 
 			var preCompressedPath = path + ".gz";
@@ -204,10 +197,10 @@ namespace SimpleCDN
 				when (ex is UnauthorizedAccessException or SecurityException)
 			{
 				// if we can't access the directory, we can't generate an index
-				_logger.LogError(ex, "Access denied to a publicly available folder ({path})", absolutePath.Replace(Environment.NewLine, "").Replace("\n", "").Replace("\r", ""));
+				_logger.LogError(ex, "Access denied to a publicly available folder ({path})", absolutePath.ReplaceLineEndings(""));
 			} catch (Exception ex)
 			{
-				_logger.LogError(ex, "Error while trying to load index file for {path}", absolutePath.Replace(Environment.NewLine, "").Replace("\n", "").Replace("\r", ""));
+				_logger.LogError(ex, "Error while trying to load index file for {path}", absolutePath.ReplaceLineEndings(""));
 			}
 			return MimeTypeHelpers.Empty;
 		}
@@ -236,9 +229,7 @@ namespace SimpleCDN
 			// if the path contained for example ../file and it resolves to a parent or sibling directory
 			// of the data root, we obviously don't allow access
 			if (!resolved.StartsWith(DataRoot))
-			{
 				return null;
-			}
 
 			return resolved;
 		}

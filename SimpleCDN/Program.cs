@@ -1,7 +1,6 @@
-using SimpleCDN;
 using SimpleCDN.Configuration;
 using SimpleCDN.Endpoints;
-using SimpleCDN.Helpers;
+using SimpleCDN.Services;
 using System.IO.Compression;
 
 var builder = WebApplication.CreateSlimBuilder(args);
@@ -16,8 +15,8 @@ builder.Configuration
 
 builder.Services.MapConfiguration();
 
-builder.Services.AddSingleton<CDNLoader>();
-builder.Services.AddSingleton<IndexGenerator>();
+builder.Services.AddSingleton<ICDNLoader, CDNLoader>();
+builder.Services.AddSingleton<IIndexGenerator, IndexGenerator>();
 
 builder.Services.AddMemoryCache();
 

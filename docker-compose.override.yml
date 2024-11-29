@@ -2,6 +2,6 @@ services:
   simplecdn:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_URLS=http://+:8080
     ports:
       - "8080"
