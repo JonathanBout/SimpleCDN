@@ -14,10 +14,10 @@ using System.Text;
 namespace SimpleCDN.Services
 {
 	public record CDNFile(byte[] Content, string MediaType, DateTimeOffset LastModified, CompressionAlgorithm Compression);
-	public class CDNLoader(IWebHostEnvironment environment, IOptionsMonitor<CDNConfiguration> options, IndexGenerator generator, ILogger<CDNLoader> logger)
+	public class CDNLoader(IWebHostEnvironment environment, IOptionsMonitor<CDNConfiguration> options, IIndexGenerator generator, ILogger<CDNLoader> logger) : ICDNLoader
 	{
 		private readonly IWebHostEnvironment _environment = environment;
-		private readonly IndexGenerator _indexGenerator = generator;
+		private readonly IIndexGenerator _indexGenerator = generator;
 		private readonly ILogger<CDNLoader> _logger = logger;
 
 		private readonly SizeLimitedCache _cache = new(options.CurrentValue.MaxMemoryCacheSize * 1000, StringComparer.OrdinalIgnoreCase);
@@ -32,6 +32,9 @@ namespace SimpleCDN.Services
 
 			if (path.StartsWith("_cdn"))
 				return LoadCDNFile(path[5..]); // remove _cdn/ from path
+
+			if (path.Contains("favicon.ico"))
+				return LoadCDNFile("logo.ico");
 
 			var fullPath = GetFullPath(path);
 

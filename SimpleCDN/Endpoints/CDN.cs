@@ -10,7 +10,7 @@ namespace SimpleCDN.Endpoints
 	{
 		public static IEndpointRouteBuilder RegisterCDNEndpoints(this IEndpointRouteBuilder builder)
 		{
-			builder.MapGet("/{*route}", (CDNLoader loader, HttpContext ctx, ILogger<Program> Logger, string route = "") =>
+			builder.MapGet("/{*route}", (ICDNLoader loader, HttpContext ctx, ILogger<Program> Logger, string route = "") =>
 			{
 				if (loader.GetFile(route) is CDNFile file)
 				{

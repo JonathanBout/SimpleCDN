@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SimpleCDN.Services
 {
-	public class IndexGenerator(IOptionsMonitor<CDNConfiguration> options)
+	public class IndexGenerator(IOptionsMonitor<CDNConfiguration> options) : IIndexGenerator
 	{
 		private readonly IOptionsMonitor<CDNConfiguration> _options = options;
 
@@ -25,7 +25,8 @@ namespace SimpleCDN.Services
 					<meta name="robots" content="noindex,nofollow">
 					<link rel="stylesheet" href="/_cdn/styles.css">
 					<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0">
-					<title>{1} &middot; Index of {2}</title>
+					<link rel="icon" href="/_cdn/logo.svg" type="image/svg+xml">
+						<title>{1} &middot; Index of {2}</title>
 				</head>
 				<body>
 				<header>
@@ -50,7 +51,7 @@ namespace SimpleCDN.Services
 
 				if (lastSlashIndex is < 1)
 					parentRootRelativePath = "/";
-else
+				else
 				{
 					parentRootRelativePath = rootRelativePath[..lastSlashIndex];
 				}

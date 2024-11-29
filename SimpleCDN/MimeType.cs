@@ -8,7 +8,7 @@
 		// text
 		HTML, Text, CSS,
 		// image
-		PNG, JPEG, GIF, SVG, WebP,
+		PNG, JPEG, GIF, SVG, WebP, ICO,
 		// font
 		Woff, Woff2, TTF, OTF, EOT,
 		// other
