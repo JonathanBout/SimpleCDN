@@ -14,6 +14,9 @@ using System.Text;
 namespace SimpleCDN
 {
 	public record CDNFile(byte[] Content, string MediaType, DateTimeOffset LastModified, CompressionAlgorithm Compression);
+
+	public record BigCDNFile(string FilePath, string MediaType, DateTimeOffset LastModified, CompressionAlgorithm Compression) : CDNFile([], MediaType, LastModified, Compression);
+
 	public class CDNLoader(IWebHostEnvironment environment, IOptionsMonitor<CDNConfiguration> options, IndexGenerator generator, ILogger<CDNLoader> logger)
 	{
 		private readonly IWebHostEnvironment _environment = environment;
@@ -29,27 +32,29 @@ namespace SimpleCDN
 		public CDNFile? GetFile(string path)
 		{
 			// separate logic for cdn files
-
-			if (path.StartsWith("_cdn"))
+			if (path.StartsWith("_cdn/"))
 			{
 				return LoadCDNFile(path[5..]); // remove _cdn/ from path
 			}
 
+			// load favicon from logo.ico file in the CDN folder
+			if (path.Contains("favicon.ico"))
+				return LoadCDNFile("logo.ico");
+
 			var fullPath = GetFullPath(path);
 
+			// if the path is null, it points to a directory outside of the data root
+			// which we for security reasons don't allow
 			if (fullPath is null) return null;
 
+			// if the file is in the cache, return it
 			if (_cache.TryGetValue(fullPath, out var cachedFile))
 			{
-				var lastWrittenTime = new DateTimeOffset(File.GetLastWriteTimeUtc(fullPath));
-
 				// if the stored file is older than the one on disk, reload it
-				if (lastWrittenTime > cachedFile.LastModified)
+				if (File.GetLastWriteTimeUtc(fullPath) <= cachedFile.LastModified)
 				{
-					return LoadFile(fullPath, "/" + path);
+					return new CDNFile(cachedFile.Content, cachedFile.MimeType.ToContentTypeString(), cachedFile.LastModified, cachedFile.Compression);
 				}
-
-				return new CDNFile(cachedFile.Content, cachedFile.MimeType.ToContentTypeString(), cachedFile.LastModified, cachedFile.Compression);
 			}
 
 			return LoadFile(fullPath, "/" + path);
@@ -57,102 +62,95 @@ namespace SimpleCDN
 
 		private CDNFile? LoadCDNFile(string path)
 		{
-			var info = _environment.WebRootFileProvider.GetFileInfo(path);
+			var file = _environment.WebRootFileProvider.GetFileInfo(path);
 
 			// don't generate indexes for CDN folder
-			if (info.IsDirectory || info.PhysicalPath is null)
-			{
+			if (file.IsDirectory || file.PhysicalPath is null)
+			{ 
 				return null;
 			}
 
-			if (_cache.TryGetValue(info.PhysicalPath, out CachedFile? cached) && cached is not null && cached.LastModified >= info.LastModified)
-			{
+			if (_cache.TryGetValue(file.PhysicalPath, out CachedFile? cached) && cached is not null && cached.LastModified >= file.LastModified)
+			{ 
 				return new CDNFile(cached.Content, cached.MimeType.ToContentTypeString(), cached.LastModified, cached.Compression);
 			}
 
-			if (!info.Exists)
-			{
+			if (!file.Exists)
 				return null;
-			}
-			var mime = MimeTypeHelpers.MimeTypeFromFileName(info.PhysicalPath);
+
+			var mime = MimeTypeHelpers.MimeTypeFromFileName(file.PhysicalPath);
 
 			var preCompressedPath = path + ".gz";
 
-			if (_environment.WebRootFileProvider.GetFileInfo(preCompressedPath) is { Exists: true } compressedFileInfo)
+			CompressionAlgorithm compression = CompressionAlgorithm.None;
+			long realSize = file.Length;
+			string realPath = file.PhysicalPath;
+
+			if (_environment.WebRootFileProvider.GetFileInfo(preCompressedPath) is { Exists: true, IsDirectory: false, PhysicalPath: not null } compressedFileInfo
+				&& compressedFileInfo.LastModified >= file.LastModified
+				&& compressedFileInfo.Length < file.Length)
 			{
-				// file is pre-compressed using gzip
-
-				using var stream = compressedFileInfo.CreateReadStream();
-				var bytes = new byte[stream.Length];
-				stream.ReadExactly(bytes);
-
-				_cache[info.PhysicalPath] = new CachedFile
-				{
-					Content = bytes,
-					LastModified = info.LastModified,
-					Size = info.Length, // still use the length and mime type from the original file, not the compressed one
-					MimeType = mime,
-					Compression = CompressionAlgorithm.GZip
-				};
-
-				return new CDNFile(bytes, mime.ToContentTypeString(), info.LastModified, CompressionAlgorithm.GZip);
-			} else
-			{
-				using var stream = info.CreateReadStream();
-				var bytes = new byte[stream.Length];
-				stream.ReadExactly(bytes);
-
-				_cache[info.PhysicalPath] = new CachedFile
-				{
-					Content = bytes,
-					LastModified = info.LastModified,
-					MimeType = mime,
-					Size = info.Length,
-					Compression = CompressionAlgorithm.None
-				};
-
-				return new CDNFile(bytes, mime.ToContentTypeString(), info.LastModified, CompressionAlgorithm.None);
+				compression = CompressionAlgorithm.GZip;
+				file = compressedFileInfo;
 			}
+
+			// TODO: instead check with the cache provider if the size is supported
+			if (file.Length > Array.MaxLength)
+			{
+				_logger.LogWarning("File {path} is too large to be cached or loaded into memory. Serving directly.", realPath.ReplaceLineEndings(""));
+				return new BigCDNFile(file.PhysicalPath, mime.ToContentTypeString(), file.LastModified, compression);
+			}
+
+			using var stream = file.CreateReadStream();
+			var bytes = new byte[stream.Length];
+			stream.ReadExactly(bytes);
+
+			_cache[realPath] = new CachedFile
+			{
+				Content = bytes,
+				LastModified = file.LastModified,
+				MimeType = mime,
+				Size = (int)realSize,
+				Compression = compression
+			};
+
+			return new CDNFile(bytes, mime.ToContentTypeString(), file.LastModified, CompressionAlgorithm.None);
 		}
 
 		private CDNFile? LoadFile(string absolutePath, string rootRelativePath)
 		{
 			var content = LoadFileFromDisk(absolutePath);
 
-			DateTimeOffset lastModified;
-
 			CachedFile? file = null;
 
+			// if the path is not a file, try to load an index file
 			if (content.content is null)
 			{
 				content = TryLoadIndex(absolutePath, rootRelativePath);
-				lastModified = DateTimeOffset.UtcNow;
 
+				// if the content is a byte array, we generated an index
 				if (content.content is byte[] bytes)
 				{
-					file = new CachedIndexFile
+					file = new CachedFile
 					{
 						Content = bytes,
-						DirectoryName = absolutePath,
 						MimeType = MimeType.HTML,
-						Size = content.content.Length
+						Size = content.content.Length,
 					};
 				}
-			} else
-			{
-				lastModified = new DateTimeOffset(File.GetLastWriteTimeUtc(absolutePath));
 			}
 
+			// if the file is null, we couldn't load it from disk or generate an index
 			if (content.content is null) return null;
-
 
 			file ??= new CachedFile
 			{
 				Content = content.content,
-				LastModified = lastModified,
 				MimeType = content.type,
 				Size = content.content.Length
 			};
+
+			file.LastModified = new DateTimeOffset(File.GetLastWriteTimeUtc(absolutePath));
 
 			// attempt to compress the file if it's not already compressed
 			if (file.Compression == CompressionAlgorithm.None)
@@ -184,19 +182,20 @@ namespace SimpleCDN
 			{
 				var indexes = Directory.EnumerateFiles(absolutePath, "index.htm?");
 
-				foreach (var indexFile in indexes)
+				var htmlPath = Path.Combine(absolutePath, "index.html");
+
+				if (File.Exists(htmlPath))
 				{
-					// efficiently check if the file is an htm(l) file
-					var substring = indexFile.AsSpan()[(indexFile.LastIndexOf('.') + 1)..]; // + 1 to skip the dot
+					var loaded = LoadFileFromDisk(htmlPath);
+					if (loaded is (MimeType, byte[])) return loaded;
+				}
 
-					if (substring.SequenceEqual("html") || substring.SequenceEqual("htm"))
-					{
-						// if the file is an index file, load it
-						var loaded = LoadFileFromDisk(indexFile);
+				var htmPath = Path.Combine(absolutePath, "index.htm");
 
-						// check after loading to make sure the file wasn't deleted in the mean time
-						if (loaded is (MimeType, byte[])) return loaded;
-					}
+				if (File.Exists(htmPath))
+				{
+					var loaded = LoadFileFromDisk(htmPath);
+					if (loaded is (MimeType, byte[])) return loaded;
 				}
 
 				return (MimeType.HTML, GenerateIndex(absolutePath, rootRelativePath));

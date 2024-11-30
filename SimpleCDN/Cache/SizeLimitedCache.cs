@@ -1,4 +1,5 @@
-﻿using SimpleCDN.Helpers;
+﻿using Microsoft.Extensions.Caching.Distributed;
+using SimpleCDN.Helpers;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Diagnostics;
@@ -8,11 +9,12 @@ using System.Runtime.InteropServices;
 namespace SimpleCDN.Cache
 {
 	/// <summary>
-	/// A cache that limits the total size of the stored values. When the size of the cache exceeds the specified limit, the oldest (least recently accessed) values are removed.
+	/// A cache that limits the total size of the stored values. When the size of the cache exceeds the specified limit, the oldest (least recently accessed) values are removed.<br/>
+	/// Implements <see cref="IDistributedCache"/> for compatibility with the <see cref="Services.CacheManager"/>
 	/// </summary>
 	/// <param name="maxSize">The maximum size of the cache, in bytes</param>
 	/// <param name="comparer">The string comparer to use for the internal dictionary</param>
-	internal class SizeLimitedCache(long maxSize, IEqualityComparer<string>? comparer)
+	internal class SizeLimitedCache(long maxSize, IEqualityComparer<string>? comparer) : IDistributedCache
 	{
 		public SizeLimitedCache(long maxSize) : this(maxSize, null) { }
 
@@ -62,6 +64,15 @@ namespace SimpleCDN.Cache
 				return wrapper.Value;
 			throw new KeyNotFoundException();
 		}
+
+		public byte[]? Get(string key) => throw new NotImplementedException();
+		public Task<byte[]?> GetAsync(string key, CancellationToken token = default) => throw new NotImplementedException();
+		public void Refresh(string key) => throw new NotImplementedException();
+		public Task RefreshAsync(string key, CancellationToken token = default) => throw new NotImplementedException();
+		public void Remove(string key) => throw new NotImplementedException();
+		public Task RemoveAsync(string key, CancellationToken token = default) => throw new NotImplementedException();
+		public void Set(string key, byte[] value, DistributedCacheEntryOptions options) => throw new NotImplementedException();
+		public Task SetAsync(string key, byte[] value, DistributedCacheEntryOptions options, CancellationToken token = default) => throw new NotImplementedException();
 
 		class ValueWrapper(CachedFile value)
 		{
