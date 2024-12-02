@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SimpleCDN.Cache;
 using SimpleCDN.Helpers;
+using SimpleCDN.Services;
 
 namespace SimpleCDN.Endpoints
 {
@@ -9,7 +10,7 @@ namespace SimpleCDN.Endpoints
 	{
 		public static IEndpointRouteBuilder RegisterCDNEndpoints(this IEndpointRouteBuilder builder)
 		{
-			builder.MapGet("/{*route}", (CDNLoader loader, HttpContext ctx, ILogger<Program> Logger, string route = "") =>
+			builder.MapGet("/{*route}", (ICDNLoader loader, HttpContext ctx, ILogger<Program> Logger, string route = "") =>
 			{
 				if (loader.GetFile(route) is CDNFile file)
 				{
@@ -19,6 +20,7 @@ namespace SimpleCDN.Endpoints
 
 					if (file.Compression == CompressionAlgorithm.GZip && acceptsGzip)
 					{
+						// append gzip to the list of accepted encodings
 						ctx.Response.Headers.ContentEncoding = new(["gzip", .. ctx.Response.Headers.ContentEncoding.AsEnumerable()]);
 					} else if (file.Compression == CompressionAlgorithm.GZip)
 					{
@@ -36,6 +38,7 @@ namespace SimpleCDN.Endpoints
 				return Results.NotFound();
 			}).CacheOutput(policy =>
 			{
+				// cache the response for 1 minute to reduce load on the server
 				policy.Cache()
 					.Expire(TimeSpan.FromMinutes(1));
 			});

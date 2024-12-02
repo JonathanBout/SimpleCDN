@@ -11,16 +11,16 @@ using System.Runtime.CompilerServices;
 using System.Security;
 using System.Text;
 
-namespace SimpleCDN
+namespace SimpleCDN.Services
 {
 	public record CDNFile(byte[] Content, string MediaType, DateTimeOffset LastModified, CompressionAlgorithm Compression);
 
 	public record BigCDNFile(string FilePath, string MediaType, DateTimeOffset LastModified, CompressionAlgorithm Compression) : CDNFile([], MediaType, LastModified, Compression);
 
-	public class CDNLoader(IWebHostEnvironment environment, IOptionsMonitor<CDNConfiguration> options, IndexGenerator generator, ILogger<CDNLoader> logger)
+	public class CDNLoader(IWebHostEnvironment environment, IOptionsMonitor<CDNConfiguration> options, IIndexGenerator generator, ILogger<CDNLoader> logger)
 	{
 		private readonly IWebHostEnvironment _environment = environment;
-		private readonly IndexGenerator _indexGenerator = generator;
+		private readonly IIndexGenerator _indexGenerator = generator;
 		private readonly ILogger<CDNLoader> _logger = logger;
 
 		private readonly SizeLimitedCache _cache = new(options.CurrentValue.MaxMemoryCacheSize * 1000, StringComparer.OrdinalIgnoreCase);
@@ -66,12 +66,12 @@ namespace SimpleCDN
 
 			// don't generate indexes for CDN folder
 			if (file.IsDirectory || file.PhysicalPath is null)
-			{ 
+			{
 				return null;
 			}
 
 			if (_cache.TryGetValue(file.PhysicalPath, out CachedFile? cached) && cached is not null && cached.LastModified >= file.LastModified)
-			{ 
+			{
 				return new CDNFile(cached.Content, cached.MimeType.ToContentTypeString(), cached.LastModified, cached.Compression);
 			}
 
@@ -86,7 +86,8 @@ namespace SimpleCDN
 			long realSize = file.Length;
 			string realPath = file.PhysicalPath;
 
-			if (_environment.WebRootFileProvider.GetFileInfo(preCompressedPath) is { Exists: true, IsDirectory: false, PhysicalPath: not null } compressedFileInfo
+			if (_environment.WebRootFileProvider.GetFileInfo(preCompressedPath) is { Exists: true, IsDirectory: false, PhysicalPath: not null }
+	compressedFileInfo
 				&& compressedFileInfo.LastModified >= file.LastModified
 				&& compressedFileInfo.Length < file.Length)
 			{
@@ -203,10 +204,10 @@ namespace SimpleCDN
 				when (ex is UnauthorizedAccessException or SecurityException)
 			{
 				// if we can't access the directory, we can't generate an index
-				_logger.LogError(ex, "Access denied to a publicly available folder ({path})", absolutePath.Replace(Environment.NewLine, "").Replace("\n", "").Replace("\r", ""));
+				_logger.LogError(ex, "Access denied to a publicly available folder ({path})", absolutePath.ReplaceLineEndings(""));
 			} catch (Exception ex)
 			{
-				_logger.LogError(ex, "Error while trying to load index file for {path}", absolutePath.Replace(Environment.NewLine, "").Replace("\n", "").Replace("\r", ""));
+				_logger.LogError(ex, "Error while trying to load index file for {path}", absolutePath.ReplaceLineEndings(""));
 			}
 			return MimeTypeHelpers.Empty;
 		}
@@ -235,9 +236,7 @@ namespace SimpleCDN
 			// if the path contained for example ../file and it resolves to a parent or sibling directory
 			// of the data root, we obviously don't allow access
 			if (!resolved.StartsWith(DataRoot))
-			{
 				return null;
-			}
 
 			return resolved;
 		}

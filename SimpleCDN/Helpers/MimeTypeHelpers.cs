@@ -24,6 +24,7 @@ namespace SimpleCDN.Helpers
 				"eot" => MimeType.EOT,
 				"svg" => MimeType.SVG,
 				"webp" => MimeType.WebP,
+				"ico" => MimeType.ICO,
 				_ => MimeType.Unknown
 			};
 		}
@@ -46,6 +47,7 @@ namespace SimpleCDN.Helpers
 				MimeType.TTF => MediaTypeNames.Font.Ttf,
 				MimeType.OTF => MediaTypeNames.Font.Otf,
 				MimeType.EOT => "application/vnd.ms-fontobject",
+				MimeType.ICO => MediaTypeNames.Image.Icon,
 				_ => MediaTypeNames.Application.Octet,
 			};
 		}
