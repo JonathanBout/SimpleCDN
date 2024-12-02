@@ -1,11 +1,11 @@
 ﻿@font-face {
     font-family: Code;
     font-display: swap;
-    src: local("Cascadia Code"),url(/CascadiaCode/woff2/CascadiaCode.woff2) format("woff2"),url(/CascadiaCode/ttf/CascadiaCode.ttf) format("truetype"),url(/CascadiaCode/CascadiaCode.ttf) format("truetype"),url(/CascadiaCode/otf/static/CascadiaCodeNF-Regular.otf) format("opentype"),local("Cascadia Mono"),monospace;
+    src: local("Cascadia Code"),url(/CascadiaCode/woff2/CascadiaCode.woff2) format("woff2"),url(/CascadiaCode/ttf/CascadiaCode.ttf) format("truetype"),url(/CascadiaCode/CascadiaCode.ttf) format("truetype"),url(/CascadiaCode/otf/static/CascadiaCodeNF-Regular.otf) format("opentype"),local("Cascadia Mono");
 }
 
 :root {
-	font-family: Code;
+	font-family: Code, monospace;
 }
 
 * {
@@ -32,6 +32,7 @@ main {
 table {
 	margin: auto;
 	overflow: auto;
+	border-collapse: collapse;
 }
 
 h1 {
@@ -45,9 +46,29 @@ th, td {
 	padding: .2em 1em;
 }
 
+.col-size, .col-date {
+	text-align: center;
+}
+
 thead th {
 	font-size: 1.2rem;
 	border-bottom: 1px solid black;
+}
+
+tr {
+	position: relative;
+	transition: background-color .5s;
+}
+
+tr:has(a):hover {
+	transition: background-color 200ms;
+	background-color: #eee;
+}
+
+.col-name a::after {
+	content: '';
+	position: absolute;
+	inset: 0;
 }
 
 footer {
