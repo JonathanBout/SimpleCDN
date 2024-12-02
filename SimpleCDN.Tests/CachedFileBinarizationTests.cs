@@ -25,9 +25,11 @@ namespace SimpleCDN.Tests
 			var bytes = file.GetBytes();
 			var newFile = CachedFile.FromBytes(bytes);
 
+			Assert.That(newFile, Is.Not.Null);
+
 			Assert.Multiple(() =>
 			{
-				Assert.That(newFile.Content, Is.EqualTo(file.Content));
+				Assert.That(newFile!.Content, Is.EqualTo(file.Content));
 				Assert.That(newFile.Compression, Is.EqualTo(file.Compression));
 				Assert.That(newFile.MimeType, Is.EqualTo(file.MimeType));
 				Assert.That(newFile.LastModified, Is.EqualTo(file.LastModified));
