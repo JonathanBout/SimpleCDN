@@ -1,13 +1,15 @@
 ﻿using Microsoft.Extensions.Options;
 using SimpleCDN.Configuration;
 using SimpleCDN.Helpers;
+using System.Security;
 using System.Text;
 
 namespace SimpleCDN.Services
 {
-	public class IndexGenerator(IOptionsMonitor<CDNConfiguration> options) : IIndexGenerator
+	public class IndexGenerator(IOptionsMonitor<CDNConfiguration> options, ILogger<IndexGenerator> logger) : IIndexGenerator
 	{
 		private readonly IOptionsMonitor<CDNConfiguration> _options = options;
+		private readonly ILogger<IndexGenerator> _logger = logger;
 
 		public byte[]? GenerateIndex(string absolutePath, string rootRelativePath)
 		{
@@ -59,18 +61,27 @@ namespace SimpleCDN.Services
 				AppendRow(index, parentRootRelativePath, "Parent Directory", "parent", -1, parent.LastWriteTimeUtc);
 			}
 
-			foreach (var subDirectory in directory.EnumerateDirectories())
+			try
 			{
-				var name = subDirectory.Name;
 
-				AppendRow(index, Path.Combine(rootRelativePath, name), name, "folder", -1, subDirectory.LastWriteTimeUtc);
-			}
+				foreach (var subDirectory in directory.EnumerateDirectories())
+				{
+					var name = subDirectory.Name;
 
-			foreach (var file in directory.EnumerateFiles())
+					AppendRow(index, Path.Combine(rootRelativePath, name), name, "folder", -1, subDirectory.LastWriteTimeUtc);
+				}
+
+				foreach (var file in directory.EnumerateFiles())
+				{
+					var name = file.Name;
+
+					AppendRow(index, Path.Combine(rootRelativePath, name), name, "file", file.Length, file.LastWriteTimeUtc);
+				}
+			} catch (SecurityException ex)
 			{
-				var name = file.Name;
+				_logger.LogError(ex, "Access denied to publicly available directory {directory} while generating an index", directory.FullName);
 
-				AppendRow(index, Path.Combine(rootRelativePath, name), name, "file", file.Length, file.LastWriteTimeUtc);
+				return null;
 			}
 
 			index.AppendFormat("</tbody></table></main><footer>{0}</footer></body></html>", _options.CurrentValue.Footer);

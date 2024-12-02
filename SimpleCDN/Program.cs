@@ -1,3 +1,6 @@
+using Microsoft.Extensions.Caching.Distributed;
+using SimpleCDN;
+using SimpleCDN.Cache;
 using SimpleCDN.Configuration;
 using SimpleCDN.Endpoints;
 using SimpleCDN.Services;
@@ -15,10 +18,22 @@ builder.Configuration
 
 builder.Services.MapConfiguration();
 
+//builder.Services.AddStackExchangeRedisCache(options =>
+//{
+//	options.Configuration = builder.Configuration["Cache:Redis:Host"];
+//	options.InstanceName = "SimpleCDN";
+
+//	options.ConfigurationOptions ??= new();
+
+//	builder.Configuration.Bind("Cache:Redis", options.ConfigurationOptions);
+//});
+
+builder.Services.AddSingleton<IDistributedCache, SizeLimitedCache>();
+
 builder.Services.AddSingleton<ICDNLoader, CDNLoader>();
 builder.Services.AddSingleton<IIndexGenerator, IndexGenerator>();
-
-builder.Services.AddMemoryCache();
+builder.Services.AddSingleton<IPhysicalFileReader, PhysicalFileReader>();
+builder.Services.AddSingleton<ICacheManager, CacheManager>();
 
 var app = builder.Build();
 
