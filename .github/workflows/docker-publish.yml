@@ -34,7 +34,7 @@ jobs:
             dotnet_rid: linux-amd64
             runner: ubuntu-latest
     concurrency:
-      group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+      group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}-${{ matrix.arch }}
       cancel-in-progress: true
     runs-on: ${{ matrix.platform.runner }}
     permissions:
