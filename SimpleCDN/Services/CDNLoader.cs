@@ -13,13 +13,11 @@ namespace SimpleCDN.Services
 		IWebHostEnvironment environment,
 		IOptionsMonitor<CDNConfiguration> options,
 		IIndexGenerator generator,
-		ILogger<CDNLoader> logger,
 		ICacheManager cache,
 		IPhysicalFileReader fs) : ICDNLoader
 	{
 		private readonly IWebHostEnvironment _environment = environment;
 		private readonly IIndexGenerator _indexGenerator = generator;
-		private readonly ILogger<CDNLoader> _logger = logger;
 		private readonly IPhysicalFileReader _fs = fs;
 		private readonly ICacheManager _cache = cache;
 
@@ -45,12 +43,6 @@ namespace SimpleCDN.Services
 			pathSpan.Normalize();
 
 			path = pathSpan.ToString();
-
-			//if (!pathSpan.StartsWith(DataRoot.AsSpan()))
-			//{
-			//	_logger.LogWarning("Path '{path}' refers to a file outside of the data root '{DataRoot}'", path.ForLog(), DataRoot.ForLog());
-			//	return null;
-			//}
 
 			if (pathSpan.StartsWith("/_cdn/"))
 			{

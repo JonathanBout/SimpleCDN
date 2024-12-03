@@ -18,10 +18,6 @@ namespace SimpleCDN.Tests
 		const string TEXT_CONTENT = "Hello, world!";
 		const string SVG_CONTENT = "<svg></svg>";
 
-
-		private static string BaseFolder => Path.Combine(Path.GetTempPath(), "SimpleCDN.Tests");
-		private static string TempFolder => Path.Combine(BaseFolder, "wwwroot");
-
 		private static readonly Dictionary<string, MockFile> Files = new()
 		{
 			["/" + JSON_FILENAME] = new(DateTime.Now, Encoding.UTF8.GetBytes(JSON_CONTENT)),
@@ -33,13 +29,12 @@ namespace SimpleCDN.Tests
 
 		private static CDNLoader CreateLoader()
 		{
-			var options = new OptionsMock<CDNConfiguration>(new() { DataRoot = TempFolder });
+			var options = new OptionsMock<CDNConfiguration>(new() { DataRoot = "/" });
 
 			return new CDNLoader(
 				new MockWebHostEnvironment(),
 				options,
 				new IndexGenerator(options, new MockLogger<IndexGenerator>()),
-				new MockLogger<CDNLoader>(),
 				new MockCacheManager(),
 				new MockPhysicalFileReader(Files));
 		}

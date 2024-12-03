@@ -4,37 +4,36 @@ using SimpleCDN.Configuration;
 using SimpleCDN.Endpoints;
 using SimpleCDN.Services;
 
-var builder = WebApplication.CreateSlimBuilder(args);
+internal partial class Program
+{
+	private static void Main(string[] args)
+	{
+		var builder = WebApplication.CreateSlimBuilder(args);
 
-builder.Configuration.Sources.Clear();
+		// reconfigure the configuration to make sure we're using the right sources in the right order
+		builder.Configuration.Sources.Clear();
+		builder.Configuration
+			.AddEnvironmentVariables()
+			.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+			.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+			.AddCommandLine(args);
 
-builder.Configuration
-	.AddEnvironmentVariables()
-	.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-	.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
-	.AddCommandLine(args);
+		builder.Services.MapConfiguration();
 
-builder.Services.MapConfiguration();
+		// for now, we use a simple size-limited in-memory cache.
+		// In the future, we may want to give options for other cache implementations
+		// like Redis or Memcached.
+		builder.Services.AddSingleton<IDistributedCache, SizeLimitedCache>();
 
-//builder.Services.AddStackExchangeRedisCache(options =>
-//{
-//	options.Configuration = builder.Configuration["Cache:Redis:Host"];
-//	options.InstanceName = "SimpleCDN";
+		builder.Services.AddSingleton<ICDNLoader, CDNLoader>();
+		builder.Services.AddSingleton<IIndexGenerator, IndexGenerator>();
+		builder.Services.AddSingleton<IPhysicalFileReader, PhysicalFileReader>();
+		builder.Services.AddSingleton<ICacheManager, CacheManager>();
 
-//	options.ConfigurationOptions ??= new();
+		var app = builder.Build();
 
-//	builder.Configuration.Bind("Cache:Redis", options.ConfigurationOptions);
-//});
+		app.RegisterCDNEndpoints();
 
-builder.Services.AddSingleton<IDistributedCache, SizeLimitedCache>();
-
-builder.Services.AddSingleton<ICDNLoader, CDNLoader>();
-builder.Services.AddSingleton<IIndexGenerator, IndexGenerator>();
-builder.Services.AddSingleton<IPhysicalFileReader, PhysicalFileReader>();
-builder.Services.AddSingleton<ICacheManager, CacheManager>();
-
-var app = builder.Build();
-
-app.RegisterCDNEndpoints();
-
-app.Run();
+		app.Run();
+	}
+}
