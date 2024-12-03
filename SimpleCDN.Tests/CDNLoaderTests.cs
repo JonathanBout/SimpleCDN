@@ -44,7 +44,7 @@ namespace SimpleCDN.Tests
 			return new CDNLoader(
 				new MockWebHostEnvironment(),
 				options,
-				new IndexGenerator(options),
+				new IndexGenerator(options, new MockLogger<IndexGenerator>()),
 				new MockLogger<CDNLoader>(),
 				new MockCacheManager(),
 				new MockPhysicalFileReader(Files));
