@@ -26,13 +26,18 @@ jobs:
   build:
     strategy:
       matrix:
-        platform:
-          - arch: linux/arm64
-            dotnet_rid: linux-arm64
-            runner: buildjet-2vcpu-ubuntu-2204-arm
-          - arch: linux/amd64
-            dotnet_rid: linux-amd64
-            runner: ubuntu-latest
+        platform: [
+          {
+            arch: "linux/arm64",
+            dotnet_rid: "linux-arm64",
+            runner: "buildjet-2vcpu-ubuntu-2204-arm"
+          },
+          {
+            arch: "linux/amd64",
+            dotnet_rid: "linux-amd64",
+            runner: "ubuntu-latest"
+          }
+        ]
     concurrency:
       group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}-${{ matrix.arch }}
       cancel-in-progress: true
