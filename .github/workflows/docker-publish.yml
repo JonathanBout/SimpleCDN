@@ -50,6 +50,7 @@ jobs:
       id-token: write
     
     steps:
+      - name: Building for ${{ matrix.arch }} on ${{ matrix.runner }}
       - name: Checkout repository
         uses: actions/checkout@v4
 
