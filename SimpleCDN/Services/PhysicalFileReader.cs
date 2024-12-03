@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
 using SimpleCDN.Configuration;
-using System.IO.Enumeration;
 
 namespace SimpleCDN.Services
 {

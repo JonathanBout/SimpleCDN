@@ -1,7 +1,4 @@
-﻿using System.Buffers.Binary;
-using System.IO;
-using System.Numerics;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
 namespace SimpleCDN.Helpers
 {

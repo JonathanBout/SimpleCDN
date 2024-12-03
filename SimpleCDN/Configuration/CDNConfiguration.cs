@@ -1,8 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
-using System.Reflection;
-
-namespace SimpleCDN.Configuration
+﻿namespace SimpleCDN.Configuration
 {
 	public class CDNConfiguration
 	{

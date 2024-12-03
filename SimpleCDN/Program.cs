@@ -1,10 +1,8 @@
 using Microsoft.Extensions.Caching.Distributed;
-using SimpleCDN;
 using SimpleCDN.Cache;
 using SimpleCDN.Configuration;
 using SimpleCDN.Endpoints;
 using SimpleCDN.Services;
-using System.IO.Compression;
 
 var builder = WebApplication.CreateSlimBuilder(args);
 

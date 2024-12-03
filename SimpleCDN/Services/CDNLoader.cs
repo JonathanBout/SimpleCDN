@@ -1,17 +1,7 @@
-﻿using Microsoft.AspNetCore.Http.Features;
-using Microsoft.AspNetCore.Mvc.Formatters;
-using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using SimpleCDN.Cache;
 using SimpleCDN.Configuration;
 using SimpleCDN.Helpers;
-using System;
-using System.IO.Compression;
-using System.Net.Mime;
-using System.Runtime.CompilerServices;
-using System.Security;
-using System.Text;
-using System.Text.RegularExpressions;
 
 namespace SimpleCDN.Services
 {

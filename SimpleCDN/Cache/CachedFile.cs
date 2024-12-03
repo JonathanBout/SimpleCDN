@@ -1,5 +1,4 @@
-﻿using Microsoft.VisualBasic;
-using System.Buffers.Binary;
+﻿using System.Buffers.Binary;
 
 namespace SimpleCDN.Cache
 {

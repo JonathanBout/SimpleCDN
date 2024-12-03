@@ -1,7 +1,4 @@
-﻿
-using System.IO.Enumeration;
-
-namespace SimpleCDN.Services
+﻿namespace SimpleCDN.Services
 {
 	public interface IPhysicalFileReader
 	{

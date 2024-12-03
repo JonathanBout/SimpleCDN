@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Net.Http.Headers;
+﻿using Microsoft.Net.Http.Headers;
 using SimpleCDN.Cache;
 using SimpleCDN.Helpers;
 using SimpleCDN.Services;

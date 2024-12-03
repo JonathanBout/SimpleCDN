@@ -1,5 +1,4 @@
 ﻿using SimpleCDN.Helpers;
-using System.Net.Sockets;
 
 namespace SimpleCDN.Tests
 {

@@ -1,9 +1,6 @@
 ﻿using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Options;
 using SimpleCDN.Cache;
-using SimpleCDN.Configuration;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 
 namespace SimpleCDN.Services
 {

@@ -18,7 +18,7 @@
 
 	public class InMemoryCacheConfiguration
 	{
-		
+
 	}
 
 	public class RedisCacheConfiguration

@@ -1,13 +1,7 @@
 ﻿using SimpleCDN.Configuration;
-using SimpleCDN.Helpers;
 using SimpleCDN.Services;
 using SimpleCDN.Tests.Mocks;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.Xml;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace SimpleCDN.Tests
 {
