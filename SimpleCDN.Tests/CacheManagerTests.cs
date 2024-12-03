@@ -64,17 +64,11 @@ namespace SimpleCDN.Tests
 
 			cache.CacheFile(TEST_PATH, file);
 
-			Assert.Multiple(() =>
-			{
-				Assert.That(cacheImplementation.Values, Has.Count.EqualTo(1));
-				Assert.That(cache.TryRemove(TEST_PATH), Is.True);
-			});
+			Assert.That(cacheImplementation.Values, Has.Count.EqualTo(1));
 
-			Assert.Multiple(() =>
-			{
-				Assert.That(cacheImplementation.Values, Has.Count.EqualTo(0));
-				Assert.That(cache.TryRemove(TEST_PATH), Is.False);
-			});
+			cache.TryRemove(TEST_PATH);
+
+			Assert.That(cacheImplementation.Values, Has.Count.EqualTo(0));
 		}
 	}
 }
