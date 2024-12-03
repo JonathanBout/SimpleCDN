@@ -26,22 +26,17 @@ jobs:
   build:
     strategy:
       matrix:
-        platform: [
-          {
-            arch: "linux/arm64",
-            dotnet_rid: "linux-arm64",
-            runner: "buildjet-2vcpu-ubuntu-2204-arm"
-          },
-          {
-            arch: "linux/amd64",
-            dotnet_rid: "linux-amd64",
-            runner: "ubuntu-latest"
-          }
-        ]
+       include:
+        - arch: "linux/arm64"
+          dotnet_rid: "linux-arm64"
+          runner: "buildjet-2vcpu-ubuntu-2204-arm"
+        - arch: "linux/amd64"
+          dotnet_rid: "linux-amd64"
+          runner: "ubuntu-latest"
     concurrency:
       group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}-${{ matrix.arch }}
       cancel-in-progress: true
-    runs-on: ${{ matrix.platform.runner }}
+    runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
       packages: write
@@ -96,7 +91,7 @@ jobs:
         id: build-and-push
         env:
           BRANCH_NAME: ${{ env.BRANCH_NAME }}
-          DOTNET_PLATFORM: ${{ matrix.platform.dotnet_rid }}
+          DOTNET_PLATFORM: ${{ matrix.dotnet_rid }}
         uses: docker/build-push-action@v6.10.0
         with:
           context: .
@@ -104,7 +99,7 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          platforms: ${{ matrix.platform.arch }}
+          platforms: ${{ matrix.arch }}
           build-args: |
             DOTNET_BUILD_PLATFORM=$DOTNET_PLATFORM
             # set version number to the version in the tag name if this is a release
