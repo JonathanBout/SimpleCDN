@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.FileProviders.Internal;
 
 namespace SimpleCDN.Tests.Mocks
 {

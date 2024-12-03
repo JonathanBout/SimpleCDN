@@ -1,15 +1,15 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Buffers.Binary;
 
 namespace SimpleCDN.Cache
 {
 	public class CachedFile
 	{
-		private long _size;
+		private int _size;
 
 		public CachedFile() { }
 
 		public CompressionAlgorithm Compression { get; set; } = CompressionAlgorithm.None;
-		public required long Size
+		public required int Size
 		{
 			get
 			{
@@ -29,45 +29,129 @@ namespace SimpleCDN.Cache
 		public required byte[] Content { get; set; }
 		public required MimeType MimeType { get; set; }
 		public virtual DateTimeOffset LastModified { get; set; }
-	}
 
-	public readonly struct CompressionAlgorithm : IEquatable<CompressionAlgorithm>
-	{
-		public static readonly CompressionAlgorithm GZip = new("gzip");
-		public static readonly CompressionAlgorithm None = new("");
-		public readonly string Name { get; } = "";
-		private CompressionAlgorithm(string name)
+		/// <summary>
+		/// Gets the size of a serialized <see cref="CachedFile"/> with the given content length.
+		/// </summary>
+		/// <param name="contentLength"></param>
+		/// <returns></returns>
+		//                                                         content size  algorithm id   content         real size     mime type      last modified
+		private static int GetSerializedSize(int contentLength) => sizeof(int) + sizeof(uint) + contentLength + sizeof(int) + sizeof(uint) + sizeof(long);
+		/// <summary>
+		/// Gets the serialized size of this <see cref="CachedFile"/>.
+		/// </summary>
+		private int SerializedSize => GetSerializedSize(Content.Length);
+
+		/// <summary>
+		/// Serializes this <see cref="CachedFile"/> to a new <see cref="byte"/>[].
+		/// </summary>
+		/// <returns></returns>
+		internal byte[] GetBytes()
 		{
-			Name = name;
+			var bytes = new byte[SerializedSize];
+			var span = bytes.AsSpan();
+			GetBytes(span);
+			return bytes;
 		}
 
-		public override string ToString() => Name;
-		public bool Equals(CompressionAlgorithm other)
+		/// <summary>
+		/// Serializes this <see cref="CachedFile"/> into the given <see cref="Span{T}"/>.
+		/// </summary>
+		/// <param name="bytes"></param>
+		/// <returns></returns>
+		/// <exception cref="ArgumentException"></exception>
+		internal virtual int GetBytes(Span<byte> bytes)
 		{
-			return Name.Equals(other.Name, StringComparison.OrdinalIgnoreCase);
-		}
+			// format:
+			//	content size				(int, 4 bytes)
+			//	compression algorithm id	(uint, 4 bytes)
+			//	content						(byte array, content size bytes)
+			//	actual size					(int, 4 bytes) equal to content size if no compression
+			//	mime type id				(uint, 4 bytes)
+			//	last modified				(long, 8 bytes)
 
-		public override bool Equals([NotNullWhen(true)] object? obj)
-		{
-			if (obj is CompressionAlgorithm algorithm)
+			if (bytes.Length < SerializedSize)
 			{
-				return Equals(algorithm);
+				throw new ArgumentException($"Span is too short. Expected: {SerializedSize}. Actual: {bytes.Length}", nameof(bytes));
 			}
-			return false;
+
+			var offset = 0;
+
+			// write content size
+			BinaryPrimitives.WriteInt32LittleEndian(bytes[offset..], Content.Length);
+
+			offset += sizeof(int);
+
+			// write compression algorithm id
+			BinaryPrimitives.WriteUInt32LittleEndian(bytes[offset..], Compression.Id);
+
+			offset += sizeof(uint);
+
+			// write content
+			Content.CopyTo(bytes[offset..]);
+
+			offset += Content.Length;
+
+			// write uncompressed size
+			BinaryPrimitives.WriteInt32LittleEndian(bytes[offset..], Size);
+
+			offset += sizeof(int);
+
+			// write mime type id
+			BinaryPrimitives.WriteUInt32LittleEndian(bytes[offset..], (uint)MimeType);
+
+			offset += sizeof(uint);
+
+			// write last modified
+			BinaryPrimitives.WriteInt64LittleEndian(bytes[offset..], LastModified.UtcTicks);
+
+			return offset + sizeof(long);
 		}
 
-		public override int GetHashCode() => Name.GetHashCode(StringComparison.OrdinalIgnoreCase);
-
-		public static implicit operator string(CompressionAlgorithm algorithm) => algorithm.Name;
-
-		public static bool operator ==(CompressionAlgorithm left, CompressionAlgorithm right)
+		internal static CachedFile? FromBytes(ReadOnlySpan<byte> bytes)
 		{
-			return left.Equals(right);
-		}
+			if (bytes.Length < sizeof(int))
+			{
+				return null;
+			}
 
-		public static bool operator !=(CompressionAlgorithm left, CompressionAlgorithm right)
-		{
-			return !(left == right);
+			var offset = 0;
+
+			var contentSize = BinaryPrimitives.ReadInt32LittleEndian(bytes[offset..]);
+
+			if (bytes.Length < GetSerializedSize(contentSize))
+			{
+				return null;
+			}
+
+			offset += sizeof(int);
+
+			var compression = CompressionAlgorithm.FromId(BinaryPrimitives.ReadUInt32LittleEndian(bytes[offset..]));
+
+			offset += sizeof(uint);
+
+			var content = bytes[offset..(offset + contentSize)].ToArray();
+
+			offset += content.Length;
+
+			var realSize = BinaryPrimitives.ReadInt32LittleEndian(bytes[offset..]);
+
+			offset += sizeof(int);
+
+			var mimeType = (MimeType)BinaryPrimitives.ReadUInt32LittleEndian(bytes[offset..]);
+
+			offset += sizeof(uint);
+
+			var lastModified = new DateTimeOffset(BinaryPrimitives.ReadInt64LittleEndian(bytes[offset..]), TimeSpan.Zero);
+
+			return new()
+			{
+				Compression = compression,
+				Content = content,
+				MimeType = mimeType,
+				LastModified = lastModified,
+				Size = realSize
+			};
 		}
 	}
 }

@@ -3,7 +3,7 @@
 	/// <summary>
 	/// Represents the mime types SimpleCDN supports. All other mime types are considered <see cref="Unknown"/> and will be served as application/octet-stream.
 	/// </summary>
-	public enum MimeType
+	public enum MimeType : uint
 	{
 		// text
 		HTML, Text, CSS,

@@ -10,7 +10,7 @@ public class GZipTests
 	[TestCase(HTML_CONTENT, TestName = "HTML Compression and Decompression")]
 	public void Compress_Decompress(string inputText)
 	{
-		byte[] data = Encoding.UTF8.GetBytes(inputText);
+		var data = Encoding.UTF8.GetBytes(inputText);
 		var dataSpan = data.AsSpan();
 
 		var compressed = GZipHelpers.TryCompress(ref dataSpan);
@@ -26,7 +26,7 @@ public class GZipTests
 	[TestCase("{}", TestName = "Tiny JSON does not compress")]
 	public void Compress_SmallData_Fails(string inputText)
 	{
-		byte[] data = Encoding.UTF8.GetBytes(inputText);
+		var data = Encoding.UTF8.GetBytes(inputText);
 		var dataSpan = data.AsSpan();
 		var compressed = GZipHelpers.TryCompress(ref dataSpan);
 		Assert.That(compressed, Is.False);
