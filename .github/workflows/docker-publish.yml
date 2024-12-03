@@ -51,6 +51,10 @@ jobs:
     
     steps:
       - name: Building for ${{ matrix.arch }} on ${{ matrix.runner }}
+        run: echo "Building for $ARCH on $RUNNER"
+        env:
+          ARCH: ${{ matrix.arch }}
+          RUNNER: ${{ matrix.runner }}
       - name: Checkout repository
         uses: actions/checkout@v4
 
