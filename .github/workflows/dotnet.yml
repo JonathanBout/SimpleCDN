@@ -14,10 +14,8 @@ on:
       - '**.md'
 
 jobs:
-  build:
-
+  unit-test:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v4
     - name: Setup .NET
@@ -25,8 +23,23 @@ jobs:
       with:
         dotnet-version: 9.0.x
     - name: Restore dependencies
-      run: dotnet restore SimpleCDN.sln
+      run: dotnet restore SimpleCDN.Tests/SimpleCDN.Tests.csproj
     - name: Build
-      run: dotnet build SimpleCDN.sln --no-restore
+      run: dotnet build SimpleCDN.Tests/SimpleCDN.Tests.csproj --no-restore
     - name: Test
-      run: dotnet test SimpleCDN.sln --no-build --verbosity normal
+      run: dotnet test SimpleCDN.Tests/SimpleCDN.Tests.csproj --no-build --verbosity normal
+
+  integration-test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 9.0.x
+    - name: Restore dependencies
+      run: dotnet restore SimpleCDN.Tests.Integration/SimpleCDN.Integration.csproj
+    - name: Build
+      run: dotnet build SimpleCDN.Tests.Integration/SimpleCDN.Integration.csproj --no-restore
+    - name: Test
+      run: dotnet test SimpleCDN.Tests.Integration/SimpleCDN.Integration.csproj --no-build --verbosity normal
