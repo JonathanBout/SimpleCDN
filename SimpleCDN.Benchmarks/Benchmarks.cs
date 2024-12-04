@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 namespace SimpleCDN.Benchmarks
 {
 	[MemoryDiagnoser(false)]
-	[SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "Needed for BenchmarkDotNet")]
 	public class Benchmarks
 	{
 		public IEnumerable<char[]> Paths =>
