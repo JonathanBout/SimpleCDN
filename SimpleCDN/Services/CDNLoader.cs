@@ -49,7 +49,7 @@ namespace SimpleCDN.Services
 				return GetSystemFile(path[5..]);
 			}
 
-			var filesystemPath = Path.Combine(DataRoot, path);
+			var filesystemPath = Path.Combine(DataRoot, path.TrimStart('/'));
 
 			if (!_fs.FileExists(filesystemPath))
 			{
