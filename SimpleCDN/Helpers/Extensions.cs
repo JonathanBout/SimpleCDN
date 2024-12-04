@@ -34,64 +34,54 @@ namespace SimpleCDN.Helpers
 			return $"{result:0.##}{sizeNames[sizeNameIndex]}B";
 		}
 
-		public static (T left, IEnumerable<T> right) RemoveFirst<T>(this IEnumerable<T> source)
-		{
-			var enumerator = source.GetEnumerator();
-
-			if (!enumerator.MoveNext())
-				ArgumentOutOfRangeException.ThrowIfLessThan(0, 1, nameof(source));
-
-			return (enumerator.Current, RestEnumerator(enumerator));
-
-			static IEnumerable<T> RestEnumerator(IEnumerator<T> enumerator)
-			{
-				while (enumerator.MoveNext())
-				{
-					yield return enumerator.Current;
-				}
-			}
-		}
-
+		/// <summary>
+		/// Normalizes a path by removing all . and .. segments in-place. When ready,
+		/// <paramref name="path"/> will be shortened to contain just the normalized path.
+		/// </summary>
+		/// <param name="path">The path to normalize in-place</param>
 		public static void Normalize(ref this Span<char> path)
 		{
 			var segments = MemoryExtensions.Split(path, '/');
 
-			var segmentsToRemove = new List<Range>();
+			var rangesToRemove = new List<Range>();
 
-			Range lastSegment = Range.All;
+			var resultRanges = new Stack<Range>();
+
+			var originalLength = path.Length;
 
 			foreach (var segment in segments)
 			{
-				if (segment.GetOffsetAndLength(path.Length).Length == 0)
+				if (segment.GetOffsetAndLength(originalLength).Length == 0)
 				{
 					continue;
 				}
 
 				if (path[segment] is ['.', '.'])
 				{
-					if (!lastSegment.Equals(Range.All))
+					if (resultRanges.TryPop(out Range lastSegment))
 					{
-						segmentsToRemove.Add(lastSegment);
+						rangesToRemove.Add(lastSegment);
 					}
 
-					segmentsToRemove.Add(segment);
+					rangesToRemove.Add(segment);
 
 				} else if (path[segment] is ['.'])
 				{
 					// if the segment is . it should be removed
-					segmentsToRemove.Add(segment);
+					rangesToRemove.Add(segment);
+				} else
+				{
+					resultRanges.Push(segment);
 				}
-
-				lastSegment = segment;
 			}
 
 			int offset = 0;
 
-			foreach (var segmentToRemove in segmentsToRemove)
-			{
-				// transform path, so that 
+			var segmentsToRemove = rangesToRemove.Select(s => s.GetOffsetAndLength(originalLength)).OrderBy(s => s.Offset);
 
-				var (start, length) = segmentToRemove.GetOffsetAndLength(path.Length);
+			foreach (var segment in segmentsToRemove)
+			{
+				var (start, length) = segment;
 
 				// include the / before the segment
 				// and subtract the offset to account for previously removed segments
@@ -123,6 +113,12 @@ namespace SimpleCDN.Helpers
 			}
 		}
 
+		/// <summary>
+		/// Sanitizes a string for use in log messages:<br/>
+		/// - replaces all whitespace (including newlines, tabs, ...) with a single space
+		/// </summary>
+		/// <param name="input"></param>
+		/// <returns></returns>
 		public static string ForLog(this string input) => WhitespaceRegex().Replace(input, " ");
 
 		[GeneratedRegex(@"\s+", RegexOptions.Multiline | RegexOptions.Compiled)]
