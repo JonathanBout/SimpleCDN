@@ -16,8 +16,9 @@ namespace SimpleCDN.Endpoints
 
 					if (loader.GetFile(route) is CDNFile file)
 					{
+						var typedAccept = ctx.Request.GetTypedHeaders().Accept;
 						// check if the client accepts the file's media type
-						if (!ctx.Request.GetTypedHeaders().Accept.Contains(new MediaTypeHeaderValue(file.MediaType)))
+						if (typedAccept.Count > 0 && !typedAccept.Contains(new MediaTypeHeaderValue(file.MediaType)) && !typedAccept.Contains(new MediaTypeHeaderValue("*/*")))
 						{
 							return Results.StatusCode(StatusCodes.Status406NotAcceptable);
 						}
