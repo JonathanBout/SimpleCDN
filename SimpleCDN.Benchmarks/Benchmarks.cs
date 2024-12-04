@@ -25,7 +25,7 @@ namespace SimpleCDN.Benchmarks
 
 		[Benchmark(OperationsPerInvoke = NormalizationBenchmarkIterationsPerInvoke)]
 		[ArgumentsSource(nameof(Paths))]
-		public void NormalizationBenchmark(char[] path)
+		public void Normalize(char[] path)
 		{
 			for (var i = 0; i < NormalizationBenchmarkIterationsPerInvoke; i++)
 			{
