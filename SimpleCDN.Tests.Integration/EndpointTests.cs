@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.Testing;
-
-namespace SimpleCDN.Tests.Integration
+﻿namespace SimpleCDN.Tests.Integration
 {
 	public class EndpointTests : IClassFixture<CustomWebApplicationFactory>
 	{

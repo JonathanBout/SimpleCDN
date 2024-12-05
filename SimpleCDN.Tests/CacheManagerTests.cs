@@ -1,11 +1,7 @@
 ﻿using SimpleCDN.Cache;
 using SimpleCDN.Services;
 using SimpleCDN.Tests.Mocks;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace SimpleCDN.Tests
 {
