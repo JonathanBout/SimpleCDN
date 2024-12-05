@@ -13,7 +13,6 @@ namespace SimpleCDN.Endpoints
 			{
 				try
 				{
-
 					if (loader.GetFile(route) is CDNFile file)
 					{
 						var typedAccept = ctx.Request.GetTypedHeaders().Accept;
@@ -57,6 +56,7 @@ namespace SimpleCDN.Endpoints
 			}).CacheOutput(policy =>
 			{
 				// cache the response for 1 minute to reduce load on the server
+				// this is another layer of caching, on top of the CDNLoader cache.
 				policy.Cache()
 					.Expire(TimeSpan.FromMinutes(1))
 					.SetVaryByRouteValue("route")

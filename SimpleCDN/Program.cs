@@ -20,6 +20,15 @@ namespace SimpleCDN
 				.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
 				.AddCommandLine(args);
 
+			builder.Services.AddOutputCache(options =>
+			{
+				var configuration = options.ApplicationServices.GetRequiredService<CDNConfiguration>();
+
+				// output cache is 1/10th of memory cache
+				// in bytes               in kilobytes
+				options.MaximumBodySize = configuration.MaxMemoryCacheSize * 100;
+			});
+
 			builder.Services.MapConfiguration();
 
 			// for now, we use a simple size-limited in-memory cache.
@@ -35,6 +44,7 @@ namespace SimpleCDN
 			var app = builder.Build();
 
 			app.RegisterCDNEndpoints();
+			app.UseOutputCache();
 
 			app.Run();
 		}
