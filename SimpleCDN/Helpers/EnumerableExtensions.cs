@@ -1,4 +1,8 @@
-﻿namespace SimpleCDN.Helpers
+﻿
+
+using Microsoft.Net.Http.Headers;
+
+namespace SimpleCDN.Helpers
 {
 	public static class EnumerableExtensions
 	{
@@ -18,6 +22,18 @@
 					yield return enumerator.Current;
 				}
 			}
+		}
+
+		public static bool ContainsMediaType(this IList<MediaTypeHeaderValue> list, string mediaType)
+		{
+			foreach (var item in list)
+			{
+				if (MTHVComparer.Instance.Equals(item, new MediaTypeHeaderValue(mediaType)))
+				{
+					return true;
+				}
+			}
+			return false;
 		}
 	}
 }
