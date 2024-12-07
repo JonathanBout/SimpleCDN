@@ -1,4 +1,7 @@
-﻿namespace SimpleCDN.Tests.Integration
+﻿using System.Net;
+using System.Net.Http.Headers;
+
+namespace SimpleCDN.Tests.Integration
 {
 	public class EndpointTests : IClassFixture<CustomWebApplicationFactory>
 	{
@@ -57,6 +60,26 @@
 
 			var content = await response.Content.ReadAsStringAsync();
 			Assert.Contains(expectedText, content);
+		}
+
+		[Theory]
+		[InlineData("/test.txt", "text/plain", false)]
+		[InlineData("/test.txt", "application/json",true)]
+		[InlineData("/data/test.json", "application/json", false)]
+		[InlineData("/data/test.json", "text/plain", true)]
+		public async Task Test_UnsupportedMediaType_WhenWrongAcceptHeader(string endpoint, string supportedMediaType, bool shouldFail)
+		{
+			var client = _webApplicationFactory.CreateClient();
+			var request = new HttpRequestMessage(HttpMethod.Get, endpoint);
+			request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(supportedMediaType));
+			var response = await client.SendAsync(request);
+			if (shouldFail)
+			{
+				Assert.Equal(HttpStatusCode.NotAcceptable, response.StatusCode);
+			} else
+			{
+				Assert.True(response.IsSuccessStatusCode, response.StatusCode.ToString());
+			}
 		}
 	}
 }

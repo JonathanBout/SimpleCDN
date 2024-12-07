@@ -8,8 +8,6 @@ Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-co
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleCDN.Tests", "SimpleCDN.Tests\SimpleCDN.Tests.csproj", "{9F41AC4B-73A5-AED7-2FAD-13532040B2E1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleCDN.Benchmarks", "SimpleCDN.Benchmarks\SimpleCDN.Benchmarks.csproj", "{01B35836-CD1D-0631-A280-04996E3E2058}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleCDN.Tests.Integration", "SimpleCDN.Tests.Integration\SimpleCDN.Tests.Integration.csproj", "{748DF05A-61E9-3214-6751-2FB8D9C75A1C}"
 EndProject
 Global
@@ -30,9 +28,6 @@ Global
 		{9F41AC4B-73A5-AED7-2FAD-13532040B2E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9F41AC4B-73A5-AED7-2FAD-13532040B2E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9F41AC4B-73A5-AED7-2FAD-13532040B2E1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{01B35836-CD1D-0631-A280-04996E3E2058}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{01B35836-CD1D-0631-A280-04996E3E2058}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{01B35836-CD1D-0631-A280-04996E3E2058}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{748DF05A-61E9-3214-6751-2FB8D9C75A1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{748DF05A-61E9-3214-6751-2FB8D9C75A1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{748DF05A-61E9-3214-6751-2FB8D9C75A1C}.Release|Any CPU.ActiveCfg = Release|Any CPU

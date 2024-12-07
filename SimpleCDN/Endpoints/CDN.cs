@@ -2,6 +2,7 @@
 using SimpleCDN.Cache;
 using SimpleCDN.Helpers;
 using SimpleCDN.Services;
+using System.Linq;
 
 namespace SimpleCDN.Endpoints
 {
@@ -18,7 +19,7 @@ namespace SimpleCDN.Endpoints
 					{
 						var typedAccept = ctx.Request.GetTypedHeaders().Accept;
 						// check if the client accepts the file's media type
-						if (typedAccept.Count > 0 && !typedAccept.Contains(new MediaTypeHeaderValue(file.MediaType)) && !typedAccept.Contains(new MediaTypeHeaderValue("*/*")))
+						if (typedAccept.Count > 0 && !typedAccept.ContainsMediaType(file.MediaType))
 						{
 							return Results.StatusCode(StatusCodes.Status406NotAcceptable);
 						}
