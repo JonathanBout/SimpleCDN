@@ -54,13 +54,6 @@ namespace SimpleCDN.Endpoints
 				}
 
 				return Results.NotFound();
-			}).CacheOutput(policy =>
-			{
-				// cache the response for 1 minute to reduce load on the server
-				policy.Cache()
-					.Expire(TimeSpan.FromMinutes(1))
-					.SetVaryByRouteValue("route")
-					.SetVaryByHeader("content-encoding");
 			});
 
 			return builder;
