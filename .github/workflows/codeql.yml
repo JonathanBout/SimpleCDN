@@ -76,7 +76,11 @@ jobs:
     # to build your code.
     # ℹ️ Command-line programs to run using the OS shell.
     # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
-    - if: matrix.build-mode == 'manual'
+    - name: Setup .NET Core SDK
+      uses: actions/setup-dotnet@v4.1.0
+      with:
+        dotnet-version: 9.0.x
+    - name: Build the project
       shell: bash
       run: |
         dotnet restore SimpleCDN.sln
