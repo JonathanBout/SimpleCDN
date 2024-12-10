@@ -8,11 +8,6 @@
 		public required string DataRoot { get; set; }
 
 		/// <summary>
-		/// The maximum size of the in-memory cache in kB. Default is 500,000 (500 MB)
-		/// </summary>
-		public uint MaxMemoryCacheSize { get; set; } = 500_000;
-
-		/// <summary>
 		/// The footer to be added to the bottom of generated index files. Default is a link to the SimpleCDN GitHub repository
 		/// and the text "Powered by SimpleCDN". Supports HTML.
 		/// </summary>
@@ -43,21 +38,10 @@
 				isValid = false;
 			}
 
-			if (MaxMemoryCacheSize == 0)
-			{
-				logger.LogCritical("MaxMemoryCacheSize must be greater than 0");
-				isValid = false;
-			}
-
 			if (MaxCachedItemSize < 1 || MaxCachedItemSize > Array.MaxLength)
 			{
 				logger.LogCritical("MaxCachedItemSize must be greater than 0 and smaller than Array.MaxLength ({max array length} in this case)", Array.MaxLength);
 				isValid = false;
-			}
-
-			if (MaxCachedItemSize > MaxMemoryCacheSize)
-			{
-				logger.LogWarning("MaxCachedItemSize should be smaller than MaxMemoryCacheSize. Inserting an item larger than MaxMemoryCacheSize will evict all entries from the cache.");
 			}
 
 			// warn if MaxCachedItemSize is greater than a third of system memory

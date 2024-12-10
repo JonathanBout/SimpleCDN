@@ -8,3 +8,5 @@ services:
     - ../:/data
     environment:
     - CDN_DATA_ROOT=/data
+    - RedisCache__User=redis
+    - RedisCache__Password=secret_redis

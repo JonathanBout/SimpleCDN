@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.StackExchangeRedis;
 using SimpleCDN.Cache;
 using SimpleCDN.Configuration;
 using SimpleCDN.Endpoints;
@@ -22,10 +23,21 @@ namespace SimpleCDN
 
 			builder.Services.MapConfiguration();
 
-			// for now, we use a simple size-limited in-memory cache.
-			// In the future, we may want to give options for other cache implementations
-			// like Redis or Memcached.
-			builder.Services.AddSingleton<IDistributedCache, SizeLimitedCache>();
+			if (builder.Configuration.GetSection("RedisCache") is IConfigurationSection rcConfig && rcConfig.Exists())
+			{
+				builder.Services.AddStackExchangeRedisCache(_ => { })
+					.Configure<RedisCacheOptions>(options =>
+					{
+						options.ConfigurationOptions ??= new();
+						rcConfig.Bind(options.ConfigurationOptions);
+					});
+
+			} else if (builder.Configuration.GetSection("MemoryCache") is IConfigurationSection mcConfig)
+			{
+				// By default, we use the in-memory cache
+				builder.Services.AddSingleton<IDistributedCache, SizeLimitedCache>()
+					.Configure<InMemoryCacheConfiguration>(mcConfig);
+			}
 
 			builder.Services.AddSingleton<ICDNLoader, CDNLoader>();
 			builder.Services.AddSingleton<IIndexGenerator, IndexGenerator>();

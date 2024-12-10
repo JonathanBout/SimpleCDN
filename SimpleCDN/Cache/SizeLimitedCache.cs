@@ -13,10 +13,10 @@ namespace SimpleCDN.Cache
 	/// </summary>
 	/// <param name="maxSize">The maximum size of the cache, in bytes</param>
 	/// <param name="comparer">The string comparer to use for the internal dictionary</param>
-	internal class SizeLimitedCache(IOptionsMonitor<CDNConfiguration> options, ILogger<SizeLimitedCache> logger) : IDistributedCache
+	internal class SizeLimitedCache(IOptionsMonitor<InMemoryCacheConfiguration> options, ILogger<SizeLimitedCache> logger) : IDistributedCache
 	{
 		private readonly ConcurrentDictionary<string, ValueWrapper> _dictionary = new(StringComparer.OrdinalIgnoreCase);
-		private readonly long _maxSize = options.CurrentValue.MaxMemoryCacheSize;
+		private readonly long _maxSize = options.CurrentValue.MaxSize;
 		private readonly ILogger<SizeLimitedCache> _logger = logger;
 		public long Size => _dictionary.Values.Sum(wrapper => wrapper.Size);
 

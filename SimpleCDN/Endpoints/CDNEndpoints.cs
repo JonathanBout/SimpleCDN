@@ -6,15 +6,18 @@ using System.Linq;
 
 namespace SimpleCDN.Endpoints
 {
-	public static class CDN
+	/// <summary>
+	/// A dummy class for the logger type
+	/// </summary>
+	public class CDN;
+	public static class CDNEndpoints
 	{
 		public static IEndpointRouteBuilder RegisterCDNEndpoints(this IEndpointRouteBuilder builder)
 		{
-			builder.MapGet("/{*route}", (ICDNLoader loader, HttpContext ctx, ILogger<Program> logger, string route = "") =>
+			builder.MapGet("/{*route}", (ICDNLoader loader, HttpContext ctx, ILogger<CDN> logger, string route = "") =>
 			{
 				try
 				{
-
 					if (loader.GetFile(route) is CDNFile file)
 					{
 						var typedAccept = ctx.Request.GetTypedHeaders().Accept;
