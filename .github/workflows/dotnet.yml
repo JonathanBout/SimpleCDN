@@ -26,9 +26,9 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore SimpleCDN.Tests/SimpleCDN.Tests.csproj
     - name: Build
-      run: dotnet build SimpleCDN.Tests/SimpleCDN.Tests.csproj --no-restore
+      run: dotnet build SimpleCDN.Tests/SimpleCDN.Tests.csproj --no-restore -p:TreatWarningsAsErrors=true
     - name: Test
-      run: dotnet test SimpleCDN.Tests/SimpleCDN.Tests.csproj --no-build --verbosity normal
+      run: dotnet test SimpleCDN.Tests/SimpleCDN.Tests.csproj --no-build --verbosity normal -p:TreatWarningsAsErrors=true
 
   integration-test:
     runs-on: ubuntu-latest
