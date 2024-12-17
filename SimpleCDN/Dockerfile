@@ -54,7 +54,7 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
     curl
 
-HEALTHCHECK --interval=30s --timeout=3s --start-period=1s --start-interval=2s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=3s --start-period=1s --retries=3 \
     CMD curl --fail http://localhost:8080/_cdn/server/health || exit 1
     
 ENTRYPOINT ["./SimpleCDN"]
