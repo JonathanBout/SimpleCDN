@@ -9,6 +9,7 @@ updates:
     directories: # Location of package manifests
     - "/SimpleCDN"
     - "/SimpleCDN.Tests"
+    - "/SimpleCDN.Tests.Integration"
     schedule:
       interval: "weekly"
   - package-ecosystem: "docker"
