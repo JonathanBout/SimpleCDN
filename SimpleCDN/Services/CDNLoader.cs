@@ -16,12 +16,14 @@ namespace SimpleCDN.Services
 		IOptionsMonitor<CDNConfiguration> options,
 		IIndexGenerator generator,
 		ICacheManager cache,
+		ILogger<CDNLoader> logger,
 		IPhysicalFileReader fs) : ICDNLoader
 	{
 		private readonly IWebHostEnvironment _environment = environment;
 		private readonly IIndexGenerator _indexGenerator = generator;
 		private readonly IPhysicalFileReader _fs = fs;
 		private readonly ICacheManager _cache = cache;
+		private readonly ILogger<CDNLoader> _logger = logger;
 
 		private readonly IOptionsMonitor<CDNConfiguration> _options = options;
 
@@ -70,8 +72,11 @@ namespace SimpleCDN.Services
 		{
 			if (requestPath is "" or "/")
 			{
+				_logger.LogInformation("Redirecting '/' to system file 'index.html'");
 				return GetSystemFile("index.html");
 			}
+
+			_logger.LogInformation("Requesting system file '{path}'", requestPath);
 
 			IFileInfo fileInfo = _environment.WebRootFileProvider.GetFileInfo(requestPath);
 
@@ -79,11 +84,14 @@ namespace SimpleCDN.Services
 			{
 				_cache.TryRemove(requestPath);
 
+				_logger.LogWarning("System file '{path}' does not exist", requestPath);
+
 				return null;
 			}
 
 			if (_cache.TryGetValue(requestPath, out CachedFile? cachedFile) && cachedFile.LastModified >= fileInfo.LastModified)
 			{
+				_logger.LogInformation("Serving system file '{path}' from cache", requestPath);
 				return new CDNFile(cachedFile.Content, cachedFile.MimeType.ToContentTypeString(), cachedFile.LastModified, cachedFile.Compression);
 			}
 
@@ -139,7 +147,7 @@ namespace SimpleCDN.Services
 				return GetRegularFile(absoluteIndexHtml, Path.Combine(requestPath, "index.html"));
 			}
 
-			if (_cache.TryGetValue(requestPath, out var cachedFile) && cachedFile.LastModified > _fs.GetLastModified(absolutePath))
+			if (_cache.TryGetValue(requestPath, out CachedFile? cachedFile) && cachedFile.LastModified > _fs.GetLastModified(absolutePath))
 			{
 				return new CDNFile(cachedFile.Content, cachedFile.MimeType.ToContentTypeString(), cachedFile.LastModified, cachedFile.Compression);
 			}
@@ -172,7 +180,6 @@ namespace SimpleCDN.Services
 			{
 				return null;
 			}
-
 
 			if (_cache.TryGetValue(requestPath, out CachedFile? cachedFile) && cachedFile.LastModified > _fs.GetLastModified(absolutePath))
 			{
