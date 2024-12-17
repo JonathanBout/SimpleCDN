@@ -1,8 +1,6 @@
-﻿using Microsoft.Net.Http.Headers;
-using SimpleCDN.Cache;
+﻿using SimpleCDN.Cache;
 using SimpleCDN.Helpers;
 using SimpleCDN.Services;
-using System.Linq;
 
 namespace SimpleCDN.Endpoints
 {

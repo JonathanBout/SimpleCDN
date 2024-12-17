@@ -1,6 +1,5 @@
 ﻿using Microsoft.Net.Http.Headers;
 using System.Diagnostics.CodeAnalysis;
-using System.Xml;
 
 namespace SimpleCDN.Helpers
 {
