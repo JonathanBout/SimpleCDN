@@ -1,4 +1,5 @@
-﻿using SimpleCDN.Cache;
+﻿using Microsoft.Net.Http.Headers;
+using SimpleCDN.Cache;
 using SimpleCDN.Helpers;
 using SimpleCDN.Services;
 
@@ -12,13 +13,16 @@ namespace SimpleCDN.Endpoints
 	{
 		public static IEndpointRouteBuilder RegisterCDNEndpoints(this IEndpointRouteBuilder builder)
 		{
+			// health check endpoint
+			builder.MapGet(Globals.SystemFilesRoot + "/server/health", () => Results.Ok());
+
 			builder.MapGet("/{*route}", (ICDNLoader loader, HttpContext ctx, ILogger<CDN> logger, string route = "") =>
 			{
 				try
 				{
 					if (loader.GetFile(route) is CDNFile file)
 					{
-						var typedAccept = ctx.Request.GetTypedHeaders().Accept;
+						IList<MediaTypeHeaderValue> typedAccept = ctx.Request.GetTypedHeaders().Accept;
 						// check if the client accepts the file's media type
 						if (typedAccept.Count > 0 && !typedAccept.ContainsMediaType(file.MediaType))
 						{

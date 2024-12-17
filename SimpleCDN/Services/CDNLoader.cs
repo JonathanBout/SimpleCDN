@@ -1,7 +1,9 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Options;
 using SimpleCDN.Cache;
 using SimpleCDN.Configuration;
 using SimpleCDN.Helpers;
+using System.Net.Mime;
 
 namespace SimpleCDN.Services
 {
@@ -9,7 +11,7 @@ namespace SimpleCDN.Services
 
 	public record BigCDNFile(string FilePath, string MediaType, DateTimeOffset LastModified, CompressionAlgorithm Compression) : CDNFile([], MediaType, LastModified, Compression);
 
-	public partial class CDNLoader(
+	public class CDNLoader(
 		IWebHostEnvironment environment,
 		IOptionsMonitor<CDNConfiguration> options,
 		IIndexGenerator generator,
@@ -38,13 +40,13 @@ namespace SimpleCDN.Services
 			}
 
 			var pathChars = path.ToCharArray();
-			var pathSpan = pathChars.AsSpan();
+			Span<char> pathSpan = pathChars.AsSpan();
 
 			pathSpan.Normalize();
 
 			path = pathSpan.ToString();
 
-			if (pathSpan.StartsWith("/_cdn/"))
+			if (pathSpan.StartsWith(Globals.SystemFilesRoot + "/") || path.Equals(Globals.SystemFilesRoot))
 			{
 				return GetSystemFile(path[5..]);
 			}
@@ -66,15 +68,21 @@ namespace SimpleCDN.Services
 
 		private CDNFile? GetSystemFile(string requestPath)
 		{
-			var fileInfo = _environment.WebRootFileProvider.GetFileInfo(requestPath);
+			if (requestPath is "" or "/")
+			{
+				return GetSystemFile("index.html");
+			}
+
+			IFileInfo fileInfo = _environment.WebRootFileProvider.GetFileInfo(requestPath);
 
 			if (!fileInfo.Exists || fileInfo.PhysicalPath is null || fileInfo.IsDirectory)
 			{
 				_cache.TryRemove(requestPath);
+
 				return null;
 			}
 
-			if (_cache.TryGetValue(requestPath, out var cachedFile) && cachedFile.LastModified >= fileInfo.LastModified)
+			if (_cache.TryGetValue(requestPath, out CachedFile? cachedFile) && cachedFile.LastModified >= fileInfo.LastModified)
 			{
 				return new CDNFile(cachedFile.Content, cachedFile.MimeType.ToContentTypeString(), cachedFile.LastModified, cachedFile.Compression);
 			}
@@ -96,14 +104,14 @@ namespace SimpleCDN.Services
 
 			var content = _fs.LoadIntoArray(fileInfo.PhysicalPath);
 
-			var lastModified = fileInfo.LastModified;
+			DateTimeOffset lastModified = fileInfo.LastModified;
 
-			var mediaType = MimeTypeHelpers.MimeTypeFromFileName(requestPath);
+			MimeType mediaType = MimeTypeHelpers.MimeTypeFromFileName(requestPath);
 
 			// if no compressed equivalent existed on disk, try to compress it ourselves.
 			if (compression == CompressionAlgorithm.None)
 			{
-				var contentSpan = content.AsSpan();
+				Span<byte> contentSpan = content.AsSpan();
 				if (GZipHelpers.TryCompress(ref contentSpan))
 				{
 					compression = CompressionAlgorithm.GZip;
@@ -125,6 +133,7 @@ namespace SimpleCDN.Services
 			}
 
 			var absoluteIndexHtml = Path.Combine(absolutePath, "index.html");
+
 			if (_fs.FileExists(absoluteIndexHtml))
 			{
 				return GetRegularFile(absoluteIndexHtml, Path.Combine(requestPath, "index.html"));
@@ -142,8 +151,8 @@ namespace SimpleCDN.Services
 				return null;
 			}
 
-			var indexSpan = index.AsSpan();
-			var indexCompresion = CompressionAlgorithm.None;
+			Span<byte> indexSpan = index.AsSpan();
+			CompressionAlgorithm indexCompresion = CompressionAlgorithm.None;
 			var originalSize = indexSpan.Length;
 
 			if (GZipHelpers.TryCompress(ref indexSpan))
@@ -164,25 +173,22 @@ namespace SimpleCDN.Services
 				return null;
 			}
 
-			var actualLastModified = _fs.GetLastModified(absolutePath);
 
-			if (_cache.TryGetValue(requestPath, out var cachedFile) && cachedFile.LastModified > actualLastModified)
+			if (_cache.TryGetValue(requestPath, out CachedFile? cachedFile) && cachedFile.LastModified > _fs.GetLastModified(absolutePath))
 			{
 				return new CDNFile(cachedFile.Content, cachedFile.MimeType.ToContentTypeString(), cachedFile.LastModified, cachedFile.Compression);
 			}
 
 			if (!_fs.CanLoadIntoArray(absolutePath))
 			{
-				return new BigCDNFile(absolutePath, MimeTypeHelpers.MimeTypeFromFileName(requestPath).ToContentTypeString(), actualLastModified, CompressionAlgorithm.None);
+				return new BigCDNFile(absolutePath, MimeTypeHelpers.MimeTypeFromFileName(requestPath).ToContentTypeString(), _fs.GetLastModified(absolutePath), CompressionAlgorithm.None);
 			}
 
 			var content = _fs.LoadIntoArray(absolutePath);
 
-			var mediaType = MimeTypeHelpers.MimeTypeFromFileName(requestPath);
+			CompressionAlgorithm compression = CompressionAlgorithm.None;
 
-			var compression = CompressionAlgorithm.None;
-
-			var contentSpan = content.AsSpan();
+			Span<byte> contentSpan = content.AsSpan();
 
 			var uncompressedLength = contentSpan.Length;
 
@@ -192,9 +198,9 @@ namespace SimpleCDN.Services
 				content = contentSpan.ToArray();
 			}
 
-			_cache.CacheFile(requestPath, content, uncompressedLength, actualLastModified, mediaType, compression);
+			_cache.CacheFile(requestPath, content, uncompressedLength, _fs.GetLastModified(absolutePath), MimeTypeHelpers.MimeTypeFromFileName(requestPath), compression);
 
-			return new CDNFile(content, mediaType.ToContentTypeString(), actualLastModified, compression);
+			return new CDNFile(content, MimeTypeHelpers.MimeTypeFromFileName(requestPath).ToContentTypeString(), _fs.GetLastModified(absolutePath), compression);
 		}
 	}
 }

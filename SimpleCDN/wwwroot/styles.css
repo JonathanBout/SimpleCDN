@@ -10,6 +10,7 @@
 
 * {
 	box-sizing: border-box;
+	text-align: center;
 }
 
 body {
@@ -48,6 +49,10 @@ th, td {
 
 .col-size, .col-date {
 	text-align: center;
+}
+
+.col-name {
+	text-align: start;
 }
 
 thead th {
