@@ -11,18 +11,16 @@ namespace SimpleCDN.Cache
 	/// A local, in-memory cache that limits the total size of the stored values. When the size of the cache exceeds the specified limit, the oldest (least recently accessed) values are removed.<br/>
 	/// Implements <see cref="IDistributedCache"/> for compatibility with the <see cref="Services.CacheManager"/>. It is not actually distributed.
 	/// </summary>
-	/// <param name="maxSize">The maximum size of the cache, in bytes</param>
-	/// <param name="comparer">The string comparer to use for the internal dictionary</param>
-	internal class SizeLimitedCache(IOptionsMonitor<CDNConfiguration> options, ILogger<SizeLimitedCache> logger) : IDistributedCache
+	internal class SizeLimitedCache(IOptionsMonitor<InMemoryCacheConfiguration> options, ILogger<SizeLimitedCache> logger) : IDistributedCache
 	{
 		private readonly ConcurrentDictionary<string, ValueWrapper> _dictionary = new(StringComparer.OrdinalIgnoreCase);
-		private readonly long _maxSize = options.CurrentValue.MaxMemoryCacheSize;
+		private readonly long _maxSize = options.CurrentValue.MaxSize;
 		private readonly ILogger<SizeLimitedCache> _logger = logger;
 		public long Size => _dictionary.Values.Sum(wrapper => wrapper.Size);
 
 		public byte[]? Get(string key)
 		{
-			if (_dictionary.TryGetValue(key, out var wrapper))
+			if (_dictionary.TryGetValue(key, out ValueWrapper? wrapper))
 			{
 				_logger.LogDebug("Cache HIT {key}", key.ForLog());
 				return wrapper.Value;
@@ -56,14 +54,14 @@ namespace SimpleCDN.Cache
 		{
 			_dictionary[key] = new ValueWrapper(value);
 
-			var byOldest = _dictionary.OrderBy(wrapper => wrapper.Value.AccessedAt).AsEnumerable();
+			IEnumerable<KeyValuePair<string, ValueWrapper>> byOldest = _dictionary.OrderBy(wrapper => wrapper.Value.AccessedAt).AsEnumerable();
 
 			while (Size > _maxSize)
 			{
 				try
 				{
-					(var oldest, byOldest) = byOldest.RemoveFirst();
-					_dictionary.TryRemove(oldest.Key, out _);
+					((string oldestKey, _), byOldest) = byOldest.RemoveFirst();
+					_dictionary.TryRemove(oldestKey, out _);
 				} catch (ArgumentOutOfRangeException)
 				{
 					// code should never reach this point, but just in case as a safety net

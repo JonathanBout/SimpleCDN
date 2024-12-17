@@ -10,7 +10,7 @@ namespace SimpleCDN
 	{
 		private static void Main(string[] args)
 		{
-			var builder = WebApplication.CreateSlimBuilder(args);
+			WebApplicationBuilder builder = WebApplication.CreateSlimBuilder(args);
 
 			// reconfigure the configuration to make sure we're using the right sources in the right order
 			builder.Configuration.Sources.Clear();
@@ -32,7 +32,7 @@ namespace SimpleCDN
 			builder.Services.AddSingleton<IPhysicalFileReader, PhysicalFileReader>();
 			builder.Services.AddSingleton<ICacheManager, CacheManager>();
 
-			var app = builder.Build();
+			WebApplication app = builder.Build();
 
 			app.RegisterCDNEndpoints();
 

@@ -25,9 +25,9 @@ namespace SimpleCDN.Services
 				<html>
 				<head>
 					<meta name="robots" content="noindex,nofollow">
-					<link rel="stylesheet" href="/_cdn/styles.css">
+					<link rel="stylesheet" href="{3}/styles.css">
 					<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0">
-					<link rel="icon" href="/_cdn/logo.svg" type="image/svg+xml">
+					<link rel="icon" href="{3}/logo.svg" type="image/svg+xml">
 					<title>{1} &middot; Index of {2}</title>
 				</head>
 				<body>
@@ -43,7 +43,7 @@ namespace SimpleCDN.Services
 							<th class="col-date">Last Change (UTC)</th>
 						</tr></thead>
 						<tbody>
-				""", rootRelativePath.Replace("/", "<wbr>/"), _options.CurrentValue.PageTitle, rootRelativePath);
+				""", rootRelativePath.Replace("/", "<wbr>/"), _options.CurrentValue.PageTitle, rootRelativePath, Globals.SystemFilesRoot);
 
 			if (rootRelativePath is not "/" and not "" && directory.Parent is DirectoryInfo parent)
 			{
@@ -52,8 +52,9 @@ namespace SimpleCDN.Services
 				string parentRootRelativePath;
 
 				if (lastSlashIndex is < 1)
+				{
 					parentRootRelativePath = "/";
-				else
+				} else
 				{
 					parentRootRelativePath = rootRelativePath[..lastSlashIndex];
 				}
@@ -64,14 +65,14 @@ namespace SimpleCDN.Services
 			try
 			{
 
-				foreach (var subDirectory in directory.EnumerateDirectories())
+				foreach (DirectoryInfo subDirectory in directory.EnumerateDirectories())
 				{
 					var name = subDirectory.Name;
 
 					AppendRow(index, Path.Combine(rootRelativePath, name), name, "folder", -1, subDirectory.LastWriteTimeUtc);
 				}
 
-				foreach (var file in directory.EnumerateFiles())
+				foreach (FileInfo file in directory.EnumerateFiles())
 				{
 					var name = file.Name;
 
@@ -94,7 +95,7 @@ namespace SimpleCDN.Services
 		private static void AppendRow(StringBuilder index, string href, string name, string icon, long size, DateTimeOffset lastModified)
 		{
 			index.Append("<tr>");
-			index.AppendFormat("""<td class="col-icon"><img src="/_cdn/{0}.svg" alt="{0}"></img></td>""", icon);
+			index.AppendFormat("""<td class="col-icon"><img src="{1}/{0}.svg" alt="{0}"></img></td>""", icon, Globals.SystemFilesRoot);
 			index.AppendFormat("""<td class="col-name"><a href="{0}">{1}</a></td>""", href, name);
 			index.AppendFormat("""<td class="col-size">{0}</td>""", size < 0 ? "-" : size.FormatByteCount());
 			index.AppendFormat("""<td class="col-date">{0}</td>""", lastModified.ToString("dd/MM/yyyy HH:mm"));

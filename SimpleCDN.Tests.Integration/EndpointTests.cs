@@ -64,7 +64,7 @@ namespace SimpleCDN.Tests.Integration
 
 		[Theory]
 		[InlineData("/test.txt", "text/plain", false)]
-		[InlineData("/test.txt", "application/json",true)]
+		[InlineData("/test.txt", "application/json", true)]
 		[InlineData("/data/test.json", "application/json", false)]
 		[InlineData("/data/test.json", "text/plain", true)]
 		public async Task Test_UnsupportedMediaType_WhenWrongAcceptHeader(string endpoint, string supportedMediaType, bool shouldFail)
