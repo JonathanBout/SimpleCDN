@@ -14,7 +14,7 @@ namespace SimpleCDN.Endpoints
 		public static IEndpointRouteBuilder RegisterCDNEndpoints(this IEndpointRouteBuilder builder)
 		{
 			// health check endpoint
-			builder.MapGet(Globals.SystemFilesRoot + "/server/health", () => Results.Ok());
+			builder.MapGet(Globals.SystemFilesRoot + "/server/health", () => "healthy");
 
 			builder.MapGet("/{*route}", (ICDNLoader loader, HttpContext ctx, ILogger<CDN> logger, string route = "") =>
 			{
@@ -52,7 +52,7 @@ namespace SimpleCDN.Endpoints
 							bytes = GZipHelpers.Decompress(bytes);
 						}
 
-						return Results.File(bytes, file.MediaType, lastModified: file.LastModified, enableRangeProcessing: true);
+						return Results.File(bytes, file.MediaType, enableRangeProcessing: true, lastModified: file.LastModified);
 					}
 				} catch (Exception ex)
 				{

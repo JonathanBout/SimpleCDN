@@ -36,6 +36,7 @@ namespace SimpleCDN.Tests
 				options,
 				new IndexGenerator(options, new MockLogger<IndexGenerator>()),
 				new MockCacheManager(),
+				new MockLogger<CDNLoader>(),
 				new MockPhysicalFileReader(Files));
 		}
 
@@ -46,7 +47,7 @@ namespace SimpleCDN.Tests
 		[TestCase("/data/../../inaccesible.txt", TestName = "File in /data's parent's parent directory")]
 		public void Test_ParentDirectory_IsInaccesible(string path)
 		{
-			var loader = CreateLoader();
+			CDNLoader loader = CreateLoader();
 
 			Assert.That(loader.GetFile(path), Is.Null);
 		}
@@ -57,7 +58,7 @@ namespace SimpleCDN.Tests
 		[TestCase("/data/nx/nx.txt", TestName = "File in Non-existent directory")]
 		public void Test_NonExistentFile_IsInaccesible(string name)
 		{
-			var loader = CreateLoader();
+			CDNLoader loader = CreateLoader();
 			Assert.That(loader.GetFile(name), Is.Null);
 		}
 
@@ -71,8 +72,8 @@ namespace SimpleCDN.Tests
 		[TestCase("/non-existent/../" + SVG_FILENAME, SVG_CONTENT, "image/svg+xml", TestName = "Existing SVG File with path traversal")]
 		public void Test_AccessibleFiles(string name, string content, string mediaType)
 		{
-			var loader = CreateLoader();
-			var file = loader.GetFile(name);
+			CDNLoader loader = CreateLoader();
+			CDNFile? file = loader.GetFile(name);
 			Assert.That(file, Is.Not.Null);
 			Assert.Multiple(() =>
 			{

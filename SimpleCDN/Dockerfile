@@ -9,8 +9,6 @@ ARG FINAL_BASE_IMAGE=${LAUNCHING_FROM_VS:+aotdebug}
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 USER $APP_UID
 WORKDIR /app
-EXPOSE 8080
-
 
 # This stage is used to build the service project
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
@@ -45,16 +43,13 @@ USER app
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM ${FINAL_BASE_IMAGE:-mcr.microsoft.com/dotnet/runtime-deps:9.0} AS final
 WORKDIR /app
-EXPOSE 8080
 COPY --from=publish /app/publish .
 ENV CDN_DATA_ROOT=/data
 
-# Install curl for healthcheck
+# Install curl for use in healthchecks. Due to possible changes
+# to ports, we can't specify the HEALTHCHECK in the Dockerfile
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
     curl
-
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD curl --fail http://localhost:8080/_cdn/server/health || exit 1
     
 ENTRYPOINT ["./SimpleCDN"]

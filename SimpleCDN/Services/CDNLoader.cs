@@ -16,12 +16,14 @@ namespace SimpleCDN.Services
 		IOptionsMonitor<CDNConfiguration> options,
 		IIndexGenerator generator,
 		ICacheManager cache,
+		ILogger<CDNLoader> logger,
 		IPhysicalFileReader fs) : ICDNLoader
 	{
 		private readonly IWebHostEnvironment _environment = environment;
 		private readonly IIndexGenerator _indexGenerator = generator;
 		private readonly IPhysicalFileReader _fs = fs;
 		private readonly ICacheManager _cache = cache;
+		private readonly ILogger<CDNLoader> _logger = logger;
 
 		private readonly IOptionsMonitor<CDNConfiguration> _options = options;
 
@@ -70,8 +72,11 @@ namespace SimpleCDN.Services
 		{
 			if (requestPath is "" or "/")
 			{
+				_logger.LogDebug("Redirecting '/' to system file 'index.html'");
 				return GetSystemFile("index.html");
 			}
+
+			_logger.LogDebug("Requesting system file '{path}'", requestPath.ForLog());
 
 			IFileInfo fileInfo = _environment.WebRootFileProvider.GetFileInfo(requestPath);
 
@@ -79,11 +84,14 @@ namespace SimpleCDN.Services
 			{
 				_cache.TryRemove(requestPath);
 
+				_logger.LogDebug("System file '{path}' does not exist", requestPath);
+
 				return null;
 			}
 
 			if (_cache.TryGetValue(requestPath, out CachedFile? cachedFile) && cachedFile.LastModified >= fileInfo.LastModified)
 			{
+				_logger.LogDebug("Serving system file '{path}' from cache", requestPath);
 				return new CDNFile(cachedFile.Content, cachedFile.MimeType.ToContentTypeString(), cachedFile.LastModified, cachedFile.Compression);
 			}
 
@@ -99,6 +107,7 @@ namespace SimpleCDN.Services
 			// if the file is too big to load into memory, we want to stream it directly 
 			if (!_fs.CanLoadIntoArray(fileInfo.Length))
 			{
+				_logger.LogDebug("System file '{path}' is too big to load into memory, streaming instead", requestPath.ForLog());
 				return new BigCDNFile(fileInfo.PhysicalPath, MimeTypeHelpers.MimeTypeFromFileName(requestPath).ToContentTypeString(), fileInfo.LastModified, CompressionAlgorithm.None);
 			}
 
@@ -139,7 +148,7 @@ namespace SimpleCDN.Services
 				return GetRegularFile(absoluteIndexHtml, Path.Combine(requestPath, "index.html"));
 			}
 
-			if (_cache.TryGetValue(requestPath, out var cachedFile) && cachedFile.LastModified > _fs.GetLastModified(absolutePath))
+			if (_cache.TryGetValue(requestPath, out CachedFile? cachedFile) && cachedFile.LastModified > _fs.GetLastModified(absolutePath))
 			{
 				return new CDNFile(cachedFile.Content, cachedFile.MimeType.ToContentTypeString(), cachedFile.LastModified, cachedFile.Compression);
 			}
@@ -173,7 +182,6 @@ namespace SimpleCDN.Services
 				return null;
 			}
 
-
 			if (_cache.TryGetValue(requestPath, out CachedFile? cachedFile) && cachedFile.LastModified > _fs.GetLastModified(absolutePath))
 			{
 				return new CDNFile(cachedFile.Content, cachedFile.MimeType.ToContentTypeString(), cachedFile.LastModified, cachedFile.Compression);
@@ -181,6 +189,7 @@ namespace SimpleCDN.Services
 
 			if (!_fs.CanLoadIntoArray(absolutePath))
 			{
+				_logger.LogDebug("File '{path}' is too big to load into memory, streaming instead", requestPath.ForLog());
 				return new BigCDNFile(absolutePath, MimeTypeHelpers.MimeTypeFromFileName(requestPath).ToContentTypeString(), _fs.GetLastModified(absolutePath), CompressionAlgorithm.None);
 			}
 
