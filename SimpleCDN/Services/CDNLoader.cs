@@ -72,11 +72,11 @@ namespace SimpleCDN.Services
 		{
 			if (requestPath is "" or "/")
 			{
-				_logger.LogInformation("Redirecting '/' to system file 'index.html'");
+				_logger.LogDebug("Redirecting '/' to system file 'index.html'");
 				return GetSystemFile("index.html");
 			}
 
-			_logger.LogInformation("Requesting system file '{path}'", requestPath);
+			_logger.LogDebug("Requesting system file '{path}'", requestPath.ForLog());
 
 			IFileInfo fileInfo = _environment.WebRootFileProvider.GetFileInfo(requestPath);
 
@@ -84,14 +84,14 @@ namespace SimpleCDN.Services
 			{
 				_cache.TryRemove(requestPath);
 
-				_logger.LogWarning("System file '{path}' does not exist", requestPath);
+				_logger.LogDebug("System file '{path}' does not exist", requestPath);
 
 				return null;
 			}
 
 			if (_cache.TryGetValue(requestPath, out CachedFile? cachedFile) && cachedFile.LastModified >= fileInfo.LastModified)
 			{
-				_logger.LogInformation("Serving system file '{path}' from cache", requestPath);
+				_logger.LogDebug("Serving system file '{path}' from cache", requestPath);
 				return new CDNFile(cachedFile.Content, cachedFile.MimeType.ToContentTypeString(), cachedFile.LastModified, cachedFile.Compression);
 			}
 
@@ -107,6 +107,7 @@ namespace SimpleCDN.Services
 			// if the file is too big to load into memory, we want to stream it directly 
 			if (!_fs.CanLoadIntoArray(fileInfo.Length))
 			{
+				_logger.LogDebug("System file '{path}' is too big to load into memory, streaming instead", requestPath.ForLog());
 				return new BigCDNFile(fileInfo.PhysicalPath, MimeTypeHelpers.MimeTypeFromFileName(requestPath).ToContentTypeString(), fileInfo.LastModified, CompressionAlgorithm.None);
 			}
 
@@ -188,6 +189,7 @@ namespace SimpleCDN.Services
 
 			if (!_fs.CanLoadIntoArray(absolutePath))
 			{
+				_logger.LogDebug("File '{path}' is too big to load into memory, streaming instead", requestPath.ForLog());
 				return new BigCDNFile(absolutePath, MimeTypeHelpers.MimeTypeFromFileName(requestPath).ToContentTypeString(), _fs.GetLastModified(absolutePath), CompressionAlgorithm.None);
 			}
 
