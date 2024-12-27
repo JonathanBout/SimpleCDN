@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.FileProviders;
-using SimpleCDN.Tests.Mocks;
+using SimpleCDN.Tests.Unit.Mocks;
 using System.Collections;
 
 namespace SimpleCDN.Tests.Unit.Mocks

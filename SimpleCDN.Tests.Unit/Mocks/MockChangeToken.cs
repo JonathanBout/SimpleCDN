@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Primitives;
-using SimpleCDN.Tests.Mocks;
+using SimpleCDN.Tests.Unit.Mocks;
 
 namespace SimpleCDN.Tests.Unit.Mocks
 {

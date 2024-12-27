@@ -7,7 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
 // Assembly Info
-[assembly: InternalsVisibleTo("SimpleCDN.Tests")]
+[assembly: InternalsVisibleTo("SimpleCDN.Tests.Unit")]
 [assembly: InternalsVisibleTo("SimpleCDN.Tests.Integration")]
 
 // Global Suppressions

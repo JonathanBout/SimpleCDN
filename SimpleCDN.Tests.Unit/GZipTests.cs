@@ -11,7 +11,7 @@ public class GZipTests
 	public void Compress_Decompress(string inputText)
 	{
 		var data = Encoding.UTF8.GetBytes(inputText);
-		var dataSpan = data.AsSpan();
+		Span<byte> dataSpan = data.AsSpan();
 
 		var compressed = GZipHelpers.TryCompress(ref dataSpan);
 
@@ -27,7 +27,7 @@ public class GZipTests
 	public void Compress_SmallData_Fails(string inputText)
 	{
 		var data = Encoding.UTF8.GetBytes(inputText);
-		var dataSpan = data.AsSpan();
+		Span<byte> dataSpan = data.AsSpan();
 		var compressed = GZipHelpers.TryCompress(ref dataSpan);
 		Assert.That(compressed, Is.False);
 	}
