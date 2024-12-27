@@ -21,15 +21,14 @@ env:
   IMAGE_NAME: ${{ github.repository }}
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
 
-
 jobs:
   build:
     strategy:
       matrix:
        include:
-        - arch: "linux/arm64"
-          dotnet_rid: "linux-arm64"
-          runner: "buildjet-2vcpu-ubuntu-2204-arm"
+        #- arch: "linux/arm64"
+        #  dotnet_rid: "linux-arm64"
+        #  runner: "buildjet-2vcpu-ubuntu-2204-arm"
         - arch: "linux/amd64"
           dotnet_rid: "linux-amd64"
           runner: "ubuntu-latest"
@@ -68,14 +67,19 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          
+
+      - name: Set REPO env variable
+        run: |
+          docker_repo="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
+          echo "DOCKER_REPO=${docker_repo@L}" >> "${GITHUB_ENV}"
+      
       # Extract metadata (tags, labels) for Docker
       # https://github.com/docker/metadata-action
       - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@v5.6.1
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.DOCKER_REPO }}
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
@@ -88,7 +92,7 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: ${{ matrix.arch }}
-          outputs: type=image,"name=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}",push-by-digest=true,name-canonical=true,push=true
+          outputs: type=image,"name=${{ env.DOCKER_REPO }}",push-by-digest=true,name-canonical=true,push=true
           build-args: |
             DOTNET_BUILD_PLATFORM=${{ matrix.dotnet_rid }}
             
@@ -133,13 +137,17 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set REPO env variable
+        run: |
+          docker_repo="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
+          echo "DOCKER_REPO=${docker_repo@L}" >> "${GITHUB_ENV}"
       # Extract metadata (tags, labels) for Docker
       # https://github.com/docker/metadata-action
       - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@v5.6.1
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.DOCKER_REPO }}
           # use the dev tag if build is on main branch, use latest tag if build is on release
           # this means latest will always mean the latest stable build.
           tags: |
@@ -150,11 +158,11 @@ jobs:
         working-directory: /tmp/digests
         run: |
           docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
-            $(printf '${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@sha256:%s ' *)
+            $(printf '${{ env.DOCKER_REPO }}@sha256:%s ' *)
   
       - name: Inspect image
         run: |
-          docker buildx imagetools inspect ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}
+          docker buildx imagetools inspect ${{ env.DOCKER_REPO }}:${{ steps.meta.outputs.version }}
       # Sign the resulting Docker image digest except on PRs.
       # This will only write to the public Rekor transparency log when the Docker
       # repository is public to avoid leaking data.  If you would like to publish
