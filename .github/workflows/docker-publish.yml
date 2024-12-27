@@ -120,13 +120,13 @@ jobs:
       # with sigstore/fulcio when running outside of PRs.
       id-token: write
     steps:
-      # # Install the cosign tool except on PR
-      # # https://github.com/sigstore/cosign-installer
-      # - name: Install cosign
-      #  if: github.event_name != 'pull_request'
-      #  uses: sigstore/cosign-installer@v3.7.0
-      #  with:
-      #    cosign-release: 'v2.2.4'
+      # Install the cosign tool except on PR
+      # https://github.com/sigstore/cosign-installer
+      - name: Install cosign
+        if: github.event_name != 'pull_request'
+        uses: sigstore/cosign-installer@v3.7.0
+        with:
+          cosign-release: 'v2.2.4'
       - name: Download digests
         uses: actions/download-artifact@v4
         with:
@@ -173,11 +173,13 @@ jobs:
       # repository is public to avoid leaking data.  If you would like to publish
       # transparency data even for private images, pass --force to cosign below.
       # https://github.com/sigstore/cosign
-      #- name: Sign the published Docker image
-      #  if: ${{ github.event_name != 'pull_request' }}
-      #  env:
-      #    TAGS: ${{ steps.meta.outputs.tags }}
-      #    DIGEST: ${{ steps.build-and-push.outputs.digest }}
-      #  # This step uses the identity token to provision an ephemeral certificate
-      #  # against the sigstore community Fulcio instance.
-      #  run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
+      - name: Sign the published Docker image
+        if: ${{ github.event_name != 'pull_request' }}
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
+        # This step uses the identity token to provision an ephemeral certificate
+        # against the sigstore community Fulcio instance.
+        run: |
+          # extract the digest using docker inspect and take only the sha256
+          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' ${{ env.DOCKER_REPO }} | grep -Po "(?<=@).*")
+          echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
