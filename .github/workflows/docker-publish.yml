@@ -1,10 +1,5 @@
 name: Build & Publish Docker Image
 
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
 on:
   push:
     branches: [ "main" ]
@@ -158,7 +153,6 @@ jobs:
             type=sha,format=long
             type=ref,event=branch
             type=ref,event=tag
-            type=ref,event=workflow_dispatch
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}
             type=semver,pattern={{major}}.{{minor}}
@@ -168,9 +162,15 @@ jobs:
           # extract labels from the metadata and add them as annotations
           # extract tags from the metadata and append them to the command
           # append the full image name and digest
+          labels=$(jq -cr '.labels | to_entries | map("--annotation \"manifest-descriptor:" + .key + "=" + .value + "\"") | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON")
+          tags=$(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON")
+          echo "LABELS"
+          echo "$labels"
+          echo "TAGS"
+          echo "$tags"
           docker buildx imagetools create \
-            $(jq -cr '.labels | to_entries | map("--annotation \"manifest-descriptor:" + .key + "=" + .value + "\"") | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
-            $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $labels \
+            $tags \
             $(printf '${{ env.DOCKER_REPO }}@sha256:%s ' *)
   
       - name: Inspect image
