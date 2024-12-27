@@ -180,6 +180,6 @@ jobs:
         # This step uses the identity token to provision an ephemeral certificate
         # against the sigstore community Fulcio instance.
         run: |
-          # extract the digest using docker inspect and take only the sha256
-          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' ${{ env.DOCKER_REPO }} | grep -Po "(?<=@).*")
+          # extract the digest using buildx imagetools inspect and take only the sha256:...
+          DIGEST=$(docker buildx imagetools inspect ghcr.io/jonathanbout/simplecdn:latest | grep -Po "(?<=Digest:)\s*sha256:.*" | grep -Po "[^\s]*")
           echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
