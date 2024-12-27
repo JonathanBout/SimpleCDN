@@ -90,6 +90,8 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           platforms: ${{ matrix.arch }}
           outputs: type=image,"name=${{ env.DOCKER_REPO }}",push-by-digest=true,name-canonical=true,push=true
+          provenance: false
+          sbom: false
           build-args: |
             DOTNET_BUILD_PLATFORM=${{ matrix.dotnet_rid }}
             
