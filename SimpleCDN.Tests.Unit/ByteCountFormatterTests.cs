@@ -1,6 +1,6 @@
 ﻿using SimpleCDN.Helpers;
 
-namespace SimpleCDN.Tests
+namespace SimpleCDN.Tests.Unit
 {
 	[TestFixture(TestName = "Byte Count Formatter Tests")]
 	public class ByteCountFormatterTests

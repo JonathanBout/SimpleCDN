@@ -1,4 +1,4 @@
-﻿namespace SimpleCDN.Tests.Mocks
+﻿namespace SimpleCDN.Tests.Unit.Mocks
 {
 	internal class MockDisposable : IDisposable
 	{

@@ -2,7 +2,7 @@
 using SimpleCDN.Services;
 using System.Diagnostics.CodeAnalysis;
 
-namespace SimpleCDN.Tests.Mocks
+namespace SimpleCDN.Tests.Unit.Mocks
 {
 	internal class MockCacheManager : ICacheManager
 	{

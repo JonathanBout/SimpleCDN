@@ -12,9 +12,9 @@ services:
     - CDN_DATA_ROOT=/data
     - ASPNETCORE_ENVIRONMENT=Development
     healthcheck:
-        test: ["CMD", "curl", "-f", "http://localhost:8080/_cdn/server/health"]
+        test: ["CMD", "/bin/health-check.sh"]
         interval: 30s
         timeout: 5s
         start_interval: 2s
         start_period: 2s
-        retries: 5  
+        retries: 5

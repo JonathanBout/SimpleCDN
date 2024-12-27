@@ -1,9 +1,9 @@
 ﻿using SimpleCDN.Cache;
 using SimpleCDN.Services;
-using SimpleCDN.Tests.Mocks;
+using SimpleCDN.Tests.Unit.Mocks;
 using System.Text;
 
-namespace SimpleCDN.Tests
+namespace SimpleCDN.Tests.Unit
 {
 	[TestFixture(TestName = "Cache Manager Tests")]
 	public class CacheManagerTests

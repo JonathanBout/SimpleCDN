@@ -1,4 +1,4 @@
-﻿namespace SimpleCDN.Tests
+﻿namespace SimpleCDN.Tests.Unit
 {
 	[TestFixture]
 	public class NormalizeTests

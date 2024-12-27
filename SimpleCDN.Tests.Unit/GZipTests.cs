@@ -1,7 +1,7 @@
 ﻿using SimpleCDN.Helpers;
 using System.Text;
 
-namespace SimpleCDN.Tests;
+namespace SimpleCDN.Tests.Unit;
 
 [TestFixture(TestName = "GZip Compression Tests")]
 public class GZipTests

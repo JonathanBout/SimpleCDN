@@ -21,7 +21,10 @@ namespace SimpleCDN
 	internal static class Globals
 	{
 		// NOTE: when changing this value, make sure to also change the references in wwwroot/index.html
-		// and probably some other places (use the search feature of your IDE!)
+		// and probably some other places (use the global search feature of your IDE!)
+		/// <summary>
+		/// The root URL for the system files, like the style sheet
+		/// </summary>
 		public const string SystemFilesRoot = "/_cdn";
 	}
 }

@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Caching.Distributed;
 
-namespace SimpleCDN.Tests.Mocks
+namespace SimpleCDN.Tests.Unit.Mocks
 {
 	internal class DistributedCacheMock : IDistributedCache
 	{
@@ -12,9 +12,7 @@ namespace SimpleCDN.Tests.Mocks
 			if (token.IsCancellationRequested) return Task.FromCanceled<byte[]?>(token);
 
 			if (Values.TryGetValue(key, out var value))
-			{
 				return Task.FromResult<byte[]?>(value);
-			}
 
 			return Task.FromResult<byte[]?>(null);
 		}

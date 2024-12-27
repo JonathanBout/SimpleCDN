@@ -1,7 +1,8 @@
 ﻿using Microsoft.Extensions.FileProviders;
+using SimpleCDN.Tests.Mocks;
 using System.Collections;
 
-namespace SimpleCDN.Tests.Mocks
+namespace SimpleCDN.Tests.Unit.Mocks
 {
 	internal class MockDirectoryContents(string name) : IDirectoryContents
 	{

@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.FileProviders;
 
-namespace SimpleCDN.Tests.Mocks
+namespace SimpleCDN.Tests.Unit.Mocks
 {
 	internal class MockFileInfo(string path, string name) : IFileInfo
 	{
