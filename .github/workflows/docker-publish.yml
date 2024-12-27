@@ -26,9 +26,9 @@ jobs:
     strategy:
       matrix:
        include:
-        - arch: "linux/arm64"
-          dotnet_rid: "linux-arm64"
-          runner: "buildjet-2vcpu-ubuntu-2204-arm"
+#        - arch: "linux/arm64"
+#          dotnet_rid: "linux-arm64"
+#          runner: "buildjet-2vcpu-ubuntu-2204-arm"
         - arch: "linux/amd64"
           dotnet_rid: "linux-amd64"
           runner: "ubuntu-latest"
@@ -153,12 +153,15 @@ jobs:
         uses: docker/metadata-action@v5.6.1
         with:
           images: ${{ env.DOCKER_REPO }}
-          # use the dev tag if build is on main branch, use latest tag if build is on release
-          # this means latest will always mean the latest stable build.
           tags: |
-            ${{ env.BRANCH_NAME == 'main' && 'dev' || 'latest' }}
-            ${{ github.sha }}
-            ${{ env.BRANCH_NAME }}
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,format=long
+            type=ref,event=branch
+            type=ref,event=tag
+            type=ref,event=workflow_dispatch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}
+            type=semver,pattern={{major}}.{{minor}}
       - name: Create manifest list and push
         working-directory: /tmp/digests
         run: |
@@ -181,7 +184,8 @@ jobs:
       - name: Sign the published Docker image
         if: ${{ github.event_name != 'pull_request' }}
         env:
-          TAGS: ${{ steps.meta.outputs.tags }}
+          TAGS: |
+            ${{ steps.meta.outputs.tags }}
         # This step uses the identity token to provision an ephemeral certificate
         # against the sigstore community Fulcio instance.
         run: |
