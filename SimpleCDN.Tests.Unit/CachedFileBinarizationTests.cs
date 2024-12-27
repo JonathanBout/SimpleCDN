@@ -1,7 +1,7 @@
 ﻿using SimpleCDN.Cache;
 using System.Text;
 
-namespace SimpleCDN.Tests
+namespace SimpleCDN.Tests.Unit
 {
 	[TestFixture(TestName = "Cached File Binarization Tests")]
 	public class CachedFileBinarizationTests

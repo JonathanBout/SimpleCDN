@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace SimpleCDN.Tests.Mocks
+namespace SimpleCDN.Tests.Unit.Mocks
 {
 	internal class MockLogger<T> : ILogger<T>
 	{

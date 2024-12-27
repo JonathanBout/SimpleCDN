@@ -1,9 +1,9 @@
 ﻿using SimpleCDN.Configuration;
 using SimpleCDN.Services;
-using SimpleCDN.Tests.Mocks;
+using SimpleCDN.Tests.Unit.Mocks;
 using System.Text;
 
-namespace SimpleCDN.Tests
+namespace SimpleCDN.Tests.Unit
 {
 	[TestFixture(TestName = "CDN Loader Tests")]
 	public class CDNLoaderTests

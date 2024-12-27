@@ -1,4 +1,4 @@
-﻿namespace SimpleCDN.Tests
+﻿namespace SimpleCDN.Tests.Unit
 {
 	[TestFixture]
 	public class NormalizeTests
@@ -12,7 +12,7 @@
 		public void Test_Normalize_Normalizes(string path, string expected)
 		{
 			var pathChars = path.ToCharArray();
-			var span = pathChars.AsSpan();
+			Span<char> span = pathChars.AsSpan();
 
 			Helpers.Extensions.Normalize(ref span);
 

@@ -6,7 +6,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleCDN", "SimpleCDN\Simp
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{81DDED9D-158B-E303-5F62-77A2896D2A5A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleCDN.Tests", "SimpleCDN.Tests\SimpleCDN.Tests.csproj", "{9F41AC4B-73A5-AED7-2FAD-13532040B2E1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleCDN.Tests.Unit", "SimpleCDN.Tests.Unit\SimpleCDN.Tests.Unit.csproj", "{9F41AC4B-73A5-AED7-2FAD-13532040B2E1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleCDN.Tests.Integration", "SimpleCDN.Tests.Integration\SimpleCDN.Tests.Integration.csproj", "{748DF05A-61E9-3214-6751-2FB8D9C75A1C}"
 EndProject

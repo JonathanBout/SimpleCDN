@@ -1,6 +1,6 @@
 ﻿using SimpleCDN.Services;
 
-namespace SimpleCDN.Tests.Mocks
+namespace SimpleCDN.Tests.Unit.Mocks
 {
 	record MockFile(DateTimeOffset LastModified, byte[] Content);
 
@@ -13,10 +13,8 @@ namespace SimpleCDN.Tests.Mocks
 
 		public bool CanLoadIntoArray(string path)
 		{
-			if (_files.TryGetValue(path, out var file))
-			{
+			if (_files.TryGetValue(path, out MockFile? file))
 				return file.Content.Length <= ARRAY_SIZE_THRESHOLD;
-			}
 
 			return false;
 		}
@@ -47,10 +45,8 @@ namespace SimpleCDN.Tests.Mocks
 
 		private MockFile? GetFile(string path)
 		{
-			if (_files.TryGetValue(path, out var file))
-			{
+			if (_files.TryGetValue(path, out MockFile? file))
 				return file;
-			}
 			return null;
 		}
 
