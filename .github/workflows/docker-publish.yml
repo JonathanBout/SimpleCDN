@@ -162,7 +162,12 @@ jobs:
       - name: Create manifest list and push
         working-directory: /tmp/digests
         run: |
-          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+          # extract labels from the metadata and add them as annotations
+          # extract tags from the metadata and append them to the command
+          # append the full image name and digest
+          docker buildx imagetools create \
+            $(jq -cr '.labels | to_entries | map("--annotation \"manifest-descriptor:" + .key + "=" + .value + "\"") | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
             $(printf '${{ env.DOCKER_REPO }}@sha256:%s ' *)
   
       - name: Inspect image
