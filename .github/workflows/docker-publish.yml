@@ -162,7 +162,7 @@ jobs:
           # extract labels from the metadata and add them as annotations
           # extract tags from the metadata and append them to the command
           # append the full image name and digest
-          labels=$(jq -cr '.labels | to_entries | map("--annotation \"manifest-descriptor:" + .key + "=" + .value + "\"") | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON")
+          labels=$(jq -cr '.labels | to_entries | map("--annotation \"index:" + .key + "=" + .value + "\"") | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON")
           tags=$(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON")
           sources=$(printf '${{ env.DOCKER_REPO }}@sha256:%s ' *)
           declare -a "label_array=($labels)"
@@ -170,11 +170,6 @@ jobs:
           echo "LABELS"
           echo "$labels"
           echo "$label_array"
-          echo "TAGS"
-          echo "$tags"
-          echo "$tag_array"
-          echo "SOURCES"
-          echo "$sources"
           docker buildx imagetools create \
             "${label_array[@]}" \
             "${tag_array[@]}" \
