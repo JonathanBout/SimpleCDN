@@ -1,10 +1,10 @@
 ﻿using SimpleCDN.Services;
 
-namespace SimpleCDN.Tests.Unit.Mocks
+namespace SimpleCDN.Tests.Mocks
 {
-	record MockFile(DateTimeOffset LastModified, byte[] Content);
+	public record MockFile(DateTimeOffset LastModified, byte[] Content);
 
-	internal class MockPhysicalFileReader(Dictionary<string, MockFile> files) : IPhysicalFileReader
+	public class MockPhysicalFileReader(Dictionary<string, MockFile> files) : IPhysicalFileReader
 	{
 		// small threshold for easier testing
 		const int ARRAY_SIZE_THRESHOLD = 1000;
@@ -40,6 +40,13 @@ namespace SimpleCDN.Tests.Unit.Mocks
 		}
 
 		public DateTimeOffset GetLastModified(string path) => GetFile(path)?.LastModified ?? DateTimeOffset.MinValue;
+
+		public bool IsDotFile(string path)
+		{
+			var sections = path.Split('/', '\\');
+			return sections.Any(s => s.StartsWith('.'));
+		}
+
 		public byte[] LoadIntoArray(string path) => GetFile(path) is MockFile f ? f.Content : [];
 		public Stream OpenFile(string path) => GetFile(path) is MockFile f ? new MemoryStream(f.Content) : Stream.Null;
 

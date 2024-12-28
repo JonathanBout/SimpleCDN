@@ -1,4 +1,6 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Numerics;
+using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 
 namespace SimpleCDN.Helpers
 {
@@ -41,7 +43,7 @@ namespace SimpleCDN.Helpers
 		/// <param name="path">The path to normalize in-place</param>
 		public static void Normalize(ref this Span<char> path)
 		{
-			var segments = MemoryExtensions.Split(path, '/');
+			MemoryExtensions.SpanSplitEnumerator<char> segments = MemoryExtensions.Split(path, '/');
 
 			var rangesToRemove = new List<Range>();
 
@@ -49,7 +51,7 @@ namespace SimpleCDN.Helpers
 
 			var originalLength = path.Length;
 
-			foreach (var segment in segments)
+			foreach (Range segment in segments)
 			{
 				if (segment.GetOffsetAndLength(originalLength).Length == 0)
 				{
@@ -77,16 +79,16 @@ namespace SimpleCDN.Helpers
 
 			int offset = 0;
 
-			var segmentsToRemove = rangesToRemove.Select(s => s.GetOffsetAndLength(originalLength)).OrderBy(s => s.Offset);
-
-			foreach (var segment in segmentsToRemove)
+			foreach ((int Offset, int Length) segment in rangesToRemove
+															.Select(s => s.GetOffsetAndLength(originalLength))
+															.OrderBy(s => s.Offset))
 			{
-				var (start, length) = segment;
+				(int start, int length) = segment;
 
 				// include the / before the segment
 				// and subtract the offset to account for previously removed segments
 				start -= 1 + offset;
-				length += 1;
+				length++;
 
 				if (start < 0)
 				{
@@ -101,7 +103,7 @@ namespace SimpleCDN.Helpers
 					}
 				}
 
-				var target = path[start..];
+				Span<char> target = path[start..];
 
 				// move the rest of the path to the left, overwriting the segment
 				path[(start + length)..].CopyTo(target);
@@ -117,11 +119,25 @@ namespace SimpleCDN.Helpers
 		/// Sanitizes a string for use in log messages:<br/>
 		/// - replaces all whitespace (including newlines, tabs, ...) with a single space
 		/// </summary>
-		/// <param name="input"></param>
-		/// <returns></returns>
 		public static string ForLog(this string input) => WhitespaceRegex().Replace(input, " ");
 
 		[GeneratedRegex(@"\s+", RegexOptions.Multiline | RegexOptions.Compiled)]
 		private static partial Regex WhitespaceRegex();
+
+		public static bool HasAnyFlag<T>(this T enumValue, T flag) where T : Enum, IConvertible
+		{
+			var intValue = enumValue.ToInt64(null);
+			var intFlag = flag.ToInt64(null);
+
+			return (intValue & intFlag) != 0;
+		}
+
+		public static bool DoesNotHaveFlag<T>(this T enumValue, T flag) where T : Enum, IConvertible
+		{
+			var intValue = enumValue.ToInt64(null);
+			var intFlag = flag.ToInt64(null);
+
+			return (intValue & intFlag) == 0;
+		}
 	}
 }

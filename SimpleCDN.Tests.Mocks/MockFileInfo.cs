@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.FileProviders;
 
-namespace SimpleCDN.Tests.Unit.Mocks
+namespace SimpleCDN.Tests.Mocks
 {
-	internal class MockFileInfo(string path, string name) : IFileInfo
+	public class MockFileInfo(string path, string name) : IFileInfo
 	{
 		public bool Exists => true;
 		public long Length => 0;

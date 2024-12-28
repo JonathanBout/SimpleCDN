@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Primitives;
-using SimpleCDN.Tests.Unit.Mocks;
+using SimpleCDN.Tests.Mocks;
 
-namespace SimpleCDN.Tests.Unit.Mocks
+namespace SimpleCDN.Tests.Mocks
 {
-	internal class MockChangeToken : IChangeToken
+	public class MockChangeToken : IChangeToken
 	{
 		public bool HasChanged { get; }
 		public bool ActiveChangeCallbacks { get; }

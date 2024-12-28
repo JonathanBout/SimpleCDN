@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Caching.Distributed;
 
-namespace SimpleCDN.Tests.Unit.Mocks
+namespace SimpleCDN.Tests.Mocks
 {
-	internal class DistributedCacheMock : IDistributedCache
+	public class DistributedCacheMock : IDistributedCache
 	{
 		public Dictionary<string, byte[]> Values { get; set; } = [];
 

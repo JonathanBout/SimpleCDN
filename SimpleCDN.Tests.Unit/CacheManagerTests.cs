@@ -1,6 +1,6 @@
 ﻿using SimpleCDN.Cache;
 using SimpleCDN.Services;
-using SimpleCDN.Tests.Unit.Mocks;
+using SimpleCDN.Tests.Mocks;
 using System.Text;
 
 namespace SimpleCDN.Tests.Unit

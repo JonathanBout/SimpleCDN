@@ -1,10 +1,9 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.FileProviders;
-using SimpleCDN.Tests.Unit.Mocks;
 
-namespace SimpleCDN.Tests.Unit.Mocks
+namespace SimpleCDN.Tests.Mocks
 {
-	internal class MockWebHostEnvironment : IWebHostEnvironment
+	public class MockWebHostEnvironment : IWebHostEnvironment
 	{
 		public string WebRootPath
 		{

@@ -11,5 +11,6 @@
 		IEnumerable<FileSystemInfo> GetEntries(string path);
 		byte[] LoadIntoArray(string path);
 		Stream OpenFile(string path);
+		bool IsDotFile(string path);
 	}
 }

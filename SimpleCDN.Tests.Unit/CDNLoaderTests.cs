@@ -1,6 +1,6 @@
 ﻿using SimpleCDN.Configuration;
 using SimpleCDN.Services;
-using SimpleCDN.Tests.Unit.Mocks;
+using SimpleCDN.Tests.Mocks;
 using System.Text;
 
 namespace SimpleCDN.Tests.Unit
@@ -13,6 +13,9 @@ namespace SimpleCDN.Tests.Unit
 		const string SVG_FILENAME = "data/image.svg";
 		const string DEEPLY_NESED_FILENAME = "data/nested/deeply/nested/file.txt";
 		const string INACCESSIBLE_FILENAME = "../inaccesible.txt";
+		const string DOTFILE_FILENAME = ".gitignore";
+
+		const string DOTDIRECTORY_WITH_FILE_FILENAME = ".directory/file.txt";
 
 		const string JSON_CONTENT = "{}";
 		const string TEXT_CONTENT = "Hello, world!";
@@ -25,11 +28,18 @@ namespace SimpleCDN.Tests.Unit
 			["/" + SVG_FILENAME] = new(DateTime.Now, Encoding.UTF8.GetBytes(SVG_CONTENT)),
 			["/" + DEEPLY_NESED_FILENAME] = new(DateTime.Now, Encoding.UTF8.GetBytes(TEXT_CONTENT)),
 			["/" + INACCESSIBLE_FILENAME] = new(DateTime.Now, Encoding.UTF8.GetBytes(":(")),
+			["/" + DOTFILE_FILENAME] = new(DateTime.Now, Encoding.UTF8.GetBytes("[Bb]in/")),
+			["/" + DOTDIRECTORY_WITH_FILE_FILENAME] = new(DateTime.Now, Encoding.UTF8.GetBytes("Hello, world!")),
 		};
 
-		private static CDNLoader CreateLoader()
+		private static CDNLoader CreateLoader(Action<CDNConfiguration>? configure = null)
 		{
 			var options = new OptionsMock<CDNConfiguration>(new() { DataRoot = "/" });
+
+			if (configure is not null)
+			{
+				configure(options.CurrentValue);
+			}
 
 			return new CDNLoader(
 				new MockWebHostEnvironment(),

@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Primitives;
 
-namespace SimpleCDN.Tests.Unit.Mocks
+namespace SimpleCDN.Tests.Mocks
 {
-	internal class MockFileProvider(string path) : IFileProvider
+	public class MockFileProvider(string path) : IFileProvider
 	{
 		public IDirectoryContents GetDirectoryContents(string subpath)
 		{
