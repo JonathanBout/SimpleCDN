@@ -26,7 +26,7 @@ namespace SimpleCDN.Benchmarks
 		[GlobalSetup]
 		public void Setup()
 		{
-			dataRoot = Directory.CreateTempSubdirectory("SimpleCDN-Benchmarks").FullName;
+			dataRoot = Directory.CreateTempSubdirectory("SimpleCDN-Benchmarks-").FullName;
 
 			reader = new PhysicalFileReader(new MockLogger<PhysicalFileReader>(), new OptionsMock<CDNConfiguration>(new CDNConfiguration { DataRoot = dataRoot }));
 
@@ -51,6 +51,8 @@ namespace SimpleCDN.Benchmarks
 		[ArgumentsSource(nameof(Paths))]
 		public bool IsDotfileStrings(string path)
 		{
+			// This method has the same logic as the one in the PhysicalFileReader class, but it's using strings instead of spans.
+			// This is to compare the performance of the two methods.
 			path = Path.Combine(dataRoot, path);
 
 			if (!File.Exists(path) && !Directory.Exists(path))
