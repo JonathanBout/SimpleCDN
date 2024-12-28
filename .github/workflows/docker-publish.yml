@@ -1,10 +1,5 @@
 name: Build & Publish Docker Image
 
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
 on:
   push:
     branches: [ "main" ]
@@ -21,7 +16,6 @@ env:
   IMAGE_NAME: ${{ github.repository }}
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
 
-
 jobs:
   build:
     strategy:
@@ -32,7 +26,7 @@ jobs:
           runner: "buildjet-2vcpu-ubuntu-2204-arm"
         - arch: "linux/amd64"
           dotnet_rid: "linux-amd64"
-          runner: "ubuntu-latest"
+          runner: "ubuntu-22.04"
     concurrency:
       group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}-${{ matrix.arch }}
       cancel-in-progress: true
@@ -40,27 +34,22 @@ jobs:
     permissions:
       contents: read
       packages: write
-      # This is used to complete the identity challenge
-      # with sigstore/fulcio when running outside of PRs.
-      id-token: write
     
     steps:
       - name: Building for ${{ matrix.arch }} on ${{ matrix.runner }}
-        run: echo "Building for $ARCH on $RUNNER"
+        run: |
+          echo "Building for $ARCH on $RUNNER"
+          platform=${{ matrix.arch }}
+          echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV          
         env:
           ARCH: ${{ matrix.arch }}
           RUNNER: ${{ matrix.runner }}
+          
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      # Install the cosign tool except on PR
-      # https://github.com/sigstore/cosign-installer
-      - name: Install cosign
-        if: github.event_name != 'pull_request'
-        uses: sigstore/cosign-installer@v3.7.0
-        with:
-          cosign-release: 'v2.2.4'
-
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
       # Login against a Docker registry except on PR
       # https://github.com/docker/login-action
       - name: Log into registry ${{ env.REGISTRY }}
@@ -70,20 +59,19 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          
+
+      - name: Set REPO env variable
+        run: |
+          docker_repo="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
+          echo "DOCKER_REPO=${docker_repo@L}" >> "${GITHUB_ENV}"
+      
       # Extract metadata (tags, labels) for Docker
       # https://github.com/docker/metadata-action
       - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@v5.6.1
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          # use the dev tag if build is on main branch, use latest tag if build is on release
-          # this means latest will always mean the latest stable build.
-          tags: |
-            ${{ env.BRANCH_NAME == 'main' && 'dev' || 'latest' }}
-            ${{ github.sha }}
-            ${{ env.BRANCH_NAME }}
+          images: ${{ env.DOCKER_REPO }}
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
@@ -94,12 +82,98 @@ jobs:
           context: .
           file: ./SimpleCDN/Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: ${{ matrix.arch }}
+          outputs: type=image,"name=${{ env.DOCKER_REPO }}",push-by-digest=true,name-canonical=true,push=true
+          provenance: false
+          sbom: false
           build-args: |
             DOTNET_BUILD_PLATFORM=${{ matrix.dotnet_rid }}
+            
+      - name: Export digest
+        run: |
+          mkdir -p /tmp/digests
+          digest="${{ steps.build-and-push.outputs.digest }}"
+          touch "/tmp/digests/${digest#sha256:}"          
 
+      - name: Upload digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-${{ env.PLATFORM_PAIR }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  merge:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'pull_request' }}
+    needs:
+      - build
+    permissions:
+      contents: read
+      packages: write
+      # This is used to complete the identity challenge
+      # with sigstore/fulcio when running outside of PRs.
+      id-token: write
+    steps:
+      # Install the cosign tool except on PR
+      # https://github.com/sigstore/cosign-installer
+      - name: Install cosign
+        if: github.event_name != 'pull_request'
+        uses: sigstore/cosign-installer@v3.7.0
+        with:
+          cosign-release: 'v2.2.4'
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: /tmp/digests
+          pattern: digests-*
+          merge-multiple: true
+      # Login against a Docker registry except on PR
+      # https://github.com/docker/login-action
+      - name: Log into registry ${{ env.REGISTRY }}
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3.3.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set REPO env variable
+        run: |
+          docker_repo="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
+          echo "DOCKER_REPO=${docker_repo@L}" >> "${GITHUB_ENV}"
+      # Extract metadata (tags, labels) for Docker
+      # https://github.com/docker/metadata-action
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5.6.1
+        with:
+          images: ${{ env.DOCKER_REPO }}
+            # latest tag always represents latest stable release
+            # include git commit SHA, git branch name, git tag name
+            # when a semver tag, e.g. '1.2.3', add tags '1', '1.2' and '1.2.3'
+          tags: |
+            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/') }}
+            type=sha,format=long
+            type=ref,event=branch
+            type=ref,event=tag
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}
+            type=semver,pattern={{major}}.{{minor}}
+            # disable automatic latest tag
+          flavor: |
+            latest=false
+      - name: Create manifest list and push
+        working-directory: /tmp/digests
+        run: |
+          # extract tags from the metadata and append them to the command
+          # append the full image name and digest
+          tags=$(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON")
+          sources=$(printf '${{ env.DOCKER_REPO }}@sha256:%s ' *)
+          docker buildx imagetools create $tags $sources
+      - name: Inspect image
+        run: |
+          docker buildx imagetools inspect ${{ env.DOCKER_REPO }}:${{ steps.meta.outputs.version }}
       # Sign the resulting Docker image digest except on PRs.
       # This will only write to the public Rekor transparency log when the Docker
       # repository is public to avoid leaking data.  If you would like to publish
@@ -108,8 +182,11 @@ jobs:
       - name: Sign the published Docker image
         if: ${{ github.event_name != 'pull_request' }}
         env:
-          TAGS: ${{ steps.meta.outputs.tags }}
-          DIGEST: ${{ steps.build-and-push.outputs.digest }}
+          TAGS: |
+            ${{ steps.meta.outputs.tags }}
         # This step uses the identity token to provision an ephemeral certificate
         # against the sigstore community Fulcio instance.
-        run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
+        run: |
+          # extract the digest using buildx imagetools inspect | take only the sha256:... | remove whitespace
+          DIGEST=$(docker buildx imagetools inspect ${{ env.DOCKER_REPO }}:${{ steps.meta.outputs.version }} | grep -Po "(?<=Digest:)\s*sha256:.*" | grep -Po "[^\s]*")
+          echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
