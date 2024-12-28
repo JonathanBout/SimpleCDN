@@ -165,15 +165,19 @@ jobs:
           labels=$(jq -cr '.labels | to_entries | map("--annotation \"manifest-descriptor:" + .key + "=" + .value + "\"") | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON")
           tags=$(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON")
           sources=$(printf '${{ env.DOCKER_REPO }}@sha256:%s ' *)
+          declare -a "label_array=($labels)"
+          declare -a "tag_array=($tags)"
           echo "LABELS"
           echo "$labels"
+          echo "$label_array"
           echo "TAGS"
           echo "$tags"
+          echo "$tag_array"
           echo "SOURCES"
           echo "$sources"
           docker buildx imagetools create \
-            $labels \
-            $tags \
+            "${label_array[@]}" \
+            "${tag_array[@]}" \
             $sources
   
       - name: Inspect image
