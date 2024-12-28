@@ -170,8 +170,8 @@ jobs:
           # echo "LABELS"
           # echo "$labels"
           # echo "$label_array"
-          # docker buildx imagetools create \
-            --annotation "org.opencontainers.image.description=A simple CDN with local in-memory caching"
+          docker buildx imagetools create \
+            --annotation "org.opencontainers.image.description=A simple CDN with local in-memory caching" \
             $tags \
             $sources
   
