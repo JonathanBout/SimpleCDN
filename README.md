@@ -1,5 +1,4 @@
-# SimpleCDN
-
+# ![SimpleCDN Logo. A folder icon with three stacked horizontal stripes on it, stacked from long at the top to short at the bottom.](./SimpleCDN/wwwroot/logo.svg) SimpleCDN
 SimpleCDN is, well, a simple CDN server. Currently it is only tested for single-instance use, but I don't see any reasons why a load balancer wouldn't work. Be aware this CDN currently doesn't support any
 distributed caching, meaning both servers will build their own cache.
 
@@ -8,8 +7,8 @@ distributed caching, meaning both servers will build their own cache.
 
 **Tags:**
 - `latest`: the latest stable release
+- `main`: the latest build of the main branch, usually on the last commit. Not recommended for production as it may contain bugs or break.
 - `vX.X.X`: pin to a specific version. Recommended for production scenarios. Supported versions can be found in the [tags listing](https://github.com/JonathanBout/SimpleCDN/tags).
-- `dev`: the latest build of the `main` branch. Not recommended for production as it may contain bugs.
 
 #### with `docker run`
 ```
