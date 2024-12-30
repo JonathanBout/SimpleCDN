@@ -61,8 +61,10 @@ COPY ["SimpleCDN/health-check.sh", "/bin/health-check.sh"]
 
 # Install curl for use in healthchecks. Due to possible changes
 # to ports, we can't specify the HEALTHCHECK in the Dockerfile
+USER root
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
     curl
+USER app
 
 ENTRYPOINT ["./SimpleCDN"]
