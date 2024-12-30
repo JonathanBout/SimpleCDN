@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace SimpleCDN.Tests.Unit.Mocks
+namespace SimpleCDN.Tests.Mocks
 {
-	internal class MockLogger<T> : ILogger<T>
+	public class MockLogger<T> : ILogger<T>
 	{
 		public IDisposable? BeginScope<TState>(TState state) where TState : notnull => new MockDisposable();
 		public bool IsEnabled(LogLevel logLevel) => true;

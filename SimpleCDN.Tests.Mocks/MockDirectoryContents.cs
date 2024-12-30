@@ -1,10 +1,10 @@
 ﻿using Microsoft.Extensions.FileProviders;
-using SimpleCDN.Tests.Unit.Mocks;
+using SimpleCDN.Tests.Mocks;
 using System.Collections;
 
-namespace SimpleCDN.Tests.Unit.Mocks
+namespace SimpleCDN.Tests.Mocks
 {
-	internal class MockDirectoryContents(string name) : IDirectoryContents
+	public class MockDirectoryContents(string name) : IDirectoryContents
 	{
 		public bool Exists => true;
 		public IEnumerator<IFileInfo> GetEnumerator()

@@ -8,7 +8,7 @@ namespace SimpleCDN.Tests.Integration
 		public const string GENERATED_INDEX_ID = "!GENERATED!INDEX!";
 
 		public string DataRoot => _rootDirectory.FullName;
-		private readonly DirectoryInfo _rootDirectory = Directory.CreateTempSubdirectory("SimpleCDN");
+		private readonly DirectoryInfo _rootDirectory = Directory.CreateTempSubdirectory("SimpleCDN-IntegrationTests");
 
 		protected override void ConfigureWebHost(IWebHostBuilder builder)
 		{

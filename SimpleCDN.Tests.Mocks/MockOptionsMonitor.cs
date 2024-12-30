@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Options;
 
-namespace SimpleCDN.Tests.Unit.Mocks
+namespace SimpleCDN.Tests.Mocks
 {
-	internal class OptionsMock<T>(T value) : IOptionsMonitor<T>, IOptions<T>, IOptionsSnapshot<T> where T : class
+	public class OptionsMock<T>(T value) : IOptionsMonitor<T>, IOptions<T>, IOptionsSnapshot<T> where T : class
 	{
 		public T CurrentValue => value;
 		public T Value => CurrentValue;

@@ -83,7 +83,7 @@ jobs:
     - name: Build the project
       shell: bash
       run: |
-        dotnet publish -c Release SimpleCDN.sln
+        dotnet build -c Release SimpleCDN.sln
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3

@@ -64,10 +64,12 @@ namespace SimpleCDN.Services
 
 			try
 			{
-
 				foreach (DirectoryInfo subDirectory in directory.EnumerateDirectories())
 				{
 					var name = subDirectory.Name;
+
+					if (name.StartsWith('.') && !_options.CurrentValue.ShowDotFiles)
+						continue;
 
 					AppendRow(index, Path.Combine(rootRelativePath, name), name, "folder", -1, subDirectory.LastWriteTimeUtc);
 				}
@@ -75,6 +77,9 @@ namespace SimpleCDN.Services
 				foreach (FileInfo file in directory.EnumerateFiles())
 				{
 					var name = file.Name;
+
+					if (name.StartsWith('.') && !_options.CurrentValue.ShowDotFiles)
+						continue;
 
 					AppendRow(index, Path.Combine(rootRelativePath, name), name, "file", file.Length, file.LastWriteTimeUtc);
 				}
@@ -87,9 +92,7 @@ namespace SimpleCDN.Services
 
 			index.AppendFormat("</tbody></table></main><footer>{0}</footer></body></html>", _options.CurrentValue.Footer);
 
-			var bytes = Encoding.UTF8.GetBytes(index.ToString());
-
-			return bytes;
+			return Encoding.UTF8.GetBytes(index.ToString());
 		}
 
 		private static void AppendRow(StringBuilder index, string href, string name, string icon, long size, DateTimeOffset lastModified)

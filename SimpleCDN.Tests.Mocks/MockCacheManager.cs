@@ -2,9 +2,9 @@
 using SimpleCDN.Services;
 using System.Diagnostics.CodeAnalysis;
 
-namespace SimpleCDN.Tests.Unit.Mocks
+namespace SimpleCDN.Tests.Mocks
 {
-	internal class MockCacheManager : ICacheManager
+	public class MockCacheManager : ICacheManager
 	{
 		public void CacheFile(string path, byte[] content, int realSize, DateTimeOffset lastModified, MimeType mimeType, CompressionAlgorithm compression) { }
 		public void CacheFile(string path, CachedFile file) { }

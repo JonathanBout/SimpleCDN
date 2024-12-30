@@ -55,6 +55,12 @@ namespace SimpleCDN.Services
 
 			var filesystemPath = Path.Combine(DataRoot, path.TrimStart('/'));
 
+			if (!_options.CurrentValue.AllowDotFileAccess && _fs.IsDotFile(filesystemPath))
+			{
+				_logger.LogDebug("Denying access to dotfile or directory '{dotfile}'.", filesystemPath.ForLog());
+				return null;
+			}
+
 			if (!_fs.FileExists(filesystemPath))
 			{
 				if (_fs.DirectoryExists(filesystemPath))

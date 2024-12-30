@@ -1,5 +1,8 @@
 ﻿using Microsoft.Extensions.Options;
+using Microsoft.Win32.SafeHandles;
 using SimpleCDN.Configuration;
+using SimpleCDN.Helpers;
+using System.Data;
 
 namespace SimpleCDN.Services
 {
@@ -35,7 +38,7 @@ namespace SimpleCDN.Services
 				return bytes;
 			} catch (Exception ex)
 			{
-				_logger.LogError(ex, "Failed to load file '{path}' into memory", path.ReplaceLineEndings(""));
+				_logger.LogError(ex, "Failed to load file '{path}' into memory", path.ForLog());
 
 				return [];
 			}
@@ -48,7 +51,7 @@ namespace SimpleCDN.Services
 				return new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
 			} catch (Exception ex)
 			{
-				_logger.LogError(ex, "Failed to open file '{path}'", path.ReplaceLineEndings(""));
+				_logger.LogError(ex, "Failed to open file '{path}'", path.ForLog());
 				return Stream.Null;
 			}
 		}
@@ -77,5 +80,31 @@ namespace SimpleCDN.Services
 			return File.GetLastWriteTimeUtc(path);
 		}
 
+		public bool IsDotFile(string path)
+		{
+			if (!FileExists(path) && !DirectoryExists(path))
+			{
+				return false;
+			}
+
+			ReadOnlySpan<char> pathSpan = path.AsSpan();
+
+			pathSpan = pathSpan[_options.CurrentValue.DataRoot.Length..];
+
+			foreach (Range section in pathSpan.SplitAny(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar))
+			{
+				if (section.GetOffsetAndLength(pathSpan.Length) is not { Length: > 0, Offset: int offset})
+				{
+					continue;
+				}
+
+				if (pathSpan[offset..].StartsWith('.'))
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
 	}
 }

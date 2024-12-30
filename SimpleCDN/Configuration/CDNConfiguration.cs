@@ -23,6 +23,26 @@
 		/// </summary>
 		public int MaxCachedItemSize { get; set; } = 8000;
 
+		private bool _showDotFiles;
+
+		/// <summary>
+		/// Whether to show files starting with a dot (e.g. .gitignore) in the index. Default is false.
+		/// This is only relevant if <see cref="AllowDotFileAccess"/> is set to true.
+		/// This setting does not control access to dotfiles, only their visibility in the index.
+		/// <br/>On Windows, this setting also affects files with the <see cref="FileAttributes.Hidden"/> attribute.
+		/// </summary>
+		public bool ShowDotFiles
+		{
+			get => _showDotFiles && AllowDotFileAccess;
+			set => _showDotFiles = value;
+		}
+
+		/// <summary>
+		/// Whether to allow access to files and directories starting with a dot (e.g. .ssl). Default is false.
+		/// <br/>On Windows, this setting also affects files with the <see cref="FileAttributes.Hidden"/> attribute.
+		/// </summary>
+		public bool AllowDotFileAccess { get; set; }
+
 		/// <summary>
 		/// Validates the configuration. Logs to the provided logger with loglevel 'critical' if any validation fails.
 		/// </summary>
@@ -34,7 +54,7 @@
 
 			if (string.IsNullOrWhiteSpace(DataRoot))
 			{
-				logger.LogCritical("DataRoot must be set");
+				logger.LogCritical($"{nameof(DataRoot)} must be set");
 				isValid = false;
 			}
 
@@ -45,11 +65,11 @@
 			}
 
 			// warn if MaxCachedItemSize is greater than a third of system memory
-			var gcMemoryInfo = GC.GetGCMemoryInfo();
+			GCMemoryInfo gcMemoryInfo = GC.GetGCMemoryInfo();
 
 			if (MaxCachedItemSize > gcMemoryInfo.TotalAvailableMemoryBytes / 3)
 			{
-				logger.LogWarning("MaxCachedItemSize is greater than a third of available memory ({availableMemory} MB). Are you sure this is a good idea?", gcMemoryInfo.TotalAvailableMemoryBytes / 1_000_000);
+				logger.LogWarning($$"""{{nameof(MaxCachedItemSize)}} is greater than a third of available memory ({availableMemory} MB). Are you sure this is a good idea?""", gcMemoryInfo.TotalAvailableMemoryBytes / 1_000_000);
 			}
 
 			return isValid;

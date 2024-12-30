@@ -36,6 +36,13 @@ namespace SimpleCDN
 
 			app.RegisterCDNEndpoints();
 
+			app.Use(async (ctx, next) =>
+			{
+				ctx.Response.Headers.Server = "SimpleCDN";
+				ctx.Response.Headers["X-Robots-Tag"] = "noindex, nofollow";
+				await next();
+			});
+
 			app.Run();
 		}
 	}
