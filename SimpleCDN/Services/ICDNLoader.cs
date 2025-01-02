@@ -1,7 +1,9 @@
-﻿namespace SimpleCDN.Services
+﻿using SimpleCDN.Helpers;
+
+namespace SimpleCDN.Services
 {
 	public interface ICDNLoader
 	{
-		CDNFile? GetFile(string path);
+		CDNFile? GetFile(string path, params IEnumerable<CompressionAlgorithm> acceptedCompression);
 	}
 }

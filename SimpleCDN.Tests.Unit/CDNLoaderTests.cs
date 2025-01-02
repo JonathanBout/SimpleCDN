@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SimpleCDN.Tests.Unit
 {
-	[TestFixture(TestName = "CDN Loader Tests")]
+	[TestFixture]
 	public class CDNLoaderTests
 	{
 		const string JSON_FILENAME = "file.json";
@@ -50,11 +50,11 @@ namespace SimpleCDN.Tests.Unit
 				new MockPhysicalFileReader(Files));
 		}
 
-		[TestCase("../inaccesible.txt", TestName = "File in parent directory")]
-		[TestCase("/../inaccesible.txt", TestName = "File in root's parent directory")]
-		[TestCase("/../../inaccesible.txt", TestName = "File in root parent's parent directory")]
-		[TestCase("../../inaccesible.txt", TestName = "File in parent's parent directory")]
-		[TestCase("/data/../../inaccesible.txt", TestName = "File in /data's parent's parent directory")]
+		[TestCase("../inaccesible.txt")]
+		[TestCase("/../inaccesible.txt")]
+		[TestCase("/../../inaccesible.txt")]
+		[TestCase("../../inaccesible.txt")]
+		[TestCase("/data/../../inaccesible.txt")]
 		public void Test_ParentDirectory_IsInaccesible(string path)
 		{
 			CDNLoader loader = CreateLoader();
@@ -62,24 +62,24 @@ namespace SimpleCDN.Tests.Unit
 			Assert.That(loader.GetFile(path), Is.Null);
 		}
 
-		[TestCase("/nx.txt", TestName = "Non-existent file in root")]
-		[TestCase("nx.txt", TestName = "Non-existent file in current directory")]
-		[TestCase("/data/nx.txt", TestName = "Non-existent file in /data directory")]
-		[TestCase("/data/nx/nx.txt", TestName = "File in Non-existent directory")]
+		[TestCase("/nx.txt")]
+		[TestCase("nx.txt")]
+		[TestCase("/data/nx.txt")]
+		[TestCase("/data/nx/nx.txt")]
 		public void Test_NonExistentFile_IsInaccesible(string name)
 		{
 			CDNLoader loader = CreateLoader();
 			Assert.That(loader.GetFile(name), Is.Null);
 		}
 
-		[TestCase(JSON_FILENAME, JSON_CONTENT, "application/json", TestName = "Existing JSON File")]
-		[TestCase(TEXT_FILENAME, TEXT_CONTENT, "text/plain", TestName = "Existing Plain Text File")]
-		[TestCase(SVG_FILENAME, SVG_CONTENT, "image/svg+xml", TestName = "Existing SVG File")]
-		[TestCase("/" + JSON_FILENAME, JSON_CONTENT, "application/json", TestName = "Existing JSON File relative to root")]
-		[TestCase("/" + TEXT_FILENAME, TEXT_CONTENT, "text/plain", TestName = "Existing Plain Text File relative to root")]
-		[TestCase("/" + SVG_FILENAME, SVG_CONTENT, "image/svg+xml", TestName = "Existing SVG File relative to root")]
-		[TestCase("/../" + SVG_FILENAME, SVG_CONTENT, "image/svg+xml", TestName = "Existing SVG File with path traversal at root")]
-		[TestCase("/non-existent/../" + SVG_FILENAME, SVG_CONTENT, "image/svg+xml", TestName = "Existing SVG File with path traversal")]
+		[TestCase(JSON_FILENAME, JSON_CONTENT, "application/json")]
+		[TestCase(TEXT_FILENAME, TEXT_CONTENT, "text/plain")]
+		[TestCase(SVG_FILENAME, SVG_CONTENT, "image/svg+xml")]
+		[TestCase("/" + JSON_FILENAME, JSON_CONTENT, "application/json")]
+		[TestCase("/" + TEXT_FILENAME, TEXT_CONTENT, "text/plain")]
+		[TestCase("/" + SVG_FILENAME, SVG_CONTENT, "image/svg+xml")]
+		[TestCase("/../" + SVG_FILENAME, SVG_CONTENT, "image/svg+xml")]
+		[TestCase("/non-existent/../" + SVG_FILENAME, SVG_CONTENT, "image/svg+xml")]
 		public void Test_AccessibleFiles(string name, string content, string mediaType)
 		{
 			CDNLoader loader = CreateLoader();

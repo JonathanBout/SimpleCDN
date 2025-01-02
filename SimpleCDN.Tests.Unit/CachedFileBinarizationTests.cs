@@ -1,12 +1,13 @@
 ﻿using SimpleCDN.Cache;
+using SimpleCDN.Helpers;
 using System.Text;
 
 namespace SimpleCDN.Tests.Unit
 {
-	[TestFixture(TestName = "Cached File Binarization Tests")]
+	[TestFixture]
 	public class CachedFileBinarizationTests
 	{
-		[TestCase(TestName = "Convert To-From")]
+		[TestCase]
 		public void ConvertToFrom()
 		{
 			var file = new CachedFile

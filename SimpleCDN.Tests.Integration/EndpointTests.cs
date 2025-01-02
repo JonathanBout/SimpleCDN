@@ -1,5 +1,7 @@
-﻿using System.Net;
+﻿using System.IO.Compression;
+using System.Net;
 using System.Net.Http.Headers;
+using System.Text;
 
 namespace SimpleCDN.Tests.Integration
 {
@@ -8,10 +10,8 @@ namespace SimpleCDN.Tests.Integration
 		private readonly CustomWebApplicationFactory _webApplicationFactory;
 
 		const string TEXT_FILE_NAME = "test.txt";
-		const string TEXT_FILE_CONTENT = "Hello, World!";
 
 		const string JSON_FILE_NAME = "data/test.json";
-		const string JSON_FILE_CONTENT = """{"key": "value"}""";
 
 		public EndpointTests(CustomWebApplicationFactory webApplicationFactory)
 		{
@@ -65,13 +65,15 @@ namespace SimpleCDN.Tests.Integration
 		[Theory]
 		[InlineData("/test.txt", "text/plain", false)]
 		[InlineData("/test.txt", "application/json", true)]
+		[InlineData("/test.txt", "*/*", false)]
 		[InlineData("/data/test.json", "application/json", false)]
 		[InlineData("/data/test.json", "text/plain", true)]
+		[InlineData("/data/test.json", "text/html, application/xml, application/json;q=0.1", false)]
 		public async Task Test_UnsupportedMediaType_WhenWrongAcceptHeader(string endpoint, string supportedMediaType, bool shouldFail)
 		{
 			HttpClient client = _webApplicationFactory.CreateClient();
 			var request = new HttpRequestMessage(HttpMethod.Get, endpoint);
-			request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(supportedMediaType));
+			request.Headers.Accept.ParseAdd(supportedMediaType);
 			HttpResponseMessage response = await client.SendAsync(request);
 			if (shouldFail)
 			{
@@ -81,5 +83,91 @@ namespace SimpleCDN.Tests.Integration
 				Assert.True(response.IsSuccessStatusCode, response.StatusCode.ToString());
 			}
 		}
+
+		[Theory]
+		[InlineData("/test.txt", "gzip", TEXT_FILE_CONTENT)]
+		[InlineData("/test.txt", "deflate", TEXT_FILE_CONTENT)]
+		[InlineData("/test.txt", "br", TEXT_FILE_CONTENT)]
+		[InlineData("/data/test.json", "gzip", JSON_FILE_CONTENT)]
+		[InlineData("/data/test.json", "deflate", JSON_FILE_CONTENT)]
+		[InlineData("/data/test.json", "br", JSON_FILE_CONTENT)]
+		public async Task Test_CanUseCompression(string endpoint, string compressionAlgorithm, string expectedContent)
+		{
+			HttpClient client = _webApplicationFactory.CreateClient();
+			var request = new HttpRequestMessage(HttpMethod.Get, endpoint);
+			request.Headers.AcceptEncoding.Add(new StringWithQualityHeaderValue(compressionAlgorithm));
+			HttpResponseMessage response = await client.SendAsync(request);
+			Assert.True(response.IsSuccessStatusCode, response.StatusCode.ToString());
+
+			Assert.Contains(compressionAlgorithm, response.Content.Headers.ContentEncoding);
+
+			// for some reason we have to manually decompress the stream.
+			// I guess we will have to write unit tests for this unit test to make sure our manual decompression works.
+			await using var decompressedStream = new MemoryStream();
+			using Stream decompressionStream = compressionAlgorithm switch
+			{
+				"gzip" => new GZipStream(await response.Content.ReadAsStreamAsync(), CompressionMode.Decompress),
+				"deflate" => new DeflateStream(await response.Content.ReadAsStreamAsync(), CompressionMode.Decompress),
+				"br" => new BrotliStream(await response.Content.ReadAsStreamAsync(), CompressionMode.Decompress),
+				_ => throw new NotSupportedException()
+			};
+
+			decompressionStream.CopyTo(decompressedStream);
+
+			var content = Encoding.UTF8.GetString(decompressedStream.ToArray());
+
+			Assert.Contains(expectedContent, content);
+		}
+
+		[Theory]
+		[InlineData("/test.txt", TEXT_FILE_CONTENT)]
+		[InlineData("/data/test.json", JSON_FILE_CONTENT)]
+		public async Task Test_AcceptsNoCompression(string endpoint, string expectedContent)
+		{
+			HttpClient client = _webApplicationFactory.CreateClient();
+			var request = new HttpRequestMessage(HttpMethod.Get, endpoint);
+			HttpResponseMessage response = await client.SendAsync(request);
+			Assert.True(response.IsSuccessStatusCode, response.StatusCode.ToString());
+			Assert.Empty(response.Content.Headers.ContentEncoding);
+
+			var content = await response.Content.ReadAsStringAsync();
+			Assert.Contains(expectedContent, content);
+		}
+
+		const string JSON_FILE_CONTENT =
+		"""
+		{
+			"nested": "value",
+			"nested2": {
+				"nested3": "value",
+				"nested4": [ "value1", "value2" ],
+				"nested5": {
+					"nested6": "value"
+				}
+			},
+			"nested7": [
+				{
+					"nested8": "value"
+				},
+				{
+					"nested9": "value"
+				}
+			]
+		}
+		""";
+
+		const string TEXT_FILE_CONTENT =
+		"""
+		Lorem ipsum dolor sit amet, consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+		Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+		Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+		Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+		Phasellus eget nunc nec nulla ultricies lacinia. Nullam nec nunc nec nulla ultricies lacinia. Nullam nec nunc nec nulla ultricies lacinia.
+		Phasellus eget nunc nec nulla ultricies lacinia. Nullam nec nunc nec nulla ultricies lacinia. Nullam nec nunc nec nulla ultricies lacinia.
+		Phasellus eget nunc nec nulla ultricies lacinia. Nullam nec nunc nec nulla ultricies lacinia. Nullam nec nunc nec nulla ultricies lacinia.
+		Phasellus eget nunc nec nulla ultricies lacinia. Nullam nec nunc nec nulla ultricies lacinia. Nullam nec nunc nec nulla ultricies lacinia.
+		This text was definitely not generated by Copilot.
+		""";
 	}
 }

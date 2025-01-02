@@ -3,6 +3,7 @@ using SimpleCDN.Cache;
 using SimpleCDN.Configuration;
 using SimpleCDN.Endpoints;
 using SimpleCDN.Services;
+using SimpleCDN.Services.Compression;
 
 namespace SimpleCDN
 {
@@ -22,6 +23,8 @@ namespace SimpleCDN
 
 			builder.Services.MapConfiguration();
 
+			builder.Services.ConfigureHttpJsonOptions(options => options.SerializerOptions.TypeInfoResolver = SourceGenerationContext.Default);
+
 			// for now, we use a simple size-limited in-memory cache.
 			// In the future, we may want to give options for other cache implementations
 			// like Redis or Memcached.
@@ -31,6 +34,12 @@ namespace SimpleCDN
 			builder.Services.AddSingleton<IIndexGenerator, IndexGenerator>();
 			builder.Services.AddSingleton<IPhysicalFileReader, PhysicalFileReader>();
 			builder.Services.AddSingleton<ICacheManager, CacheManager>();
+
+			builder.Services.AddSingleton<ICompressor, BrotliCompressor>();
+			builder.Services.AddSingleton<ICompressor, GZipCompressor>();
+			builder.Services.AddSingleton<ICompressor, DeflateCompressor>();
+
+			builder.Services.AddSingleton<ICompressionManager, CompressionManager>();
 
 			WebApplication app = builder.Build();
 

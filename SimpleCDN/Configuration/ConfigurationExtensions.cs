@@ -9,7 +9,7 @@
 			services.AddOptionsWithValidateOnStart<CDNConfiguration>()
 				.Configure<IConfiguration>((settings, configuration) =>
 				{
-					var cdnSection = configuration.GetSection("CDN");
+					IConfigurationSection cdnSection = configuration.GetSection("CDN");
 
 					// First, try to bind to ENV variables
 					settings.DataRoot = configuration["CDN_DATA_ROOT"] ?? settings.DataRoot;

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using SimpleCDN.Cache;
 using SimpleCDN.Configuration;
 using SimpleCDN.Helpers;
+using SimpleCDN.Services.Compression;
 using System.Net.Mime;
 
 namespace SimpleCDN.Services
@@ -29,7 +30,7 @@ namespace SimpleCDN.Services
 
 		string DataRoot => _options.CurrentValue.DataRoot;
 
-		public CDNFile? GetFile(string path)
+		public CDNFile? GetFile(string path, params IEnumerable<CompressionAlgorithm> acceptedCompression)
 		{
 			if (string.IsNullOrWhiteSpace(path))
 			{
@@ -50,7 +51,7 @@ namespace SimpleCDN.Services
 
 			if (pathSpan.StartsWith(Globals.SystemFilesRoot + "/") || path.Equals(Globals.SystemFilesRoot))
 			{
-				return GetSystemFile(path[5..]);
+				return GetSystemFile(path[5..], acceptedCompression);
 			}
 
 			var filesystemPath = Path.Combine(DataRoot, path.TrimStart('/'));
@@ -74,7 +75,7 @@ namespace SimpleCDN.Services
 			return GetRegularFile(filesystemPath, path);
 		}
 
-		private CDNFile? GetSystemFile(string requestPath)
+		private CDNFile? GetSystemFile(string requestPath, params IEnumerable<CompressionAlgorithm> acceptedAlgorithms)
 		{
 			if (requestPath is "" or "/")
 			{
@@ -104,17 +105,21 @@ namespace SimpleCDN.Services
 			CompressionAlgorithm compression = CompressionAlgorithm.None;
 			long originalLength = fileInfo.Length;
 
-			if (_environment.WebRootFileProvider.GetFileInfo(requestPath + ".gz") is { Exists: true, IsDirectory: false, PhysicalPath: not null } compressedFile)
+			var preferred = CompressionAlgorithm.MostPreferred(PerformancePreference.None, acceptedAlgorithms);
+
+			if (preferred != CompressionAlgorithm.None
+				&& _environment.WebRootFileProvider.GetFileInfo(requestPath + preferred.FileExtension)
+					is { Exists: true, IsDirectory: false, PhysicalPath: not null } compressedFile)
 			{
-				compression = CompressionAlgorithm.GZip;
 				fileInfo = compressedFile;
+				compression = preferred;
 			}
 
-			// if the file is too big to load into memory, we want to stream it directly 
+			// if the file is too big to load into memory, we want to stream it directly	
 			if (!_fs.CanLoadIntoArray(fileInfo.Length))
 			{
 				_logger.LogDebug("System file '{path}' is too big to load into memory, streaming instead", requestPath.ForLog());
-				return new BigCDNFile(fileInfo.PhysicalPath, MimeTypeHelpers.MimeTypeFromFileName(requestPath).ToContentTypeString(), fileInfo.LastModified, CompressionAlgorithm.None);
+				return new BigCDNFile(fileInfo.PhysicalPath, MimeTypeHelpers.MimeTypeFromFileName(requestPath).ToContentTypeString(), fileInfo.LastModified, compression);
 			}
 
 			var content = _fs.LoadIntoArray(fileInfo.PhysicalPath);
@@ -122,17 +127,6 @@ namespace SimpleCDN.Services
 			DateTimeOffset lastModified = fileInfo.LastModified;
 
 			MimeType mediaType = MimeTypeHelpers.MimeTypeFromFileName(requestPath);
-
-			// if no compressed equivalent existed on disk, try to compress it ourselves.
-			if (compression == CompressionAlgorithm.None)
-			{
-				Span<byte> contentSpan = content.AsSpan();
-				if (GZipHelpers.TryCompress(ref contentSpan))
-				{
-					compression = CompressionAlgorithm.GZip;
-					content = contentSpan.ToArray();
-				}
-			}
 
 			// unchecked cast is safe because we know the file is small enough
 			_cache.CacheFile(requestPath, content, unchecked((int)originalLength), lastModified, mediaType, compression);
@@ -166,19 +160,9 @@ namespace SimpleCDN.Services
 				return null;
 			}
 
-			Span<byte> indexSpan = index.AsSpan();
-			CompressionAlgorithm indexCompresion = CompressionAlgorithm.None;
-			var originalSize = indexSpan.Length;
+			_cache.CacheFile(requestPath, index, index.Length, _fs.GetLastModified(absolutePath), MimeType.HTML, CompressionAlgorithm.None);
 
-			if (GZipHelpers.TryCompress(ref indexSpan))
-			{
-				indexCompresion = CompressionAlgorithm.GZip;
-				index = indexSpan.ToArray();
-			}
-
-			_cache.CacheFile(requestPath, index, originalSize, _fs.GetLastModified(absolutePath), MimeType.HTML, indexCompresion);
-
-			return new CDNFile(index, MimeType.HTML.ToContentTypeString(), _fs.GetLastModified(absolutePath), indexCompresion);
+			return new CDNFile(index, MimeType.HTML.ToContentTypeString(), _fs.GetLastModified(absolutePath), CompressionAlgorithm.None);
 		}
 
 		private CDNFile? GetRegularFile(string absolutePath, string requestPath)
@@ -201,21 +185,9 @@ namespace SimpleCDN.Services
 
 			var content = _fs.LoadIntoArray(absolutePath);
 
-			CompressionAlgorithm compression = CompressionAlgorithm.None;
+			_cache.CacheFile(requestPath, content, content.Length, _fs.GetLastModified(absolutePath), MimeTypeHelpers.MimeTypeFromFileName(requestPath), CompressionAlgorithm.None);
 
-			Span<byte> contentSpan = content.AsSpan();
-
-			var uncompressedLength = contentSpan.Length;
-
-			if (GZipHelpers.TryCompress(ref contentSpan))
-			{
-				compression = CompressionAlgorithm.GZip;
-				content = contentSpan.ToArray();
-			}
-
-			_cache.CacheFile(requestPath, content, uncompressedLength, _fs.GetLastModified(absolutePath), MimeTypeHelpers.MimeTypeFromFileName(requestPath), compression);
-
-			return new CDNFile(content, MimeTypeHelpers.MimeTypeFromFileName(requestPath).ToContentTypeString(), _fs.GetLastModified(absolutePath), compression);
+			return new CDNFile(content, MimeTypeHelpers.MimeTypeFromFileName(requestPath).ToContentTypeString(), _fs.GetLastModified(absolutePath), CompressionAlgorithm.None);
 		}
 	}
 }

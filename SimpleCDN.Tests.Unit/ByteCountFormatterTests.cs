@@ -2,7 +2,7 @@
 
 namespace SimpleCDN.Tests.Unit
 {
-	[TestFixture(TestName = "Byte Count Formatter Tests")]
+	[TestFixture]
 	public class ByteCountFormatterTests
 	{
 		[TestCase(0, "0B")]

@@ -25,7 +25,7 @@ namespace SimpleCDN.Services
 
 		public bool CanLoadIntoArray(long size)
 		{
-			return size <= _options.CurrentValue.MaxCachedItemSize;
+			return size <= _options.CurrentValue.MaxCachedItemSize * 1000; // convert kB to B
 		}
 
 		public byte[] LoadIntoArray(string path)

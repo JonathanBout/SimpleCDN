@@ -77,11 +77,11 @@ namespace SimpleCDN.Tests.Unit
 		{
 			string filePath = Path.Combine(fileRoot, "file.txt");
 
-			options.MaxCachedItemSize = 100;
+			options.MaxCachedItemSize = 10;
 
 			using (FileStream stream = File.Create(filePath))
 			{
-				stream.SetLength(options.MaxCachedItemSize + 100);
+				stream.SetLength(options.MaxCachedItemSize * 1001); // 10 kB * 1001 = 10.01 MB
 			}
 
 			Assert.That(reader.CanLoadIntoArray(filePath), Is.False);

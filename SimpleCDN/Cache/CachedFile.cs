@@ -1,4 +1,5 @@
-﻿using System.Buffers.Binary;
+﻿using SimpleCDN.Helpers;
+using System.Buffers.Binary;
 
 namespace SimpleCDN.Cache
 {
@@ -49,7 +50,7 @@ namespace SimpleCDN.Cache
 		internal byte[] GetBytes()
 		{
 			var bytes = new byte[SerializedSize];
-			var span = bytes.AsSpan();
+			Span<byte> span = bytes.AsSpan();
 			GetBytes(span);
 			return bytes;
 		}

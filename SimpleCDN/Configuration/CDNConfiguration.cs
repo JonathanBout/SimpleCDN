@@ -21,7 +21,7 @@
 		/// <summary>
 		/// The maximum size of a cached item in kB. Default is 8000 (8 MB)
 		/// </summary>
-		public int MaxCachedItemSize { get; set; } = 8000;
+		public int MaxCachedItemSize { get; set; } = 500_000;
 
 		private bool _showDotFiles;
 
