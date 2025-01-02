@@ -11,5 +11,9 @@ namespace SimpleCDN.Services
 		bool TryGetValue(string key, [NotNullWhen(true)] out CachedFile? value);
 		bool TryRemove(string key);
 		bool TryRemove(string key, [NotNullWhen(true)] out CachedFile? value);
+
+#if DEBUG
+		object GetDebugView();
+#endif
 	}
 }

@@ -2,6 +2,7 @@
 using SimpleCDN.Cache;
 using SimpleCDN.Helpers;
 using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
 
 namespace SimpleCDN.Services
 {
@@ -56,5 +57,24 @@ namespace SimpleCDN.Services
 			}
 			return false;
 		}
+
+		public object GetDebugView()
+		{
+			if (_cache is SizeLimitedCache slc)
+			{
+				return new DebugView(
+					slc.GetType().Name,
+					slc.Size,
+					slc.Count,
+					[.. slc.Keys]
+				);
+			}
+
+			return new BasicDebugView(_cache.GetType().Name);
+		}
 	}
+
+	internal record BasicDebugView(string Implementation);
+
+	internal record DebugView(string Implementation, long Size, int Count, string[] Elements) : BasicDebugView(Implementation);
 }

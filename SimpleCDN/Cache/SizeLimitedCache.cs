@@ -14,9 +14,13 @@ namespace SimpleCDN.Cache
 	internal class SizeLimitedCache(IOptionsMonitor<InMemoryCacheConfiguration> options, ILogger<SizeLimitedCache> logger) : IDistributedCache
 	{
 		private readonly ConcurrentDictionary<string, ValueWrapper> _dictionary = new(StringComparer.OrdinalIgnoreCase);
-		private readonly long _maxSize = options.CurrentValue.MaxSize;
+		private long MaxSize => options.CurrentValue.MaxSize * 1000; // convert from kB to B
 		private readonly ILogger<SizeLimitedCache> _logger = logger;
-		public long Size => _dictionary.Values.Sum(wrapper => wrapper.Size);
+		public long Size => _dictionary.Values.Sum(wrapper => (long)wrapper.Size);
+
+		public int Count => _dictionary.Count;
+
+		public IEnumerable<string> Keys => _dictionary.OrderBy(kvp => kvp.Value.AccessedAt).Select(kvp => kvp.Key);
 
 		public byte[]? Get(string key)
 		{
@@ -56,7 +60,7 @@ namespace SimpleCDN.Cache
 
 			IEnumerable<KeyValuePair<string, ValueWrapper>> byOldest = _dictionary.OrderBy(wrapper => wrapper.Value.AccessedAt).AsEnumerable();
 
-			while (Size > _maxSize)
+			while (Size > MaxSize)
 			{
 				try
 				{

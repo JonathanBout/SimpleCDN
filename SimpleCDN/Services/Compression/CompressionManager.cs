@@ -28,16 +28,17 @@ namespace SimpleCDN.Services.Compression
 			return compressor.Decompress(data);
 		}
 
-		public void Compress(CompressionAlgorithm algorithm, Span<byte> data, out int newLength)
+		public bool Compress(CompressionAlgorithm algorithm, Span<byte> data, out int newLength)
 		{
 			if (!_compressors.TryGetValue(algorithm, out ICompressor? compressor) || data.Length < compressor.MinimumSize)
 			{
 				// no compressor for the selected algorithm,
 				// or the data is too small to be compressed without loss
 				newLength = data.Length;
+				return false;
 			} else
 			{
-				compressor.Compress(data, out newLength);
+				return compressor.Compress(data, out newLength);
 			}
 		}
 	}

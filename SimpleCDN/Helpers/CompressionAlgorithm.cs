@@ -7,7 +7,7 @@ namespace SimpleCDN.Helpers
 		public static readonly CompressionAlgorithm None = new("", "", 0, 0, 0);
 		public static readonly CompressionAlgorithm GZip = new("gzip", ".gz", 1, sizeGrade: 1, speedGrade: 1);
 		public static readonly CompressionAlgorithm Brotli = new("br", ".br", 2, sizeGrade: 10, speedGrade: 6);
-		public static readonly CompressionAlgorithm Deflate = new("deflate", ".zz", 3, sizeGrade: 9, speedGrade: 7);
+		public static readonly CompressionAlgorithm Deflate = new("deflate", ".zz", 3, sizeGrade: 8, speedGrade: 7);
 		public readonly string HttpName { get; } = "";
 		public readonly string FileExtension { get; } = "";
 		public readonly uint Id { get; } = 0;
@@ -22,7 +22,7 @@ namespace SimpleCDN.Helpers
 			SpeedGrade = speedGrade;
 		}
 
-		public override string ToString() => HttpName;
+		public override string ToString() => string.IsNullOrWhiteSpace(HttpName) ? "None" : HttpName;
 		public bool Equals(CompressionAlgorithm other)
 		{
 			return HttpName.Equals(other.HttpName, StringComparison.OrdinalIgnoreCase);
@@ -42,6 +42,7 @@ namespace SimpleCDN.Helpers
 				0 => None,
 				1 => GZip,
 				2 => Brotli,
+				3 => Deflate,
 				_ => throw new ArgumentOutOfRangeException(nameof(id), id, "Unknown compression algorithm id")
 			};
 		}

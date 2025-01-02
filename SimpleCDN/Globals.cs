@@ -3,8 +3,10 @@
  * In here, we also have the Globals class for constant Assembly-wide values.
  */
 
+using SimpleCDN.Services;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization;
 
 // Assembly Info
 [assembly: InternalsVisibleTo("SimpleCDN.Tests.Unit")]
@@ -26,5 +28,12 @@ namespace SimpleCDN
 		/// The root URL for the system files, like the style sheet
 		/// </summary>
 		public const string SystemFilesRoot = "/_cdn";
+	}
+
+	[JsonSourceGenerationOptions]
+	[JsonSerializable(typeof(BasicDebugView))]
+	[JsonSerializable(typeof(DebugView))]
+	internal partial class SourceGenerationContext : JsonSerializerContext
+	{
 	}
 }

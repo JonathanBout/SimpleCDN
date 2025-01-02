@@ -23,6 +23,8 @@ namespace SimpleCDN
 
 			builder.Services.MapConfiguration();
 
+			builder.Services.ConfigureHttpJsonOptions(options => options.SerializerOptions.TypeInfoResolver = SourceGenerationContext.Default);
+
 			// for now, we use a simple size-limited in-memory cache.
 			// In the future, we may want to give options for other cache implementations
 			// like Redis or Memcached.

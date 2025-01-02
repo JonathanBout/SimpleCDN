@@ -13,6 +13,10 @@ namespace SimpleCDN.Endpoints
 	{
 		public static IEndpointRouteBuilder RegisterCDNEndpoints(this IEndpointRouteBuilder builder)
 		{
+#if DEBUG
+			builder.MapGet(Globals.SystemFilesRoot + "/server/cache", (ICacheManager cache) => cache.GetDebugView());
+#endif
+
 			// health check endpoint
 			builder.MapGet(Globals.SystemFilesRoot + "/server/health", () => "healthy");
 
@@ -48,9 +52,10 @@ namespace SimpleCDN.Endpoints
 							algorithm = CompressionAlgorithm.None;
 						}
 
-						if (algorithm == CompressionAlgorithm.None && preferredAlgorithm != CompressionAlgorithm.None)
+						if (algorithm == CompressionAlgorithm.None
+							&& preferredAlgorithm != CompressionAlgorithm.None
+							&& compressionManager.Compress(preferredAlgorithm, bytes, out int newLength))
 						{
-							compressionManager.Compress(preferredAlgorithm, bytes, out int newLength);
 							// client prefers a different compression algorithm
 							if (newLength < bytes.Length)
 							{

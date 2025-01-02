@@ -15,9 +15,13 @@ namespace SimpleCDN.Tests.Mocks
 		public int MinimumSize => 0;
 
 		public Stream Compress(Stream data) => data;
-		public void Compress(Span<byte> data, out int newLength) => newLength = data.Length;
+		public bool Compress(Span<byte> data, out int newLength)
+		{
+			newLength = data.Length;
+			return false;
+		}
 		public Stream Compress(CompressionAlgorithm algorithm, Stream data) => Compress(data);
-		public void Compress(CompressionAlgorithm algorithm, Span<byte> data, out int newLength) => Compress(data, out newLength);
+		public bool Compress(CompressionAlgorithm algorithm, Span<byte> data, out int newLength) => Compress(data, out newLength);
 		public byte[] Decompress(ReadOnlySpan<byte> data) => data.ToArray();
 		public Stream Decompress(Stream data) => data;
 		public byte[] Decompress(CompressionAlgorithm algorithm, ReadOnlySpan<byte> data) => Decompress(data);

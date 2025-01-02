@@ -10,7 +10,7 @@ namespace SimpleCDN.Services.Compression
 		/// <summary>
 		/// Compresses the data, in-place. If the compressed data is not smaller than the original data, the original data is left unchanged.
 		/// </summary>
-		void Compress(Span<byte> data, out int newLength);
+		bool Compress(Span<byte> data, out int newLength);
 
 		/// <summary>
 		/// Decompresses the data.
