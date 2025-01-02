@@ -22,7 +22,7 @@ namespace SimpleCDN.Endpoints
 				{
 					var acceptedEncodings = ctx.Request.Headers.AcceptEncoding.ToString().Split(',', StringSplitOptions.TrimEntries);
 
-					var preferredAlgorithm = CompressionAlgorithm.MostPreferred(acceptedEncodings);
+					var preferredAlgorithm = CompressionAlgorithm.MostPreferred(PerformancePreference.None, acceptedEncodings);
 
 					if (loader.GetFile(route) is CDNFile file)
 					{
@@ -41,7 +41,7 @@ namespace SimpleCDN.Endpoints
 						byte[] bytes = file.Content;
 						CompressionAlgorithm algorithm = file.Compression;
 
-						if (algorithm != CompressionAlgorithm.None && !acceptedEncodings.Contains(algorithm.Name))
+						if (algorithm != CompressionAlgorithm.None && !acceptedEncodings.Contains(algorithm.HttpName))
 						{
 							// client doesn't accept the file's compression algorithm
 							bytes = compressionManager.Decompress(algorithm, bytes);
@@ -64,7 +64,7 @@ namespace SimpleCDN.Endpoints
 						// set the content encoding header
 						if (algorithm != CompressionAlgorithm.None)
 						{
-							ctx.Response.Headers.ContentEncoding = algorithm.Name;
+							ctx.Response.Headers.ContentEncoding = algorithm.HttpName;
 						}
 
 						return Results.File(bytes, file.MediaType, enableRangeProcessing: true, lastModified: file.LastModified);

@@ -5,48 +5,56 @@ using System.Text;
 
 namespace SimpleCDN.Tests.Unit;
 
-[TestFixture(TestName = "GZip Compression Tests")]
+[TestFixture()]
 public class CompressorTests
 {
-	[TestCase(JSON_CONTENT)]
-	[TestCase(HTML_CONTENT)]
-	public void Compress_Decompress(string inputText)
+	[TestCase(JSON_CONTENT, 0u)]
+	[TestCase(HTML_CONTENT, 0u)]
+	[TestCase(JSON_CONTENT, 1u)]
+	[TestCase(HTML_CONTENT, 1u)]
+	[TestCase(JSON_CONTENT, 2u)]
+	[TestCase(HTML_CONTENT, 2u)]
+	public void Compress_Decompress(string inputText, uint algorithmId)
 	{
-		var gzipData = Encoding.UTF8.GetBytes(inputText);
-		var brotliData = Encoding.UTF8.GetBytes(inputText);
+		ICompressor compressor = FromId(algorithmId);
 
-		Span<byte> gzipSpan = gzipData.AsSpan();
-		Span<byte> brotliSpan = brotliData.AsSpan();
+		var bytes = Encoding.UTF8.GetBytes(inputText);
 
-		var compressor = new CompressionManager([new GZipCompressor(), new BrotliCompressor()]);
+		compressor.Compress(bytes, out int newLength);
 
-		compressor.Compress(CompressionAlgorithm.GZip, gzipSpan, out int newLengthGzip);
-		compressor.Compress(CompressionAlgorithm.Brotli, brotliSpan, out int newLengthBrotli);
+		Assert.That(newLength, Is.LessThanOrEqualTo(bytes.Length));
 
-		var decompressedGzip = compressor.Decompress(CompressionAlgorithm.GZip, gzipSpan[..newLengthGzip]);
-		var decompressedBrotli = compressor.Decompress(CompressionAlgorithm.Brotli, brotliSpan[..newLengthBrotli]);
+		var decompressed = compressor.Decompress(bytes.AsSpan(..newLength));
 
-		Assert.Multiple(() =>
-		{
-			Assert.That(decompressedGzip, Is.EqualTo(Encoding.UTF8.GetBytes(inputText)));
-			Assert.That(decompressedBrotli, Is.EqualTo(Encoding.UTF8.GetBytes(inputText)));
-		});
+		Assert.That(Encoding.UTF8.GetString(decompressed), Is.EqualTo(inputText));
 	}
 
-	[TestCase("<i></i>")]
-	[TestCase("{}")]
-	public void Compress_SmallData_Fails(string inputText)
+	[TestCase(SMALL_CONTENT, 0u)]
+	[TestCase(SMALL_CONTENT, 1u)]
+	[TestCase(SMALL_CONTENT, 2u)]
+	public void Compress_SmallData_DoesNotGrowResult(string inputText, uint algorithmId)
 	{
+		ICompressor compressor = FromId(algorithmId);
+
 		var data = Encoding.UTF8.GetBytes(inputText);
 		Span<byte> dataSpan = data.AsSpan();
-		var compressor = new CompressionManager([new GZipCompressor()]);
 
-		compressor.Compress(CompressionAlgorithm.GZip, dataSpan, out int newLength);
+		compressor.Compress(dataSpan, out int newLength);
+
 		Assert.That(inputText[..newLength], Is.EqualTo(Encoding.UTF8.GetString(data)));
 	}
 
+	static ICompressor FromId(uint id) => id switch
+	{
+		0 => new GZipCompressor(),
+		1 => new BrotliCompressor(),
+		2 => new DeflateCompressor(),
+		_ => throw new AssertionException("Unknown algorithm id")
+	};
+
+	const string SMALL_CONTENT = "{}";
+
 	const string JSON_CONTENT =
-	// language=JSON
 	"""
 		{
 			"nested": "value",
@@ -69,7 +77,6 @@ public class CompressorTests
 		""";
 
 	const string HTML_CONTENT =
-	// language=html
 	"""
 		<!DOCTYPE html>
 		<html lang="en">

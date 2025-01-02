@@ -18,7 +18,6 @@ namespace SimpleCDN.Services
 		IIndexGenerator generator,
 		ICacheManager cache,
 		ILogger<CDNLoader> logger,
-		ICompressionManager compressor,
 		IPhysicalFileReader fs) : ICDNLoader
 	{
 		private readonly IWebHostEnvironment _environment = environment;
@@ -28,11 +27,10 @@ namespace SimpleCDN.Services
 		private readonly ILogger<CDNLoader> _logger = logger;
 
 		private readonly IOptionsMonitor<CDNConfiguration> _options = options;
-		private readonly ICompressionManager _compressor = compressor;
 
 		string DataRoot => _options.CurrentValue.DataRoot;
 
-		public CDNFile? GetFile(string path)
+		public CDNFile? GetFile(string path, params IEnumerable<CompressionAlgorithm> acceptedCompression)
 		{
 			if (string.IsNullOrWhiteSpace(path))
 			{
@@ -53,7 +51,7 @@ namespace SimpleCDN.Services
 
 			if (pathSpan.StartsWith(Globals.SystemFilesRoot + "/") || path.Equals(Globals.SystemFilesRoot))
 			{
-				return GetSystemFile(path[5..]);
+				return GetSystemFile(path[5..], acceptedCompression);
 			}
 
 			var filesystemPath = Path.Combine(DataRoot, path.TrimStart('/'));
@@ -77,7 +75,7 @@ namespace SimpleCDN.Services
 			return GetRegularFile(filesystemPath, path);
 		}
 
-		private CDNFile? GetSystemFile(string requestPath)
+		private CDNFile? GetSystemFile(string requestPath, params IEnumerable<CompressionAlgorithm> acceptedAlgorithms)
 		{
 			if (requestPath is "" or "/")
 			{
@@ -107,20 +105,21 @@ namespace SimpleCDN.Services
 			CompressionAlgorithm compression = CompressionAlgorithm.None;
 			long originalLength = fileInfo.Length;
 
-			if (_environment.WebRootFileProvider.GetFileInfo(requestPath + ".br") is { Exists: true, IsDirectory: false, PhysicalPath: not null } brotliFile)
+			var preferred = CompressionAlgorithm.MostPreferred(PerformancePreference.None, acceptedAlgorithms);
+
+			if (preferred != CompressionAlgorithm.None
+				&& _environment.WebRootFileProvider.GetFileInfo(requestPath + preferred.FileExtension)
+					is { Exists: true, IsDirectory: false, PhysicalPath: not null } compressedFile)
 			{
-				compression = CompressionAlgorithm.Brotli;
-				fileInfo = brotliFile;
-			} else if (_environment.WebRootFileProvider.GetFileInfo(requestPath + ".gz") is { Exists: true, IsDirectory: false, PhysicalPath: not null } compressedFile)
-			{
-				compression = CompressionAlgorithm.GZip;
 				fileInfo = compressedFile;
+				compression = preferred;
 			}
-			// if the file is too big to load into memory, we want to stream it directly 
+
+			// if the file is too big to load into memory, we want to stream it directly	
 			if (!_fs.CanLoadIntoArray(fileInfo.Length))
 			{
 				_logger.LogDebug("System file '{path}' is too big to load into memory, streaming instead", requestPath.ForLog());
-				return new BigCDNFile(fileInfo.PhysicalPath, MimeTypeHelpers.MimeTypeFromFileName(requestPath).ToContentTypeString(), fileInfo.LastModified, CompressionAlgorithm.None);
+				return new BigCDNFile(fileInfo.PhysicalPath, MimeTypeHelpers.MimeTypeFromFileName(requestPath).ToContentTypeString(), fileInfo.LastModified, compression);
 			}
 
 			var content = _fs.LoadIntoArray(fileInfo.PhysicalPath);

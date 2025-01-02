@@ -35,6 +35,7 @@ namespace SimpleCDN
 
 			builder.Services.AddSingleton<ICompressor, BrotliCompressor>();
 			builder.Services.AddSingleton<ICompressor, GZipCompressor>();
+			builder.Services.AddSingleton<ICompressor, DeflateCompressor>();
 
 			builder.Services.AddSingleton<ICompressionManager, CompressionManager>();
 

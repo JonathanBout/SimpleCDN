@@ -83,5 +83,41 @@ namespace SimpleCDN.Tests.Integration
 				Assert.True(response.IsSuccessStatusCode, response.StatusCode.ToString());
 			}
 		}
+
+		[Theory]
+		[InlineData("/test.txt", "gzip", TEXT_FILE_CONTENT)]
+		[InlineData("/test.txt", "deflate", TEXT_FILE_CONTENT)]
+		[InlineData("/test.txt", "br", TEXT_FILE_CONTENT)]
+		[InlineData("/data/test.json", "gzip", JSON_FILE_CONTENT)]
+		[InlineData("/data/test.json", "deflate", JSON_FILE_CONTENT)]
+		[InlineData("/data/test.json", "br", JSON_FILE_CONTENT)]
+		public async Task Test_CanUseCompression(string endpoint, string compressionAlgorithm, string expectedContent)
+		{
+			HttpClient client = _webApplicationFactory.CreateClient();
+			var request = new HttpRequestMessage(HttpMethod.Get, endpoint);
+			request.Headers.AcceptEncoding.Add(new StringWithQualityHeaderValue(compressionAlgorithm));
+			HttpResponseMessage response = await client.SendAsync(request);
+			Assert.True(response.IsSuccessStatusCode, response.StatusCode.ToString());
+
+			Assert.Contains(compressionAlgorithm, response.Content.Headers.ContentEncoding);
+
+			var content = await response.Content.ReadAsStringAsync();
+			Assert.Contains(expectedContent, content);
+		}
+
+		[Theory]
+		[InlineData("/test.txt", TEXT_FILE_CONTENT)]
+		[InlineData("/data/test.json", JSON_FILE_CONTENT)]
+		public async Task Test_AcceptsNoCompression(string endpoint, string expectedContent)
+		{
+			HttpClient client = _webApplicationFactory.CreateClient();
+			var request = new HttpRequestMessage(HttpMethod.Get, endpoint);
+			HttpResponseMessage response = await client.SendAsync(request);
+			Assert.True(response.IsSuccessStatusCode, response.StatusCode.ToString());
+			Assert.Empty(response.Content.Headers.ContentEncoding);
+
+			var content = await response.Content.ReadAsStringAsync();
+			Assert.Contains(expectedContent, content);
+		}
 	}
 }
