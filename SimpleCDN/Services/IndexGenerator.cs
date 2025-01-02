@@ -24,6 +24,7 @@ namespace SimpleCDN.Services
 				"""
 				<html>
 				<head>
+					<meta charset="utf-8">
 					<meta name="robots" content="noindex,nofollow">
 					<link rel="stylesheet" href="{3}/styles.css">
 					<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0">
