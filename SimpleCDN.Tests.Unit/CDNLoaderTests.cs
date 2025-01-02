@@ -47,6 +47,7 @@ namespace SimpleCDN.Tests.Unit
 				new IndexGenerator(options, new MockLogger<IndexGenerator>()),
 				new MockCacheManager(),
 				new MockLogger<CDNLoader>(),
+				new MockCompressor(),
 				new MockPhysicalFileReader(Files));
 		}
 

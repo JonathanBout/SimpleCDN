@@ -3,6 +3,7 @@ using SimpleCDN.Cache;
 using SimpleCDN.Configuration;
 using SimpleCDN.Endpoints;
 using SimpleCDN.Services;
+using SimpleCDN.Services.Compression;
 
 namespace SimpleCDN
 {
@@ -31,6 +32,11 @@ namespace SimpleCDN
 			builder.Services.AddSingleton<IIndexGenerator, IndexGenerator>();
 			builder.Services.AddSingleton<IPhysicalFileReader, PhysicalFileReader>();
 			builder.Services.AddSingleton<ICacheManager, CacheManager>();
+
+			builder.Services.AddSingleton<ICompressor, BrotliCompressor>();
+			builder.Services.AddSingleton<ICompressor, GZipCompressor>();
+
+			builder.Services.AddSingleton<ICompressionManager, CompressionManager>();
 
 			WebApplication app = builder.Build();
 

@@ -65,13 +65,15 @@ namespace SimpleCDN.Tests.Integration
 		[Theory]
 		[InlineData("/test.txt", "text/plain", false)]
 		[InlineData("/test.txt", "application/json", true)]
+		[InlineData("/test.txt", "*/*", false)]
 		[InlineData("/data/test.json", "application/json", false)]
 		[InlineData("/data/test.json", "text/plain", true)]
+		[InlineData("/data/test.json", "text/html, application/xml, application/json;q=0.1", false)]
 		public async Task Test_UnsupportedMediaType_WhenWrongAcceptHeader(string endpoint, string supportedMediaType, bool shouldFail)
 		{
 			HttpClient client = _webApplicationFactory.CreateClient();
 			var request = new HttpRequestMessage(HttpMethod.Get, endpoint);
-			request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(supportedMediaType));
+			request.Headers.Accept.ParseAdd(supportedMediaType);
 			HttpResponseMessage response = await client.SendAsync(request);
 			if (shouldFail)
 			{

@@ -1,4 +1,5 @@
 ﻿using SimpleCDN.Cache;
+using SimpleCDN.Helpers;
 using System.Text;
 
 namespace SimpleCDN.Tests.Unit

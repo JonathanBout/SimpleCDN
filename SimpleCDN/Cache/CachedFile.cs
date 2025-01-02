@@ -1,4 +1,5 @@
-﻿using System.Buffers.Binary;
+﻿using SimpleCDN.Helpers;
+using System.Buffers.Binary;
 
 namespace SimpleCDN.Cache
 {
