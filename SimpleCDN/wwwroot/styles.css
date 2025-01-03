@@ -17,7 +17,7 @@
 	:root {
 		--text-color: #eee;
 		--background-color: #111;
-		--link-color: #5555ee;
+		--link-color: #8888ee;
 		--hover-color: #222;
 	}
 }
@@ -48,6 +48,8 @@ main {
 
 a {
 	color: var(--link-color);
+
+	text-underline-offset: .25em;
 }
 
 table {
@@ -77,7 +79,7 @@ th, td {
 
 thead th {
 	font-size: 1.2rem;
-	border-bottom: 1px solid black;
+	border-bottom: 1px solid var(--text-color);
 }
 
 tr {

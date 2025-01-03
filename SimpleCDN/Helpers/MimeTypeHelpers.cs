@@ -4,11 +4,11 @@ namespace SimpleCDN.Helpers
 {
 	internal static class MimeTypeHelpers
 	{
-		public static MimeType MimeTypeFromFileName(string name)
+		public static MimeType MimeTypeFromFileName(ReadOnlySpan<char> name)
 		{
-			var extension = name[(name.LastIndexOf('.') + 1)..];
+			ReadOnlySpan<char> extension = name[(name.LastIndexOf('.') + 1)..];
 
-			return extension.ToLower() switch
+			return extension.ToString().ToLower() switch
 			{
 				"html" or "htm" => MimeType.HTML,
 				"txt" => MimeType.Text,
