@@ -121,6 +121,9 @@ namespace SimpleCDN.Helpers
 		/// </summary>
 		public static string ForLog(this string input) => WhitespaceRegex().Replace(input, " ");
 
+		public static string ForLog(this ReadOnlySpan<char> input) => ForLog(input.ToString());
+
+
 		[GeneratedRegex(@"\s+", RegexOptions.Multiline | RegexOptions.Compiled)]
 		private static partial Regex WhitespaceRegex();
 
@@ -138,6 +141,41 @@ namespace SimpleCDN.Helpers
 			var intFlag = flag.ToInt64(null);
 
 			return (intValue & intFlag) == 0;
+		}
+
+		public static bool StartsWithAll(this Span<char> input, params IEnumerable<ReadOnlySpan<char>> prefixes)
+		{
+			int prefixIndex = 0;
+			using IEnumerator<ReadOnlySpan<char>> prefixesEnumerator = prefixes.GetEnumerator();
+			if (!prefixesEnumerator.MoveNext())
+			{
+				return true; // no prefixes to check
+			}
+			for (int i = 0; i < input.Length; i++)
+			{
+				// compare the current character to the current prefix
+				if (prefixesEnumerator.Current[prefixIndex] == input[i])
+				{
+					// move to the next character in the prefix
+					prefixIndex++;
+					if (prefixIndex == prefixesEnumerator.Current.Length)
+					{
+						// we've reached the end of the current prefix
+						if (!prefixesEnumerator.MoveNext())
+						{
+							return true;
+						}
+						// reset the prefix index to 0
+						prefixIndex = 0;
+					}
+				} else
+				{
+					return false;
+				}
+			}
+
+			// we've reached the end of the input, but we still have prefixes to check
+			return false;
 		}
 	}
 }

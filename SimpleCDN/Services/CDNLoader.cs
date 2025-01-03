@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.FileProviders;
+﻿using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
 using SimpleCDN.Cache;
 using SimpleCDN.Configuration;
@@ -47,14 +48,19 @@ namespace SimpleCDN.Services
 
 			pathSpan.Normalize();
 
-			path = pathSpan.ToString();
+			// if the pathSpan starts with the system files root, we want to serve a system file
+			// if there are additional characters after the system files root, the first one must be a '/'
+			// as it could be /_cdnthings which wouldn't contain system files but rather user files
 
-			if (pathSpan.StartsWith(Globals.SystemFilesRoot + "/") || path.Equals(Globals.SystemFilesRoot))
+			if (pathSpan.StartsWith(Globals.SystemFilesRoot)
+				&& (pathSpan.Length == Globals.SystemFilesRoot.Length
+					|| pathSpan[Globals.SystemFilesRoot.Length] == '/'))
 			{
-				return GetSystemFile(path[5..], acceptedCompression);
+				return GetSystemFile(pathSpan[Globals.SystemFilesRoot.Length..], acceptedCompression);
 			}
 
-			var filesystemPath = Path.Combine(DataRoot, path.TrimStart('/'));
+			// trim the leading / from pathSpan to make sure we don't get a double slash
+			var filesystemPath = Path.Join(DataRoot.AsSpan(), pathSpan[1..]);
 
 			if (!_options.CurrentValue.AllowDotFileAccess && _fs.IsDotFile(filesystemPath))
 			{
@@ -66,39 +72,41 @@ namespace SimpleCDN.Services
 			{
 				if (_fs.DirectoryExists(filesystemPath))
 				{
-					return GetIndexFile(filesystemPath, pathSpan.ToString());
+					return GetIndexFile(filesystemPath, pathSpan);
 				}
 
 				return null;
 			}
 
-			return GetRegularFile(filesystemPath, path);
+			return GetRegularFile(filesystemPath, pathSpan);
 		}
 
-		private CDNFile? GetSystemFile(string requestPath, params IEnumerable<CompressionAlgorithm> acceptedAlgorithms)
+		private CDNFile? GetSystemFile(ReadOnlySpan<char> requestPath, params IEnumerable<CompressionAlgorithm> acceptedAlgorithms)
 		{
 			if (requestPath is "" or "/")
 			{
-				_logger.LogDebug("Redirecting '/' to system file 'index.html'");
+				_logger.LogDebug("Rewriting '/' to system file 'index.html'");
 				return GetSystemFile("index.html");
 			}
 
-			_logger.LogDebug("Requesting system file '{path}'", requestPath.ForLog());
+			string requestPathString = requestPath.ToString();
 
-			IFileInfo fileInfo = _environment.WebRootFileProvider.GetFileInfo(requestPath);
+			_logger.LogDebug("Requesting system file '{path}'", requestPathString.ForLog());
+
+			IFileInfo fileInfo = _environment.WebRootFileProvider.GetFileInfo(requestPathString);
 
 			if (!fileInfo.Exists || fileInfo.PhysicalPath is null || fileInfo.IsDirectory)
 			{
-				_cache.TryRemove(requestPath);
+				_cache.TryRemove(requestPathString);
 
-				_logger.LogDebug("System file '{path}' does not exist", requestPath);
+				_logger.LogDebug("System file '{path}' does not exist", requestPathString);
 
 				return null;
 			}
 
-			if (_cache.TryGetValue(requestPath, out CachedFile? cachedFile) && cachedFile.LastModified >= fileInfo.LastModified)
+			if (_cache.TryGetValue(requestPathString, out CachedFile? cachedFile) && cachedFile.LastModified >= fileInfo.LastModified)
 			{
-				_logger.LogDebug("Serving system file '{path}' from cache", requestPath);
+				_logger.LogDebug("Serving system file '{path}' from cache", requestPathString);
 				return new CDNFile(cachedFile.Content, cachedFile.MimeType.ToContentTypeString(), cachedFile.LastModified, cachedFile.Compression);
 			}
 
@@ -108,86 +116,92 @@ namespace SimpleCDN.Services
 			var preferred = CompressionAlgorithm.MostPreferred(PerformancePreference.None, acceptedAlgorithms);
 
 			if (preferred != CompressionAlgorithm.None
-				&& _environment.WebRootFileProvider.GetFileInfo(requestPath + preferred.FileExtension)
+				&& _environment.WebRootFileProvider.GetFileInfo(requestPathString + preferred.FileExtension)
 					is { Exists: true, IsDirectory: false, PhysicalPath: not null } compressedFile)
 			{
 				fileInfo = compressedFile;
 				compression = preferred;
 			}
 
+			MimeType mediaType = MimeTypeHelpers.MimeTypeFromFileName(requestPath);
+
 			// if the file is too big to load into memory, we want to stream it directly	
 			if (!_fs.CanLoadIntoArray(fileInfo.Length))
 			{
 				_logger.LogDebug("System file '{path}' is too big to load into memory, streaming instead", requestPath.ForLog());
-				return new BigCDNFile(fileInfo.PhysicalPath, MimeTypeHelpers.MimeTypeFromFileName(requestPath).ToContentTypeString(), fileInfo.LastModified, compression);
+				return new BigCDNFile(fileInfo.PhysicalPath, mediaType.ToContentTypeString(), fileInfo.LastModified, compression);
 			}
 
 			var content = _fs.LoadIntoArray(fileInfo.PhysicalPath);
 
 			DateTimeOffset lastModified = fileInfo.LastModified;
 
-			MimeType mediaType = MimeTypeHelpers.MimeTypeFromFileName(requestPath);
-
 			// unchecked cast is safe because we know the file is small enough
-			_cache.CacheFile(requestPath, content, unchecked((int)originalLength), lastModified, mediaType, compression);
+			_cache.CacheFile(requestPathString, content, unchecked((int)originalLength), lastModified, mediaType, compression);
 
 			return new CDNFile(content, mediaType.ToContentTypeString(), lastModified, compression);
 		}
 
-		private CDNFile? GetIndexFile(string absolutePath, string requestPath)
+		private CDNFile? GetIndexFile(string absolutePath, ReadOnlySpan<char> requestPath)
 		{
 			if (!_fs.DirectoryExists(absolutePath))
 			{
 				return null;
 			}
 
-			var absoluteIndexHtml = Path.Combine(absolutePath, "index.html");
+			var absoluteIndexHtml = Path.Join(absolutePath, "index.html");
 
 			if (_fs.FileExists(absoluteIndexHtml))
 			{
-				return GetRegularFile(absoluteIndexHtml, Path.Combine(requestPath, "index.html"));
+				return GetRegularFile(absoluteIndexHtml, Path.Join(requestPath, "index.html"));
 			}
 
-			if (_cache.TryGetValue(requestPath, out CachedFile? cachedFile) && cachedFile.LastModified > _fs.GetLastModified(absolutePath))
+			string requestPathString = requestPath.ToString();
+
+			if (_cache.TryGetValue(requestPathString, out CachedFile? cachedFile) && cachedFile.LastModified > _fs.GetLastModified(absolutePath))
 			{
 				return new CDNFile(cachedFile.Content, cachedFile.MimeType.ToContentTypeString(), cachedFile.LastModified, cachedFile.Compression);
 			}
 
-			var index = _indexGenerator.GenerateIndex(absolutePath, requestPath);
+			var index = _indexGenerator.GenerateIndex(absolutePath, requestPathString);
 
 			if (index is null)
 			{
 				return null;
 			}
 
-			_cache.CacheFile(requestPath, index, index.Length, _fs.GetLastModified(absolutePath), MimeType.HTML, CompressionAlgorithm.None);
+			_cache.CacheFile(requestPathString, index, index.Length, _fs.GetLastModified(absolutePath), MimeType.HTML, CompressionAlgorithm.None);
 
 			return new CDNFile(index, MimeType.HTML.ToContentTypeString(), _fs.GetLastModified(absolutePath), CompressionAlgorithm.None);
 		}
 
-		private CDNFile? GetRegularFile(string absolutePath, string requestPath)
+		private CDNFile? GetRegularFile(string absolutePath, ReadOnlySpan<char> requestPath)
 		{
 			if (!_fs.FileExists(absolutePath))
 			{
 				return null;
 			}
 
-			if (_cache.TryGetValue(requestPath, out CachedFile? cachedFile) && cachedFile.LastModified > _fs.GetLastModified(absolutePath))
+			string requestPathString = requestPath.ToString();
+
+			if (_cache.TryGetValue(requestPathString, out CachedFile? cachedFile) && cachedFile.LastModified > _fs.GetLastModified(absolutePath))
 			{
 				return new CDNFile(cachedFile.Content, cachedFile.MimeType.ToContentTypeString(), cachedFile.LastModified, cachedFile.Compression);
 			}
 
+			MimeType mediaType = MimeTypeHelpers.MimeTypeFromFileName(requestPathString);
+
 			if (!_fs.CanLoadIntoArray(absolutePath))
 			{
 				_logger.LogDebug("File '{path}' is too big to load into memory, streaming instead", requestPath.ForLog());
-				return new BigCDNFile(absolutePath, MimeTypeHelpers.MimeTypeFromFileName(requestPath).ToContentTypeString(), _fs.GetLastModified(absolutePath), CompressionAlgorithm.None);
+				return new BigCDNFile(absolutePath, mediaType.ToContentTypeString(), _fs.GetLastModified(absolutePath), CompressionAlgorithm.None);
 			}
 
 			var content = _fs.LoadIntoArray(absolutePath);
 
-			_cache.CacheFile(requestPath, content, content.Length, _fs.GetLastModified(absolutePath), MimeTypeHelpers.MimeTypeFromFileName(requestPath), CompressionAlgorithm.None);
+			_cache.CacheFile(requestPathString, content, content.Length, _fs.GetLastModified(absolutePath), mediaType, CompressionAlgorithm.None);
 
-			return new CDNFile(content, MimeTypeHelpers.MimeTypeFromFileName(requestPath).ToContentTypeString(), _fs.GetLastModified(absolutePath), CompressionAlgorithm.None);
+			return new CDNFile(content, mediaType.ToContentTypeString(), _fs.GetLastModified(absolutePath), CompressionAlgorithm.None);
 		}
 	}
 }
