@@ -15,6 +15,12 @@
 		<DebuggerSupport>false</DebuggerSupport>
 		<EnableUnsafeUTF7Encoding>false</EnableUnsafeUTF7Encoding>
 		<InvariantGlobalization>true</InvariantGlobalization>
+		<PublishTrimmed>true</PublishTrimmed>
+		<TrimMode>full</TrimMode>
+		<SuppressTrimAnalysisWarnings>false</SuppressTrimAnalysisWarnings>
+		<EventSourceSupport>false</EventSourceSupport>
+		<HttpActivityPropagationSupport>false</HttpActivityPropagationSupport>
+		<MetadataUpdaterSupport>false</MetadataUpdaterSupport>
 	</PropertyGroup>
 
 	<ItemGroup Condition="'$(Configuration)'=='Release'">
