@@ -12,8 +12,6 @@ WORKDIR /app
 ENV CDN_DATA_ROOT=/data
 ENV ASPNETCORE_URLS=http://+:8080
 
-COPY ["SimpleCDN/health-check.sh", "/bin/health-check.sh"]
-
 EXPOSE 8080
 
 # This stage is used to build the service project
@@ -25,7 +23,7 @@ RUN apt-get update \
 ARG BUILD_CONFIGURATION=Release
 ARG DOTNET_BUILD_PLATFORM=linux-x64
 WORKDIR /src
-COPY ["SimpleCDN/SimpleCDN.csproj", "SimpleCDN/"]
+COPY ["./SimpleCDN/SimpleCDN.csproj", "SimpleCDN/"]
 RUN dotnet restore "./SimpleCDN/SimpleCDN.csproj"
 COPY . .
 WORKDIR "/src/SimpleCDN"
@@ -56,15 +54,5 @@ ENV CDN_DATA_ROOT=/data
 ENV ASPNETCORE_URLS=http://+:8080
 
 EXPOSE 8080
-
-COPY ["SimpleCDN/health-check.sh", "/bin/health-check.sh"]
-
-# Install curl for use in healthchecks. Due to possible changes
-# to ports, we can't specify the HEALTHCHECK in the Dockerfile
-USER root
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-    curl
-USER app
 
 ENTRYPOINT ["./SimpleCDN"]
