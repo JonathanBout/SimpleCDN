@@ -1,14 +1,18 @@
 ﻿using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.StackExchangeRedis;
+using Microsoft.Extensions.Options;
 using SimpleCDN.Cache;
+using SimpleCDN.Configuration;
 using SimpleCDN.Helpers;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 
 namespace SimpleCDN.Services
 {
-	public class CacheManager(IDistributedCache cache) : ICacheManager
+	public class CacheManager(IDistributedCache cache, IOptionsMonitor<CacheConfiguration> options) : ICacheManager
 	{
 		private readonly IDistributedCache _cache = cache;
+		private readonly IOptionsMonitor<CacheConfiguration> _options = options;
 
 		public bool TryGetValue(string key, [NotNullWhen(true)] out CachedFile? value)
 		{
@@ -27,7 +31,15 @@ namespace SimpleCDN.Services
 
 		public void CacheFile(string path, CachedFile file)
 		{
-			_cache.SetAsync(path, file.GetBytes());
+			// this config is not used by the local in-memory cache provider (it takes the MaxAge directly from the configuration),
+			// but for example Redis does use it
+			var itemConfig = new DistributedCacheEntryOptions
+			{
+				// Use sliding expiration if max age is set.
+				// Because cached file is automatically invalidated when the file is updated, we can do this safely
+				SlidingExpiration = _options.CurrentValue.MaxAge > 0 ? TimeSpan.FromMinutes(_options.CurrentValue.MaxAge) : null,
+			};
+			_cache.SetAsync(path, file.GetBytes(), itemConfig);
 		}
 
 		public void CacheFile(string path, byte[] content, int realSize, DateTimeOffset lastModified, MimeType mimeType, CompressionAlgorithm compression)
@@ -65,6 +77,7 @@ namespace SimpleCDN.Services
 				return new DebugView(
 					slc.GetType().Name,
 					slc.Size,
+					slc.MaxSize,
 					slc.Count,
 					[.. slc.Keys]
 				);
@@ -76,5 +89,8 @@ namespace SimpleCDN.Services
 
 	internal record BasicDebugView(string Implementation);
 
-	internal record DebugView(string Implementation, long Size, int Count, string[] Elements) : BasicDebugView(Implementation);
+	internal record DebugView(string Implementation, long Size, long MaxSize, int Count, string[] Elements) : BasicDebugView(Implementation)
+	{
+		public decimal FillPercentage => (decimal)Size / MaxSize * 100;
+	}
 }

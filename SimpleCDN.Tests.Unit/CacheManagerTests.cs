@@ -1,4 +1,5 @@
 ﻿using SimpleCDN.Cache;
+using SimpleCDN.Configuration;
 using SimpleCDN.Helpers;
 using SimpleCDN.Services;
 using SimpleCDN.Tests.Mocks;
@@ -14,14 +15,23 @@ namespace SimpleCDN.Tests.Unit
 		const string TEST_DATA_3 = TEST_DATA_2 + TEST_DATA_2 + TEST_DATA_2 + TEST_DATA_2 + TEST_DATA_2 + TEST_DATA_2;
 		const string TEST_PATH = "/hello.txt";
 
+		private static (CacheManager manager, DistributedCacheMock implementation) CreateCache(Action<CacheConfiguration>? configure = null)
+		{
+			var cacheImplementation = new DistributedCacheMock();
+
+			var options = new CacheConfiguration();
+			configure?.Invoke(options);
+
+			var cache = new CacheManager(cacheImplementation, new OptionsMock<CacheConfiguration>(options));
+			return (cache, cacheImplementation);
+		}
+
 		[TestCase(TEST_DATA_1)]
 		[TestCase(TEST_DATA_2)]
 		[TestCase(TEST_DATA_3)]
 		public void Test_Add_Exists(string data)
 		{
-			var cacheImplementation = new DistributedCacheMock();
-
-			var cache = new CacheManager(cacheImplementation);
+			(CacheManager cache, DistributedCacheMock cacheImplementation) = CreateCache();
 
 			var file = new CachedFile
 			{
@@ -47,8 +57,7 @@ namespace SimpleCDN.Tests.Unit
 		[TestCase(TEST_DATA_3)]
 		public void Test_Add_Remove_DoesNotExist(string data)
 		{
-			var cacheImplementation = new DistributedCacheMock();
-			var cache = new CacheManager(cacheImplementation);
+			(CacheManager cache, DistributedCacheMock cacheImplementation) = CreateCache();
 
 			var file = new CachedFile
 			{

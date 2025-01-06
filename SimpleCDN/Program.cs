@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using SimpleCDN.Cache;
 using SimpleCDN.Configuration;
 using SimpleCDN.Endpoints;
@@ -28,7 +29,35 @@ namespace SimpleCDN
 			// for now, we use a simple size-limited in-memory cache.
 			// In the future, we may want to give options for other cache implementations
 			// like Redis or Memcached.
-			builder.Services.AddSingleton<IDistributedCache, SizeLimitedCache>();
+
+			CDNConfiguration? cdnConfig = builder.Configuration.GetSection("CDN").Get<CDNConfiguration>();
+			CacheConfiguration? cacheConfig = builder.Configuration.GetSection("Cache").Get<CacheConfiguration>();
+
+			bool cacheEnabled;
+
+			switch (cacheConfig?.Type ?? CacheConfiguration.CacheType.InMemory)
+			{
+				case CacheConfiguration.CacheType.InMemory:
+					cacheEnabled = true;
+					builder.Services.AddSingleton<SizeLimitedCache>()
+						// the cache is a hosted service as it needs to purge expired items
+						.AddHostedService(sp => sp.GetRequiredService<SizeLimitedCache>())
+						.AddSingleton<IDistributedCache>(sp => sp.GetRequiredService<SizeLimitedCache>())
+						.Configure<InMemoryCacheConfiguration>(builder.Configuration.GetSection("Cache:InMemory"));
+					break;
+				case CacheConfiguration.CacheType.Redis when cacheConfig?.Redis is not null:
+					cacheEnabled = true;
+					builder.Services.AddStackExchangeRedisCache(options =>
+					{
+						options.Configuration = cacheConfig.Redis.ConnectionString;
+						options.InstanceName = cacheConfig.Redis.InstanceName;
+					});
+					break;
+				default:
+					cacheEnabled = false;
+					builder.Services.AddSingleton<IDistributedCache, DisabledCache>();
+					break;
+			}
 
 			builder.Services.AddSingleton<ICDNLoader, CDNLoader>();
 			builder.Services.AddSingleton<IIndexGenerator, IndexGenerator>();
@@ -42,6 +71,11 @@ namespace SimpleCDN
 			builder.Services.AddSingleton<ICompressionManager, CompressionManager>();
 
 			WebApplication app = builder.Build();
+
+			if (!cacheEnabled)
+			{
+				app.Logger.LogWarning("Caching is disabled. This is not recommended for production use.");
+			}
 
 			app.RegisterCDNEndpoints();
 
