@@ -4,6 +4,7 @@ using SimpleCDN.Configuration;
 using SimpleCDN.Helpers;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.IO.Pipes;
 
 namespace SimpleCDN.Cache
 {
@@ -11,10 +12,11 @@ namespace SimpleCDN.Cache
 	/// A local, in-memory cache that limits the total size of the stored values. When the size of the cache exceeds the specified limit, the oldest (least recently accessed) values are removed.<br/>
 	/// Implements <see cref="IDistributedCache"/> for compatibility with the <see cref="Services.CacheManager"/>. It is not actually distributed.
 	/// </summary>
-	internal class SizeLimitedCache(IOptionsMonitor<InMemoryCacheConfiguration> options, ILogger<SizeLimitedCache> logger) : IDistributedCache
+	internal class SizeLimitedCache(IOptionsMonitor<InMemoryCacheConfiguration> options, ILogger<SizeLimitedCache> logger) : IDistributedCache, IHostedService
 	{
+		private readonly IOptionsMonitor<InMemoryCacheConfiguration> _options = options;
 		private readonly ConcurrentDictionary<string, ValueWrapper> _dictionary = new(StringComparer.OrdinalIgnoreCase);
-		private long MaxSize => options.CurrentValue.MaxSize * 1000; // convert from kB to B
+		public long MaxSize => _options.CurrentValue.MaxSize * 1000; // convert from kB to B
 		private readonly ILogger<SizeLimitedCache> _logger = logger;
 		public long Size => _dictionary.Values.Sum(wrapper => (long)wrapper.Size);
 
@@ -60,6 +62,7 @@ namespace SimpleCDN.Cache
 
 			IEnumerable<KeyValuePair<string, ValueWrapper>> byOldest = _dictionary.OrderBy(wrapper => wrapper.Value.AccessedAt).AsEnumerable();
 
+			// remove the oldest items until the size is within the limit
 			while (Size > MaxSize)
 			{
 				try
@@ -84,6 +87,77 @@ namespace SimpleCDN.Cache
 			Set(key, value, options);
 			return Task.CompletedTask;
 		}
+
+		#region Automatic Purging
+		private void Purge()
+		{
+			var maxAge = TimeSpan.FromMinutes(_options.CurrentValue.MaxAge);
+			_dictionary.RemoveWhere(kvp => Stopwatch.GetElapsedTime(kvp.Value.AccessedAt) < maxAge);
+		}
+
+		private async Task PurgeLoop()
+		{
+			while (_backgroundCTS?.Token.IsCancellationRequested is false)
+			{
+				await Task.Delay(TimeSpan.FromMinutes(_options.CurrentValue.PurgeInterval), _backgroundCTS.Token);
+
+				if (_backgroundCTS.Token.IsCancellationRequested)
+				{
+					break;
+				}
+
+				_logger.LogDebug("Purging expired cache items");
+
+				Purge();
+			}
+		}
+
+		private CancellationTokenSource? _backgroundCTS;
+		private IDisposable? _optionsOnChange;
+
+		public Task StartAsync(CancellationToken cancellationToken)
+		{
+			// register the options change event to restart the background task
+			_optionsOnChange ??= _options.OnChange(_ => StartAsync(default));
+
+			if (_options.CurrentValue.MaxAge == 0 || _options.CurrentValue.PurgeInterval == 0)
+			{
+				// automatic expiration and purging are disabled,
+				// stop the background task if it's running and return
+				_backgroundCTS?.Dispose();
+				_backgroundCTS = null;
+				return Task.CompletedTask;
+			}
+
+			if (_backgroundCTS is not null)
+			{
+				// background task is already running, no need to start another
+				return Task.CompletedTask;
+			}
+			_backgroundCTS = new CancellationTokenSource();
+
+			_backgroundCTS.Token.Register(() =>
+			{
+				// if the token is cancelled, dispose the token source and set it to null
+				// so that the next time StartAsync is called it may be recreated
+				_backgroundCTS?.Dispose();
+				_backgroundCTS = null;
+			});
+
+			// The background task will run in the background until the token is cancelled
+			// execution of the current method will continue immediately
+			Task.Run(PurgeLoop,
+				CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _backgroundCTS.Token).Token);
+
+			return Task.CompletedTask;
+		}
+
+		public Task StopAsync(CancellationToken cancellationToken)
+		{
+			return _backgroundCTS?.CancelAsync() ?? Task.CompletedTask;
+		}
+
+		#endregion
 
 		class ValueWrapper(byte[] value)
 		{

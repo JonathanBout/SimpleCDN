@@ -65,6 +65,7 @@ namespace SimpleCDN.Services
 				return new DebugView(
 					slc.GetType().Name,
 					slc.Size,
+					slc.MaxSize,
 					slc.Count,
 					[.. slc.Keys]
 				);
@@ -76,5 +77,8 @@ namespace SimpleCDN.Services
 
 	internal record BasicDebugView(string Implementation);
 
-	internal record DebugView(string Implementation, long Size, int Count, string[] Elements) : BasicDebugView(Implementation);
+	internal record DebugView(string Implementation, long Size, long MaxSize, int Count, string[] Elements) : BasicDebugView(Implementation)
+	{
+		public decimal FillPercentage => (decimal)Size / MaxSize * 100;
+	}
 }

@@ -177,5 +177,13 @@ namespace SimpleCDN.Helpers
 			// we've reached the end of the input, but we still have prefixes to check
 			return false;
 		}
+
+		public static void RemoveWhere<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, Func<KeyValuePair<TKey, TValue>, bool> predicate)
+		{
+			foreach ((TKey key, _) in dictionary.Where(predicate).ToList())
+			{
+				dictionary.Remove(key);
+			}
+		}
 	}
 }

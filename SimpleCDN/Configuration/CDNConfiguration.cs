@@ -5,13 +5,13 @@
 		/// <summary>
 		/// The data root path
 		/// </summary>
-		public required string DataRoot { get; set; }
+		public string DataRoot { get; set; } = "";
 
 		/// <summary>
 		/// The footer to be added to the bottom of generated index files. Default is a link to the SimpleCDN GitHub repository
 		/// and the text "Powered by SimpleCDN". Supports HTML.
 		/// </summary>
-		public string Footer { get; set; } = $"""<a href="https://github.com/jonathanbout/simplecdn">Powered by SimpleCDN</a>""";
+		public string Footer { get; set; } = """<a href="https://github.com/jonathanbout/simplecdn">Powered by SimpleCDN</a>""";
 
 		/// <summary>
 		/// The title of the generated index files. Default is "SimpleCDN". Supports HTML entities.
@@ -21,7 +21,7 @@
 		/// <summary>
 		/// The maximum size of a cached item in kB. Default is 8000 (8 MB)
 		/// </summary>
-		public int MaxCachedItemSize { get; set; } = 500_000;
+		public int MaxCachedItemSize { get; set; } = 8_000;
 
 		private bool _showDotFiles;
 
