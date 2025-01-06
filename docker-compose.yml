@@ -1,4 +1,10 @@
 services:
+  redis:
+    # this service is only needed if you are using the Redis cache with Cache__Type=Redis
+    image: redis:alpine
+    ports:
+    - "6379:6379"
+
   simplecdn:
     image: ${DOCKER_REGISTRY-}simplecdn:local-dev
     build:
@@ -11,10 +17,5 @@ services:
     environment:
     - CDN_DATA_ROOT=/data
     - ASPNETCORE_ENVIRONMENT=Development
-    healthcheck:
-        test: ["CMD", "/bin/health-check.sh"]
-        interval: 30s
-        timeout: 5s
-        start_interval: 2s
-        start_period: 2s
-        retries: 5
+    - Cache__Redis__ConnectionString=redis:6379 # Only needed if Cache__Type=Redis
+    - Cache__Type=Redis # Redis, InMemory, or Disabled

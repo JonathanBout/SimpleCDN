@@ -12,15 +12,18 @@ namespace SimpleCDN.Tests.Unit
 {
 	public class SizeLimitedCacheTests
 	{
-		private static SizeLimitedCache CreateCache(Action<InMemoryCacheConfiguration>? configure = null)
+		private static SizeLimitedCache CreateCache(Action<InMemoryCacheConfiguration>? configure = null, Action<CacheConfiguration>? configureCache = null)
 		{
 			var options = new InMemoryCacheConfiguration();
+			var cacheOptions = new CacheConfiguration();
 
 			configure?.Invoke(options);
+			configureCache?.Invoke(cacheOptions);
 
 			var optionsMock = new OptionsMock<InMemoryCacheConfiguration>(options);
+			var cacheOptionsMock = new OptionsMock<CacheConfiguration>(cacheOptions);
 
-			return new SizeLimitedCache(optionsMock, new MockLogger<SizeLimitedCache>());
+			return new SizeLimitedCache(optionsMock, cacheOptionsMock, new MockLogger<SizeLimitedCache>());
 		}
 
 		[Test]

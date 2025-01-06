@@ -12,9 +12,10 @@ namespace SimpleCDN.Cache
 	/// A local, in-memory cache that limits the total size of the stored values. When the size of the cache exceeds the specified limit, the oldest (least recently accessed) values are removed.<br/>
 	/// Implements <see cref="IDistributedCache"/> for compatibility with the <see cref="Services.CacheManager"/>. It is not actually distributed.
 	/// </summary>
-	internal class SizeLimitedCache(IOptionsMonitor<InMemoryCacheConfiguration> options, ILogger<SizeLimitedCache> logger) : IDistributedCache, IHostedService
+	internal class SizeLimitedCache(IOptionsMonitor<InMemoryCacheConfiguration> options, IOptionsMonitor<CacheConfiguration> cacheOptions, ILogger<SizeLimitedCache> logger) : IDistributedCache, IHostedService
 	{
 		private readonly IOptionsMonitor<InMemoryCacheConfiguration> _options = options;
+		private readonly IOptionsMonitor<CacheConfiguration> _cacheOptions = cacheOptions;
 		private readonly ConcurrentDictionary<string, ValueWrapper> _dictionary = new(StringComparer.OrdinalIgnoreCase);
 		public long MaxSize => _options.CurrentValue.MaxSize * 1000; // convert from kB to B
 		private readonly ILogger<SizeLimitedCache> _logger = logger;
@@ -91,7 +92,7 @@ namespace SimpleCDN.Cache
 		#region Automatic Purging
 		private void Purge()
 		{
-			var maxAge = TimeSpan.FromMinutes(_options.CurrentValue.MaxAge);
+			TimeSpan maxAge = TimeSpan.FromMinutes(_cacheOptions.CurrentValue.MaxAge);
 			_dictionary.RemoveWhere(kvp => Stopwatch.GetElapsedTime(kvp.Value.AccessedAt) < maxAge);
 		}
 
@@ -120,7 +121,7 @@ namespace SimpleCDN.Cache
 			// register the options change event to restart the background task
 			_optionsOnChange ??= _options.OnChange(_ => StartAsync(default));
 
-			if (_options.CurrentValue.MaxAge == 0 || _options.CurrentValue.PurgeInterval == 0)
+			if (_cacheOptions.CurrentValue.MaxAge == 0 || _options.CurrentValue.PurgeInterval == 0)
 			{
 				// automatic expiration and purging are disabled,
 				// stop the background task if it's running and return
