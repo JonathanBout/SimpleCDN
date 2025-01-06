@@ -14,8 +14,13 @@ namespace SimpleCDN.Endpoints
 		public static IEndpointRouteBuilder RegisterCDNEndpoints(this IEndpointRouteBuilder builder)
 		{
 #if DEBUG
+			// cache debug view. Only available in debug builds, as it exposes internal cache data
+			// only helpful when using the in-memory cache
 			builder.MapGet(Globals.SystemFilesRoot + "/server/cache", (ICacheManager cache) => cache.GetDebugView());
 #endif
+
+			// permanently redirect favicon requests to the system files root
+			builder.MapGet("/favicon.ico", () => Results.Redirect(Globals.SystemFilesRoot + "/logo.ico", true));
 
 			// health check endpoint
 			builder.MapGet(Globals.SystemFilesRoot + "/server/health", () => "healthy");
