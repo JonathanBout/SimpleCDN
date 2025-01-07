@@ -27,6 +27,11 @@ services:
     - <your_port>:8080
     environment:
     - ASPNETCORE_URLS=http://+:8080
+
+# === use below only if you want to use redis ===
+    - Cache__Redis__ConnectionString=redis:6379
+  redis:
+    image: redis
 ```
 
 ### Using dotnet
