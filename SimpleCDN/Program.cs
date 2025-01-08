@@ -45,7 +45,7 @@ namespace SimpleCDN
 						.AddSingleton<IDistributedCache>(sp => sp.GetRequiredService<SizeLimitedCache>())
 						.Configure<InMemoryCacheConfiguration>(builder.Configuration.GetSection("Cache:InMemory"));
 					break;
-				case CacheConfiguration.CacheType.Redis when cacheConfig?.Redis is not null:
+				case CacheConfiguration.CacheType.Redis when cacheConfig is { Redis.ConnectionString: not null }:
 					cacheEnabled = true;
 					builder.Services.AddStackExchangeRedisCache(options =>
 					{
