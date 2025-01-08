@@ -38,9 +38,9 @@
 		}
 
 		/// <summary>
-		/// Whether to block web crawlers from indexing the CDN files. Default is false.
+		/// Whether to block web crawlers and other bots from indexing the CDN files. Default is true.
 		/// </summary>
-		public bool BlockCrawlers { get; set; }
+		public bool BlockRobots { get; set; } = true;
 
 		/// <summary>
 		/// Whether to allow access to files and directories starting with a dot (e.g. .ssl). Default is false.
