@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 using SimpleCDN.Cache;
 using SimpleCDN.Configuration;
 using SimpleCDN.Endpoints;
@@ -81,8 +82,12 @@ namespace SimpleCDN
 
 			app.Use(async (ctx, next) =>
 			{
+				CDNConfiguration configuration = ctx.RequestServices.GetRequiredService<IOptionsSnapshot<CDNConfiguration>>().Value;
 				ctx.Response.Headers.Server = "SimpleCDN";
-				ctx.Response.Headers["X-Robots-Tag"] = "noindex, nofollow";
+				if (configuration.BlockRobots)
+				{
+					ctx.Response.Headers["X-Robots-Tag"] = "noindex, nofollow";
+				}
 				await next();
 			});
 

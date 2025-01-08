@@ -20,7 +20,7 @@ namespace SimpleCDN.Services
 
 			var index = new StringBuilder();
 
-			string robotsMeta = _options.CurrentValue.AllowDotFileAccess ? "" : "<meta name=\"robots\" content=\"noindex, nofollow\">";
+			string robotsMeta = _options.CurrentValue.BlockRobots ? "<meta name=\"robots\" content=\"noindex, nofollow\">" : "";
 
 			index.AppendFormat(
 				"""
