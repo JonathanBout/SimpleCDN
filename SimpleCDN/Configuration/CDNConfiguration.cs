@@ -38,6 +38,11 @@
 		}
 
 		/// <summary>
+		/// Whether to block web crawlers from indexing the CDN files. Default is false.
+		/// </summary>
+		public bool BlockCrawlers { get; set; }
+
+		/// <summary>
 		/// Whether to allow access to files and directories starting with a dot (e.g. .ssl). Default is false.
 		/// <br/>On Windows, this setting also affects files with the <see cref="FileAttributes.Hidden"/> attribute.
 		/// </summary>

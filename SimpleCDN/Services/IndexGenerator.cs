@@ -20,14 +20,17 @@ namespace SimpleCDN.Services
 
 			var index = new StringBuilder();
 
+			string robotsMeta = _options.CurrentValue.AllowDotFileAccess ? "" : "<meta name=\"robots\" content=\"noindex, nofollow\">";
+
 			index.AppendFormat(
 				"""
-				<html>
+				<!DOCTYPE html>
+				<html lang="en">
 				<head>
-					<meta charset="utf-8">
-					<meta name="robots" content="noindex,nofollow">
+					<meta charset="utf-8"> {4}
 					<link rel="stylesheet" href="{3}/styles.css">
 					<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0">
+					<meta name="description" content="Index of {0}">
 					<link rel="icon" href="{3}/logo.svg" type="image/svg+xml">
 					<title>{1} &middot; Index of {2}</title>
 				</head>
@@ -44,7 +47,7 @@ namespace SimpleCDN.Services
 							<th class="col-date">Last Change (UTC)</th>
 						</tr></thead>
 						<tbody>
-				""", rootRelativePath.Replace("/", "<wbr>/"), _options.CurrentValue.PageTitle, rootRelativePath, Globals.SystemFilesRoot);
+				""", rootRelativePath.Replace("/", "<wbr>/"), _options.CurrentValue.PageTitle, rootRelativePath, Globals.SystemFilesRoot, robotsMeta);
 
 			if (rootRelativePath is not "/" and not "" && directory.Parent is DirectoryInfo parent)
 			{

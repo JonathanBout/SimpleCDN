@@ -3,7 +3,7 @@ services:
     # this service is only needed if you are using the Redis cache with Cache__Type=Redis
     image: redis:alpine
     ports:
-    - "6379:6379"
+    - "6379:6379" # Expose Redis on the host machine so it can be accessed by for example a dashboard
 
   simplecdn:
     image: ${DOCKER_REGISTRY-}simplecdn:local-dev
