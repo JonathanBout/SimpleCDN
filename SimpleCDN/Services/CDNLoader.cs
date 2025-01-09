@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using SimpleCDN.Cache;
 using SimpleCDN.Configuration;
 using SimpleCDN.Helpers;
+using SimpleCDN.Services.Caching;
 using SimpleCDN.Services.Compression;
 using System.Net.Mime;
 

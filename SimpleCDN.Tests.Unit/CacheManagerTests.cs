@@ -1,7 +1,7 @@
 ﻿using SimpleCDN.Cache;
 using SimpleCDN.Configuration;
 using SimpleCDN.Helpers;
-using SimpleCDN.Services;
+using SimpleCDN.Services.Caching;
 using SimpleCDN.Tests.Mocks;
 using System.Text;
 

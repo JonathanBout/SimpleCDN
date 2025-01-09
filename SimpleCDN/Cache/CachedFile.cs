@@ -7,8 +7,6 @@ namespace SimpleCDN.Cache
 	{
 		private int _size;
 
-		public CachedFile() { }
-
 		public CompressionAlgorithm Compression { get; set; } = CompressionAlgorithm.None;
 		public required int Size
 		{

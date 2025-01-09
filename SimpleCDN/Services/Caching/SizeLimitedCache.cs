@@ -6,13 +6,14 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO.Pipes;
 
-namespace SimpleCDN.Cache
+namespace SimpleCDN.Services.Caching
 {
 	/// <summary>
 	/// A local, in-memory cache that limits the total size of the stored values. When the size of the cache exceeds the specified limit, the oldest (least recently accessed) values are removed.<br/>
-	/// Implements <see cref="IDistributedCache"/> for compatibility with the <see cref="Services.CacheManager"/>. It is not actually distributed.
+	/// Implements <see cref="IDistributedCache"/> for compatibility with the <see cref="CacheManager"/>. It is not actually distributed.
 	/// </summary>
-	internal class SizeLimitedCache(IOptionsMonitor<InMemoryCacheConfiguration> options, IOptionsMonitor<CacheConfiguration> cacheOptions, ILogger<SizeLimitedCache> logger) : IDistributedCache, IHostedService
+	internal class SizeLimitedCache(IOptionsMonitor<InMemoryCacheConfiguration> options, IOptionsMonitor<CacheConfiguration> cacheOptions, ILogger<SizeLimitedCache> logger)
+		: IDistributedCache, IHostedService, ICacheDebugInfoProvider
 	{
 		private readonly IOptionsMonitor<InMemoryCacheConfiguration> _options = options;
 		private readonly IOptionsMonitor<CacheConfiguration> _cacheOptions = cacheOptions;
@@ -49,9 +50,7 @@ namespace SimpleCDN.Cache
 		public Task RemoveAsync(string key, CancellationToken token = default)
 		{
 			if (token.IsCancellationRequested)
-			{
 				return Task.FromCanceled(token);
-			}
 
 			Remove(key);
 			return Task.CompletedTask;
@@ -68,7 +67,7 @@ namespace SimpleCDN.Cache
 			{
 				try
 				{
-					((string oldestKey, _), byOldest) = byOldest.RemoveFirst();
+					((var oldestKey, _), byOldest) = byOldest.RemoveFirst();
 					_dictionary.TryRemove(oldestKey, out _);
 				} catch (ArgumentOutOfRangeException)
 				{
@@ -81,9 +80,7 @@ namespace SimpleCDN.Cache
 		public Task SetAsync(string key, byte[] value, DistributedCacheEntryOptions options, CancellationToken token = default)
 		{
 			if (token.IsCancellationRequested)
-			{
 				return Task.FromCanceled(token);
-			}
 
 			Set(key, value, options);
 			return Task.CompletedTask;
@@ -92,7 +89,7 @@ namespace SimpleCDN.Cache
 		#region Automatic Purging
 		private void Purge()
 		{
-			TimeSpan maxAge = TimeSpan.FromMinutes(_cacheOptions.CurrentValue.MaxAge);
+			var maxAge = TimeSpan.FromMinutes(_cacheOptions.CurrentValue.MaxAge);
 			_dictionary.RemoveWhere(kvp => Stopwatch.GetElapsedTime(kvp.Value.AccessedAt) < maxAge);
 		}
 
@@ -103,9 +100,7 @@ namespace SimpleCDN.Cache
 				await Task.Delay(TimeSpan.FromMinutes(_options.CurrentValue.PurgeInterval), _backgroundCTS.Token);
 
 				if (_backgroundCTS.Token.IsCancellationRequested)
-				{
 					break;
-				}
 
 				_logger.LogDebug("Purging expired cache items");
 
@@ -135,6 +130,7 @@ namespace SimpleCDN.Cache
 				// background task is already running, no need to start another
 				return Task.CompletedTask;
 			}
+
 			_backgroundCTS = new CancellationTokenSource();
 
 			_backgroundCTS.Token.Register(() =>
@@ -158,7 +154,13 @@ namespace SimpleCDN.Cache
 			return _backgroundCTS?.CancelAsync() ?? Task.CompletedTask;
 		}
 
+
 		#endregion
+		public object GetDebugInfo()
+		{
+			return new SizeLimitedCacheDebugView(Size, MaxSize, Count, [.. Keys], FillPercentage: (double)Size / MaxSize);
+		}
+
 
 		class ValueWrapper(byte[] value)
 		{
@@ -182,4 +184,5 @@ namespace SimpleCDN.Cache
 			public static implicit operator byte[](ValueWrapper wrapper) => wrapper.Value;
 		}
 	}
+	public record SizeLimitedCacheDebugView(long Size, long MaxSize, int Count, string[] Keys, double FillPercentage);
 }

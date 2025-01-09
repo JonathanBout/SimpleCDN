@@ -1,6 +1,6 @@
 ﻿using SimpleCDN.Cache;
 using SimpleCDN.Helpers;
-using SimpleCDN.Services;
+using SimpleCDN.Services.Caching;
 using System.Diagnostics.CodeAnalysis;
 
 namespace SimpleCDN.Tests.Mocks

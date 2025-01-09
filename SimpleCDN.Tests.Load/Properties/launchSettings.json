@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "SimpleCDN.Tests.Load": {
+      "commandName": "Project",
+      "commandLineArgs": "http://localhost:1780/ 100"
+    }
+  }
+}
