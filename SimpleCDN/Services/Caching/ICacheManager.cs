@@ -2,7 +2,7 @@
 using SimpleCDN.Helpers;
 using System.Diagnostics.CodeAnalysis;
 
-namespace SimpleCDN.Services
+namespace SimpleCDN.Services.Caching
 {
 	public interface ICacheManager
 	{

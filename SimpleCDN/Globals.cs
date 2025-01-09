@@ -3,7 +3,7 @@
  * In here, we also have the Globals class for constant Assembly-wide values.
  */
 
-using SimpleCDN.Services;
+using SimpleCDN.Services.Caching;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
@@ -33,7 +33,6 @@ namespace SimpleCDN
 	[JsonSourceGenerationOptions]
 	[JsonSerializable(typeof(BasicDebugView))]
 	[JsonSerializable(typeof(DebugView))]
-	internal partial class SourceGenerationContext : JsonSerializerContext
-	{
-	}
+	[JsonSerializable(typeof(SizeLimitedCacheDebugView))]
+	internal partial class SourceGenerationContext : JsonSerializerContext;
 }

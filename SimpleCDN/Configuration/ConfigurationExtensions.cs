@@ -22,6 +22,9 @@
 				})
 				.Validate((CDNConfiguration config, ILogger<CDNConfiguration> logger) => config.Validate(logger), InvalidConfigurationMessage);
 
+			services.AddOptionsWithValidateOnStart<CacheConfiguration>()
+				.BindConfiguration("Cache");
+
 			return services;
 		}
 	}

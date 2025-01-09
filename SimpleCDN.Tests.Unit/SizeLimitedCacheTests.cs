@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Caching.Distributed;
-using SimpleCDN.Cache;
 using SimpleCDN.Configuration;
+using SimpleCDN.Services.Caching;
 using SimpleCDN.Tests.Mocks;
 using System;
 using System.Collections.Generic;

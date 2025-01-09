@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Caching.StackExchangeRedis;
 using Microsoft.Extensions.Options;
 using SimpleCDN.Cache;
 using SimpleCDN.Configuration;
@@ -7,7 +6,7 @@ using SimpleCDN.Helpers;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 
-namespace SimpleCDN.Services
+namespace SimpleCDN.Services.Caching
 {
 	public class CacheManager(IDistributedCache cache, IOptionsMonitor<CacheConfiguration> options) : ICacheManager
 	{
@@ -64,22 +63,17 @@ namespace SimpleCDN.Services
 		public bool TryRemove(string key, [NotNullWhen(true)] out CachedFile? value)
 		{
 			if (TryGetValue(key, out value))
-			{
 				return TryRemove(key);
-			}
 			return false;
 		}
 
 		public object GetDebugView()
 		{
-			if (_cache is SizeLimitedCache slc)
+			if (_cache is ICacheDebugInfoProvider debugInfoProvider)
 			{
 				return new DebugView(
-					slc.GetType().Name,
-					slc.Size,
-					slc.MaxSize,
-					slc.Count,
-					[.. slc.Keys]
+					debugInfoProvider.GetType().Name,
+					debugInfoProvider.GetDebugInfo()
 				);
 			}
 
@@ -88,9 +82,5 @@ namespace SimpleCDN.Services
 	}
 
 	internal record BasicDebugView(string Implementation);
-
-	internal record DebugView(string Implementation, long Size, long MaxSize, int Count, string[] Elements) : BasicDebugView(Implementation)
-	{
-		public decimal FillPercentage => (decimal)Size / MaxSize * 100;
-	}
+	internal record DebugView(string Implementation, object Details) : BasicDebugView(Implementation);
 }

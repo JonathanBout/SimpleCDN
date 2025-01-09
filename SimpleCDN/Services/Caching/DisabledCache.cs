@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Caching.Distributed;
 
-namespace SimpleCDN.Cache
+namespace SimpleCDN.Services.Caching
 {
 	/// <summary>
 	/// A cache that does nothing. Used when caching is disabled.

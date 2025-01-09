@@ -1,10 +1,10 @@
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
-using SimpleCDN.Cache;
 using SimpleCDN.Configuration;
 using SimpleCDN.Endpoints;
 using SimpleCDN.Services;
+using SimpleCDN.Services.Caching;
 using SimpleCDN.Services.Compression;
 
 namespace SimpleCDN
@@ -48,11 +48,7 @@ namespace SimpleCDN
 					break;
 				case CacheConfiguration.CacheType.Redis when cacheConfig is { Redis.ConnectionString: not null }:
 					cacheEnabled = true;
-					builder.Services.AddStackExchangeRedisCache(options =>
-					{
-						options.Configuration = cacheConfig.Redis.ConnectionString;
-						options.InstanceName = cacheConfig.Redis.InstanceName;
-					});
+					builder.Services.AddSingleton<IDistributedCache, CustomRedisCacheService>();
 					break;
 				default:
 					cacheEnabled = false;
