@@ -22,7 +22,7 @@ namespace SimpleCDN.Tests.Unit
 			var options = new CacheConfiguration();
 			configure?.Invoke(options);
 
-			var cache = new CacheManager(cacheImplementation, new OptionsMock<CacheConfiguration>(options));
+			var cache = new CacheManager(cacheImplementation, new OptionsMock<CacheConfiguration>(options), new MockLogger<CacheManager>());
 			return (cache, cacheImplementation);
 		}
 
