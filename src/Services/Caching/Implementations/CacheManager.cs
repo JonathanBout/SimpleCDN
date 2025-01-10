@@ -24,7 +24,20 @@ namespace SimpleCDN.Services.Caching.Implementations
 		public bool TryGetValue(string key, [NotNullWhen(true)] out CachedFile? value)
 		{
 			var start = Stopwatch.GetTimestamp();
-			var bytes = _cache.Get(key);
+
+			byte[]? bytes;
+
+			try
+			{
+				bytes = _cache.Get(key);
+			} catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error while trying to get {Key} from cache", key);
+				_missCount++;
+				value = null;
+				return false;
+			}
+
 			TimeSpan elapsed = Stopwatch.GetElapsedTime(start);
 #if DEBUG
 			lock (_durationsLock)
