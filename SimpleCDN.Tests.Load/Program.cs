@@ -3,14 +3,17 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Collections.Concurrent;
+using System.Collections;
 
 namespace SimpleCDN.Tests.Load
 {
 	static class Program
 	{
+		internal static readonly double[] percentiles = [0.5, 0.75, 0.9, 0.95, 0.99];
+
 		static async Task Main(string[] args)
 		{
-			Console.TreatControlCAsInput = true;
+			Console.Clear();
 			if (args.Length != 2)
 			{
 				Console.WriteLine("Usage: SimpleCDN.Tests.Load <url> <requests per second>");
@@ -30,47 +33,55 @@ namespace SimpleCDN.Tests.Load
 				return;
 			}
 
-			HttpClient[] clients = [.. Enumerable.Range(0, requestsPerSecond)
-			.Select(_ => new HttpClient
+			HttpClient CreateClient() => new()
 			{
 				BaseAddress = uriResult,
 				DefaultRequestHeaders = {
 					{ "User-Agent", "SimpleCDN Load Testing" }
 				}
-			})];
+			};
 
 			ConcurrentBag<int> durations = [];
+			var start = Stopwatch.GetTimestamp();
 
-			while (!Console.KeyAvailable || Console.ReadKey() is not { Key: ConsoleKey.C, Modifiers: ConsoleModifiers.Control })
+			DateTimeOffset lastRender = DateTimeOffset.MinValue;
+
+			(int left, int top) = Console.GetCursorPosition();
+
+			void Render()
 			{
-				var start = Stopwatch.GetTimestamp();
-				await Parallel.ForAsync(0, requestsPerSecond, async (i, ct) =>
+				if (DateTimeOffset.Now - lastRender > TimeSpan.FromSeconds(2))
 				{
-					var start = Stopwatch.GetTimestamp();
-					await SendRequest(clients[i], ct);
-					durations.Add((int)Stopwatch.GetElapsedTime(start).TotalMilliseconds);
-				});
+					lastRender = DateTimeOffset.Now;
+				} else
+				{
+					return;
+				}
+
 				TimeSpan elapsed = Stopwatch.GetElapsedTime(start);
 
-				Console.WriteLine("Sent {0} requests in {1:0.##} ms", requestsPerSecond, elapsed.TotalMilliseconds);
+				Console.SetCursorPosition(left, top);
+				Console.WriteLine("Average request duration: {0:0.##} ms          ", durations.Average());
+				Console.WriteLine("Max request duration: {0:0.##} ms          ", durations.Max());
+				Console.WriteLine("Min request duration: {0:0.##} ms          ", durations.Min());
+				Console.WriteLine("Total requests: {0}          ", durations.Count);
+				Console.WriteLine("                                                                    ");
 
-				if (elapsed.TotalMilliseconds < 1000)
+				foreach (var percentile in percentiles)
 				{
-					await Task.Delay(1000 - (int)elapsed.TotalMilliseconds);
+					Console.WriteLine("{0}th percentile: {1:0.##} ms          ", percentile * 100, durations.Percentile(percentile));
 				}
+
 			}
 
-			Console.WriteLine();
-			Console.WriteLine("Average request duration: {0:0.##} ms", durations.Average());
-			Console.WriteLine("Max request duration: {0:0.##} ms", durations.Max());
-			Console.WriteLine("Min request duration: {0:0.##} ms", durations.Min());
-			Console.WriteLine("Total requests: {0}", durations.Count);
-			Console.WriteLine();
-			var percentiles = new[] { 0.5, 0.75, 0.9, 0.95, 0.99 };
-			foreach (var percentile in percentiles)
+			await Parallel.ForEachAsync(new InfiniteEnumerable(), async (_, ct) =>
 			{
-				Console.WriteLine("{0}th percentile: {1:0.##} ms", percentile * 100, durations.Percentile(percentile));
-			}
+				using HttpClient client = CreateClient();
+				var start = Stopwatch.GetTimestamp();
+				await SendRequest(client, ct);
+				durations.Add((int)Stopwatch.GetElapsedTime(start).TotalMilliseconds);
+				Render();
+			});
 		}
 
 		static double Percentile(this ConcurrentBag<int> durations, double percentile)
@@ -84,15 +95,36 @@ namespace SimpleCDN.Tests.Load
 		{
 			try
 			{
-				HttpResponseMessage response = await client.GetAsync("", ct);
+				using HttpResponseMessage response = await client.GetAsync("", ct);
 
 				if (!response.IsSuccessStatusCode)
 					Console.WriteLine($"Request failed: {response.StatusCode}");
-
 			} catch (Exception ex)
 			{
 				Console.WriteLine($"Request failed: {ex.Message}");
 			}
+		}
+
+		private class InfiniteEnumerable : IEnumerable<ulong>
+		{
+			public IEnumerator<ulong> GetEnumerator() => new InfiniteEnumerator();
+			IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+		}
+
+		private class InfiniteEnumerator : IEnumerator<ulong>
+		{
+			private ulong _current;
+			public ulong Current => _current;
+
+			object IEnumerator.Current => Current;
+
+			public void Dispose() { }
+			public bool MoveNext()
+			{
+				Interlocked.Increment(ref _current);
+				return true;
+			}
+			public void Reset() => _current = 0;
 		}
 	}
 }
