@@ -32,7 +32,11 @@ namespace SimpleCDN
 
 	[JsonSourceGenerationOptions]
 	[JsonSerializable(typeof(BasicDebugView))]
+#if DEBUG
 	[JsonSerializable(typeof(DebugView))]
+	[JsonSerializable(typeof(DetailedDebugView))]
+#endif
 	[JsonSerializable(typeof(SizeLimitedCacheDebugView))]
+	[JsonSerializable(typeof(CustomRedisCacheServiceDebugView))]
 	internal partial class SourceGenerationContext : JsonSerializerContext;
 }
