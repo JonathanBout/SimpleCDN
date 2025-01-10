@@ -75,7 +75,7 @@ namespace SimpleCDN.Services.Implementations
 					if (name.StartsWith('.') && !_options.CurrentValue.ShowDotFiles)
 						continue;
 
-					AppendRow(index, name, name, Icons.Folder, -1, subDirectory.LastWriteTimeUtc);
+					AppendRow(index, name + "/", name, Icons.Folder, -1, subDirectory.LastWriteTimeUtc);
 				}
 
 				foreach (FileInfo file in directory.EnumerateFiles())
@@ -104,7 +104,7 @@ namespace SimpleCDN.Services.Implementations
 			var iconTag = GetIcon(icon);
 			index.Append("<tr>");
 			index.AppendFormat("""<td class="col-icon">{0}</td>""", iconTag);
-			index.AppendFormat("""<td class="col-name"><a href="./{0}">{1}</a></td>""", HttpUtility.UrlEncode(href), name);
+			index.AppendFormat("""<td class="col-name"><a href="./{0}">{1}</a></td>""", HttpUtility.HtmlAttributeEncode(href), name);
 			index.AppendFormat("""<td class="col-size">{0}</td>""", size < 0 ? "-" : size.FormatByteCount());
 			index.AppendFormat("""<td class="col-date">{0}</td>""", lastModified.ToString("dd/MM/yyyy HH:mm"));
 			index.Append("</tr>");

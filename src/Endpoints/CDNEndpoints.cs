@@ -40,17 +40,44 @@ namespace SimpleCDN.Endpoints
 					ctx.Response.Headers["X-Robots-Tag"] = "noindex, nofollow";
 				}
 
+				if (route is not { Length: > 0 } && !ctx.Request.Path.ToString().EndsWith('/'))
+				{
+					return Results.Redirect(ctx.Request.Path + "/", true);
+				}
+
+				route ??= "/";
+
 				try
 				{
 					var acceptedEncodings = ctx.Request.Headers.AcceptEncoding.ToString().Split(',', StringSplitOptions.TrimEntries);
 
 					var preferredAlgorithm = CompressionAlgorithm.MostPreferred(PerformancePreference.None, acceptedEncodings);
 
-					if (loader.GetFile(route ?? "/") is CDNFile file)
+					if (loader.GetFile(route) is CDNFile file)
 					{
 						if (file is RedirectCDNFile redirect)
 						{
-							return Results.Redirect(redirect.Destination, redirect.Permanent);
+							string basePath = ctx.Request.Path.ToString();
+
+							if (route.Length > 0)
+							{
+								basePath = basePath.Replace(route, "", StringComparison.Ordinal);
+
+								if (basePath.EndsWith('/'))
+								{
+									basePath = basePath[..^1];
+								}
+							}
+
+							string fullDestination;
+							if (redirect.Destination.StartsWith('/'))
+							{
+								fullDestination = basePath + redirect.Destination;
+							} else
+							{
+								fullDestination = basePath + "/" + redirect.Destination;
+							}
+							return Results.Redirect(fullDestination, redirect.Permanent);
 						}
 
 						IList<MediaTypeHeaderValue> typedAccept = ctx.Request.GetTypedHeaders().Accept;

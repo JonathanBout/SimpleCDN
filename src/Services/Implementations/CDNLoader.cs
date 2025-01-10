@@ -31,7 +31,7 @@ namespace SimpleCDN.Services.Implementations
 		public CDNFile? GetFile(string path, params IEnumerable<CompressionAlgorithm> acceptedCompression)
 		{
 			if (string.IsNullOrWhiteSpace(path))
-				path = "/";
+				return new RedirectCDNFile("/", true);
 
 			var pathChars = path.ToCharArray();
 			Span<char> pathSpan = pathChars.AsSpan();
