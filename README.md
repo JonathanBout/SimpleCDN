@@ -35,9 +35,8 @@ services:
 ```
 
 > [!WARNING]  
-> **Redis stops working when a lot of concurrent requests are sent.** Currently I can't recommend using it in production.  
-> I'm working on a fix, but I run into weird issues where the SimpleCDN containers hang and I have to restart my PC to get it back to normal.
-> If you (think you )know a proper solution, **any help will be appreciated!**
+> **Redis support is available, but it ocasionally fails**, especially in high-load scenario's. By implementing a custom connection manager,
+> it's brought down to a minimum but failures still happen. The application will simply load the data from disk instead of using the cache.
 
 ### Using dotnet
 ```
