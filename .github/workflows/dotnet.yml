@@ -24,11 +24,11 @@ jobs:
       with:
         dotnet-version: 9.0.x
     - name: Restore dependencies
-      run: dotnet restore SimpleCDN.Tests.Unit/SimpleCDN.Tests.Unit.csproj
+      run: dotnet restore tests/unit/SimpleCDN.Tests.Unit.csproj
     - name: Build
-      run: dotnet build SimpleCDN.Tests.Unit/SimpleCDN.Tests.Unit.csproj --no-restore -p:TreatWarningsAsErrors=true
+      run: dotnet build tests/unit/SimpleCDN.Tests.Unit.csproj --no-restore -p:TreatWarningsAsErrors=true
     - name: Test
-      run: dotnet test SimpleCDN.Tests.Unit/SimpleCDN.Tests.Unit.csproj --no-build --verbosity normal -p:TreatWarningsAsErrors=true
+      run: dotnet test tests/unit/SimpleCDN.Tests.Unit.csproj --no-build --verbosity normal -p:TreatWarningsAsErrors=true
 
   integration-test:
     runs-on: ubuntu-latest
@@ -40,8 +40,8 @@ jobs:
       with:
         dotnet-version: 9.0.x
     - name: Restore dependencies
-      run: dotnet restore SimpleCDN.Tests.Integration/SimpleCDN.Tests.Integration.csproj
+      run: dotnet restore tests/integration/SimpleCDN.Tests.Integration.csproj
     - name: Build
-      run: dotnet build SimpleCDN.Tests.Integration/SimpleCDN.Tests.Integration.csproj --no-restore
+      run: dotnet build tests/integration/SimpleCDN.Tests.Integration.csproj --no-restore
     - name: Test
-      run: dotnet test SimpleCDN.Tests.Integration/SimpleCDN.Tests.Integration.csproj --no-build --verbosity normal
+      run: dotnet test tests/integration/SimpleCDN.Tests.Integration.csproj --no-build --verbosity normal
