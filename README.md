@@ -1,4 +1,4 @@
-# ![SimpleCDN Logo. A folder icon with three stacked horizontal stripes on it, stacked from long at the top to short at the bottom.](./SimpleCDN/wwwroot/logo.svg) SimpleCDN
+# ![SimpleCDN Logo. A folder icon with three stacked horizontal stripes on it, stacked from long at the top to short at the bottom.](./src/wwwroot/logo.svg) SimpleCDN
 SimpleCDN is, well, a simple CDN server. Currently it is only tested for single-instance use, but I don't see any reasons why a load balancer wouldn't work. Be aware this CDN currently doesn't support any
 distributed caching, meaning both servers will build their own cache.
 
