@@ -33,7 +33,9 @@ namespace SimpleCDN.Services.Caching.Implementations
 			} catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error while trying to get {Key} from cache", key);
+#if DEBUG
 				_missCount++;
+#endif
 				value = null;
 				return false;
 			}
