@@ -2,24 +2,24 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.13.35507.96
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleCDN", "SimpleCDN\SimpleCDN.csproj", "{9C7F11BA-ECF0-8CD1-D1F5-DB31D692724E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleCDN", "src\SimpleCDN.csproj", "{9C7F11BA-ECF0-8CD1-D1F5-DB31D692724E}"
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{81DDED9D-158B-E303-5F62-77A2896D2A5A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleCDN.Tests.Unit", "SimpleCDN.Tests.Unit\SimpleCDN.Tests.Unit.csproj", "{9F41AC4B-73A5-AED7-2FAD-13532040B2E1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleCDN.Tests.Unit", "tests\unit\SimpleCDN.Tests.Unit.csproj", "{9F41AC4B-73A5-AED7-2FAD-13532040B2E1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleCDN.Tests.Integration", "SimpleCDN.Tests.Integration\SimpleCDN.Tests.Integration.csproj", "{748DF05A-61E9-3214-6751-2FB8D9C75A1C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleCDN.Tests.Integration", "tests\integration\SimpleCDN.Tests.Integration.csproj", "{748DF05A-61E9-3214-6751-2FB8D9C75A1C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleCDN.Benchmarks", "SimpleCDN.Benchmarks\SimpleCDN.Benchmarks.csproj", "{31E5662A-D9A0-4326-A1AD-AFED6266BCB4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleCDN.Benchmarks", "benchmarks\SimpleCDN.Benchmarks.csproj", "{31E5662A-D9A0-4326-A1AD-AFED6266BCB4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleCDN.Tests.Mocks", "SimpleCDN.Tests.Mocks\SimpleCDN.Tests.Mocks.csproj", "{53FD55C0-72A5-41DA-A62F-2338B4961B85}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleCDN.Tests.Mocks", "tests\mocks\SimpleCDN.Tests.Mocks.csproj", "{53FD55C0-72A5-41DA-A62F-2338B4961B85}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleCDN.Tests.Load", "SimpleCDN.Tests.Load\SimpleCDN.Tests.Load.csproj", "{6B720195-AF3B-4B9D-8A25-16BB5563C902}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleCDN.Tests.Load", "tests\load\SimpleCDN.Tests.Load.csproj", "{6B720195-AF3B-4B9D-8A25-16BB5563C902}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -9,7 +9,7 @@ services:
     image: ghcr.io/jonathanbout/simplecdn:local-dev
     build:
       context: .
-      dockerfile: SimpleCDN/Dockerfile
+      dockerfile: src/Dockerfile
     volumes:
     - ../:/data
     ports:
