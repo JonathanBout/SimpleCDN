@@ -38,16 +38,17 @@ namespace SimpleCDN.Services.Caching.Implementations
 
 				_durations.Add((ushort)elapsed.TotalMilliseconds);
 			}
+
+			// increment hit or miss count
+			Interlocked.Increment(ref bytes is not { Length: > 0 } ? ref _missCount : ref _hitCount);
 #endif
 			if (bytes is null || bytes.Length == 0)
 			{
-				Interlocked.Increment(ref _missCount);
 				_logger.LogDebug("Cache MISS for {Key} in {Duration:0} ms", key, elapsed.TotalMilliseconds);
 				value = null;
 				return false;
 			}
 
-			Interlocked.Increment(ref _hitCount);
 			_logger.LogDebug("Cache HIT for {Key} in {Duration:0} ms", key, elapsed.TotalMilliseconds);
 
 			value = CachedFile.FromBytes(bytes);
@@ -94,9 +95,9 @@ namespace SimpleCDN.Services.Caching.Implementations
 			return false;
 		}
 
+#if DEBUG
 		public object GetDebugView()
 		{
-#if DEBUG
 			lock (_durationsLock)
 			{
 				if (_cache is ICacheDebugInfoProvider debugInfoProvider)
@@ -112,19 +113,17 @@ namespace SimpleCDN.Services.Caching.Implementations
 				return new DetailedDebugView(_cache.GetType().Name, _durations,
 						_hitCount, _missCount);
 			}
-#else
-			return new BasicDebugView(_cache.GetType().Name);
-#endif
 		}
+#endif
 	}
 
+#if DEBUG
 	internal class BasicDebugView(string implementation, ulong hitCount, ulong missCount)
 	{
 		public string Implementation { get; } = implementation;
 		public ulong HitCount { get; } = hitCount;
 		public ulong MissCount { get; } = missCount;
 	}
-#if DEBUG
 	internal class DetailedDebugView : BasicDebugView
 	{
 		public double AverageDuration { get; }

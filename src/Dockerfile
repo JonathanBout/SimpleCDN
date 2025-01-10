@@ -30,11 +30,11 @@ RUN apt-get update \
     clang zlib1g-dev
 ARG BUILD_CONFIGURATION=Release
 ARG DOTNET_BUILD_PLATFORM=linux-x64
-WORKDIR /src
-COPY ["./SimpleCDN/SimpleCDN.csproj", "SimpleCDN/"]
-RUN dotnet restore "./SimpleCDN/SimpleCDN.csproj"
+WORKDIR /code
+COPY ["./src/SimpleCDN.csproj", "src/"]
+RUN dotnet restore "./src/SimpleCDN.csproj"
 COPY . .
-WORKDIR "/src/SimpleCDN"
+WORKDIR "/code/src"
 
 RUN dotnet build "./SimpleCDN.csproj" -c $BUILD_CONFIGURATION -r $DOTNET_BUILD_PLATFORM -o /app/build
 
