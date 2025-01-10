@@ -36,6 +36,8 @@ namespace SimpleCDN.Services.Implementations
 			var pathChars = path.ToCharArray();
 			Span<char> pathSpan = pathChars.AsSpan();
 
+			pathSpan.Normalize();
+
 			if (pathSpan.Length > 0 && pathSpan[0] == '/')
 			{
 				pathSpan = pathSpan[1..];
@@ -46,7 +48,6 @@ namespace SimpleCDN.Services.Implementations
 				pathSpan = pathSpan[..^1];
 			}
 
-			pathSpan.Normalize();
 
 			// if the pathSpan starts with the system files root, we want to serve a system file
 			// if there are additional characters after the system files root, the first one must be a '/'
