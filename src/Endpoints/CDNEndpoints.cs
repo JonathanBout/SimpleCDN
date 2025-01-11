@@ -14,6 +14,9 @@ namespace SimpleCDN.Endpoints
 	/// </summary>
 	internal class CDN;
 
+	/// <summary>
+	/// Contains extension methods for mapping SimpleCDN endpoints.
+	/// </summary>
 	public static class CDNEndpoints
 	{
 		/// <summary>

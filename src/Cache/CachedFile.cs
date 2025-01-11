@@ -3,11 +3,21 @@ using System.Buffers.Binary;
 
 namespace SimpleCDN.Cache
 {
+	/// <summary>
+	/// Represents a file that has been cached by the <see cref="Services.Caching.ICacheManager"/>.
+	/// </summary>
 	public class CachedFile
 	{
 		private int _size;
 
+		/// <summary>
+		/// The compression algorithm used to compress the content.
+		/// </summary>
 		public CompressionAlgorithm Compression { get; set; } = CompressionAlgorithm.None;
+
+		/// <summary>
+		/// The size of the content before compression.
+		/// </summary>
 		public required int Size
 		{
 			get
@@ -25,8 +35,20 @@ namespace SimpleCDN.Cache
 			}
 		}
 
+		/// <summary>
+		/// The content of the file, compressed with <see cref="Compression"/>.
+		/// </summary>
 		public required byte[] Content { get; set; }
+
+		/// <summary>
+		/// The MIME type of the content detected by SimpleCDN based on the file extension.
+		/// For a list of supported MIME types, see <see cref="SimpleCDN.MimeType"/>.
+		/// </summary>
 		public required MimeType MimeType { get; set; }
+
+		/// <summary>
+		/// The last modified date of the file.
+		/// </summary>
 		public virtual DateTimeOffset LastModified { get; set; }
 
 		/// <summary>

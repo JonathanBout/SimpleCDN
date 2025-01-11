@@ -1,5 +1,8 @@
 ﻿namespace SimpleCDN.Configuration
 {
+	/// <summary>
+	/// Represents the configuration for the CDN used by SimpleCDN.
+	/// </summary>
 	public class CDNConfiguration
 	{
 		/// <summary>

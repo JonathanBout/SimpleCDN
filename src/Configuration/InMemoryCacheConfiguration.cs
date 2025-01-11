@@ -1,5 +1,8 @@
 ﻿namespace SimpleCDN.Configuration
 {
+	/// <summary>
+	/// Represents the configuration for the in-memory cache used by SimpleCDN.
+	/// </summary>
 	public class InMemoryCacheConfiguration
 	{
 		/// <summary>

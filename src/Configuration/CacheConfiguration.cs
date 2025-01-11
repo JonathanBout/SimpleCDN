@@ -1,12 +1,19 @@
 ﻿namespace SimpleCDN.Configuration
 {
+	/// <summary>
+	/// Represents the configuration for the cache used by SimpleCDN.
+	/// </summary>
 	public class CacheConfiguration
 	{
 		/// <summary>
-		/// The configuration for the in-memory cache
+		/// The configuration for the in-memory cache.
 		/// </summary>
 		public InMemoryCacheConfiguration? InMemory { get; set; }
+		/// <summary>
+		/// The configuration for the Redis cache
+		/// </summary>
 		public RedisCacheConfiguration? Redis { get; set; }
+
 		private int _type = -1;
 		/// <summary>
 		/// The type of cache to use. By default or when the value is invalid, uses Redis if it has been configured, otherwise InMemory.
@@ -37,7 +44,7 @@
 		public enum CacheType
 		{
 			/// <summary>
-			/// Disable caching
+			/// Disable caching. Without good reason, this should not be used in production.
 			/// </summary>
 			Disabled,
 			/// <summary>

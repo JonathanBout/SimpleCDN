@@ -11,7 +11,7 @@ namespace SimpleCDN.Helpers
 			return extension.ToString().ToLower() switch
 			{
 				"html" or "htm" => MimeType.HTML,
-				"txt" => MimeType.Text,
+				"txt" => MimeType.Plain,
 				"png" => MimeType.PNG,
 				"json" => MimeType.JSON,
 				"jpeg" or "jpg" => MimeType.JPEG,
@@ -35,7 +35,7 @@ namespace SimpleCDN.Helpers
 			{
 				MimeType.HTML => MediaTypeNames.Text.Html,
 				MimeType.CSS => MediaTypeNames.Text.Css,
-				MimeType.Text => MediaTypeNames.Text.Plain,
+				MimeType.Plain => MediaTypeNames.Text.Plain,
 				MimeType.JSON => MediaTypeNames.Application.Json,
 				MimeType.PNG => MediaTypeNames.Image.Png,
 				MimeType.JPEG => MediaTypeNames.Image.Jpeg,

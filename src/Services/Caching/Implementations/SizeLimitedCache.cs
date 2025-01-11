@@ -181,5 +181,5 @@ namespace SimpleCDN.Services.Caching.Implementations
 			public static implicit operator byte[](ValueWrapper wrapper) => wrapper.Value;
 		}
 	}
-	public record SizeLimitedCacheDebugView(long Size, long MaxSize, int Count, string[] Keys, double FillPercentage);
+	internal record SizeLimitedCacheDebugView(long Size, long MaxSize, int Count, string[] Keys, double FillPercentage);
 }
