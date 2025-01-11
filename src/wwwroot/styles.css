@@ -1,0 +1,62 @@
+﻿@font-face {
+    font-family: Code;
+    font-display: swap;
+    src: local("Cascadia Code"),url(/CascadiaCode/woff2/CascadiaCode.woff2) format("woff2"),url(/CascadiaCode/ttf/CascadiaCode.ttf) format("truetype"),url(/CascadiaCode/CascadiaCode.ttf) format("truetype"),url(/CascadiaCode/otf/static/CascadiaCodeNF-Regular.otf) format("opentype"),local("Cascadia Mono");
+}
+
+:root {
+	font-family: Code, monospace;
+
+	--text-color: black;
+	--background-color: white;
+	--link-color: #0000EE;
+}
+
+@media(prefers-color-scheme: dark) {
+	:root {
+		--text-color: #eee;
+		--background-color: #111;
+		--link-color: #9999ff;
+	}
+}
+
+* {
+	box-sizing: border-box;
+	text-align: center;
+}
+
+body {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	min-height: 100vh;
+	margin: 0;
+	padding: 0;
+	padding-block: 5px;
+	max-width: 100vw;
+	overflow-x: hidden;
+	background-color: var(--background-color);
+	color: var(--text-color);
+}
+
+main {
+	overflow: auto;
+	flex-grow: 1;
+}
+
+a {
+	color: var(--link-color);
+
+	text-underline-offset: .25em;
+}
+
+h1 {
+	text-align: center;
+	overflow: auto;
+	padding-inline: 5px;
+
+}
+
+footer {
+	text-align: center;
+}

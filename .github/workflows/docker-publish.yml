@@ -80,7 +80,7 @@ jobs:
         uses: docker/build-push-action@v6.10.0
         with:
           context: .
-          file: ./SimpleCDN/Dockerfile
+          file: ./src/Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: ${{ matrix.arch }}

@@ -1,4 +1,4 @@
-# ![SimpleCDN Logo. A folder icon with three stacked horizontal stripes on it, stacked from long at the top to short at the bottom.](./SimpleCDN/wwwroot/logo.svg) SimpleCDN
+# ![SimpleCDN Logo. A folder icon with three stacked horizontal stripes on it, stacked from long at the top to short at the bottom.](./src/wwwroot/logo.svg) SimpleCDN
 SimpleCDN is, well, a simple CDN server. Currently it is only tested for single-instance use, but I don't see any reasons why a load balancer wouldn't work. Be aware this CDN currently doesn't support any
 distributed caching, meaning both servers will build their own cache.
 
@@ -35,9 +35,8 @@ services:
 ```
 
 > [!WARNING]  
-> **Redis stops working when a lot of concurrent requests are sent.** Currently I can't recommend using it in production.  
-> I'm working on a fix, but I run into weird issues where the SimpleCDN containers hang and I have to restart my PC to get it back to normal.
-> If you (think you )know a proper solution, **any help will be appreciated!**
+> **Redis support is available, but it ocasionally fails**, especially in high-load scenario's. By implementing a custom connection manager,
+> it's brought down to a minimum but failures still happen. The application will simply load the data from disk instead of using the cache.
 
 ### Using dotnet
 ```
