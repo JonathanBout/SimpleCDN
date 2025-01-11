@@ -42,6 +42,6 @@ jobs:
     - name: Pack
       run: dotnet pack --configuration Release --property:Version=${VERSION} --output .
     - name: Push
-      run: dotnet nuget push NuGet.Workflow.${VERSION}.nupkg --source https://nuget.pkg.github.com/acraven/index.json --api-key ${GITHUB_TOKEN}
+      run: dotnet nuget push SimpleCDN.${VERSION}.nupkg --source https://nuget.pkg.github.com/jonathanbout/index.json --api-key ${GITHUB_TOKEN}
       env:
         GITHUB_TOKEN: ${{ github.token }}
