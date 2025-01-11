@@ -87,7 +87,7 @@ namespace SimpleCDN.Services.Implementations
 
 					AppendRow(index, name, name, Icons.File, file.Length, file.LastWriteTimeUtc);
 				}
-			} catch (SecurityException ex)
+			} catch (Exception ex) when (ex is SecurityException or UnauthorizedAccessException)
 			{
 				_logger.LogError(ex, "Access denied to publicly available directory {directory} while generating an index", directory.FullName);
 
