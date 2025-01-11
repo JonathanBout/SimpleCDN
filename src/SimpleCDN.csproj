@@ -8,6 +8,17 @@
 		<PublishAot>true</PublishAot>
 		<DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<Title>SimpleCDN</Title>
+		<Authors>JonathanBout</Authors>
+		<Company>SimpleCDN</Company>
+		<Description>A simple CDN server for serving static files, with a local in-memory cache and Redis support.</Description>
+		<Copyright>Contributors of SimpleCDN</Copyright>
+		<PackageProjectUrl>https://github.com/JonathanBout/SimpleCDN</PackageProjectUrl>
+		<PackageIcon>logo.png</PackageIcon>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<RepositoryUrl>https://github.com/JonathanBout/SimpleCDN.git</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>cdn;static files;cache;aspnetcore</PackageTags>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)'=='Release'">
@@ -26,6 +37,17 @@
 
 	<ItemGroup Condition="'$(Configuration)'=='Release'">
 		<Content Remove="appsettings.Development.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="..\README.md">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	  <None Include="wwwroot\logo.png">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
 	</ItemGroup>
 
 	<ItemGroup>
