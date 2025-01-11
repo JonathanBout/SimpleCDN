@@ -34,6 +34,6 @@ jobs:
     - name: Pack
       run: dotnet pack --configuration Release --property:Version=${VERSION} --output . src/SimpleCDN.csproj
     - name: Push
-      run: dotnet nuget push SimpleCDN.${VERSION}.nupkg --source https://nuget.pkg.github.com/jonathanbout/index.json --api-key ${GITHUB_TOKEN}
+      run: dotnet nuget push SimpleCDN.${VERSION}.nupkg --api-key ${NUGET_API_KEY} --source https://api.nuget.org/v3/index.json
       env:
-        GITHUB_TOKEN: ${{ github.token }}
+        NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
