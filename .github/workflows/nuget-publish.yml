@@ -30,7 +30,7 @@ jobs:
       with:
         dotnet-version: "9.0.x"
     - name: Set VERSION variable from tag or the input
-      run: echo "VERSION=${VERSION_NAME}/refs\/tags\/v/}" >> $GITHUB_ENV
+      run: echo "VERSION=${VERSION_NAME#\/refs\/tags\/v/}" >> $GITHUB_ENV
     - name: Pack
       run: dotnet pack --configuration Release --property:Version=${VERSION} --output . src/SimpleCDN.csproj
     - name: Push
