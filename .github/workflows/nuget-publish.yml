@@ -1,0 +1,47 @@
+name: Build & Publish NuGet Package
+
+on:
+  push:
+    # Publish semver tags as releases.
+    tags: [ 'v*.*.*' ]
+    paths-ignore:
+      - '**.md'
+  workflow_dispatch:
+    inputs:
+      version_number:
+        description: "Package version, e.g. 1.10.5"
+        required: true
+        type: string
+
+env:
+  # Use docker.io for Docker Hub if empty
+  REGISTRY: ghcr.io
+  # github.repository as <account>/<repo>
+  IMAGE_NAME: ${{ github.repository }}
+  VERSION_NAME: ${{ inputs.version_number || github.head_ref }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Verify commit exists in origin/main
+      run: |
+        git fetch --no-tags --prune --depth=1 origin +refs/heads/*:refs/remotes/origin/*
+        git branch --remote --contains | grep origin/main
+    - name: Setup Dotnet
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: "9.0.x"
+    - name: Set VERSION variable from tag or the input
+      run: echo "VERSION=${VERSION_NAME}/refs\/tags\/v/}" >> $GITHUB_ENV
+    - name: Pack
+      run: dotnet pack --configuration Release --property:Version=${VERSION} --output .
+    - name: Push
+      run: dotnet nuget push SimpleCDN.${VERSION}.nupkg --source https://nuget.pkg.github.com/jonathanbout/index.json --api-key ${GITHUB_TOKEN}
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
