@@ -32,7 +32,7 @@ jobs:
     - name: Set VERSION variable from tag or the input
       run: echo "VERSION=${VERSION_NAME}/refs\/tags\/v/}" >> $GITHUB_ENV
     - name: Pack
-      run: dotnet pack --configuration Release --property:Version=${VERSION} --output .
+      run: dotnet pack --configuration Release --property:Version=${VERSION} --output . src/SimpleCDN.csproj
     - name: Push
       run: dotnet nuget push SimpleCDN.${VERSION}.nupkg --source https://nuget.pkg.github.com/jonathanbout/index.json --api-key ${GITHUB_TOKEN}
       env:
