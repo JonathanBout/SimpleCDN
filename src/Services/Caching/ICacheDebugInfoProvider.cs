@@ -2,6 +2,6 @@
 {
 	internal interface ICacheDebugInfoProvider
 	{
-		object GetDebugInfo();
+		internal object GetDebugInfo();
 	}
 }

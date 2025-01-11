@@ -14,7 +14,7 @@ namespace SimpleCDN.Tests.Unit
 			{
 				Content = Encoding.UTF8.GetBytes("Hello, World!"),
 				Compression = CompressionAlgorithm.None,
-				MimeType = MimeType.Text,
+				MimeType = MimeType.Plain,
 				LastModified = DateTimeOffset.Now,
 				Size = 0 // can be anything as the content is not compressed
 			};

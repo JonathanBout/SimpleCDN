@@ -150,5 +150,5 @@ namespace SimpleCDN.Services.Caching.Implementations
 		}
 	}
 
-	public record CustomRedisCacheServiceDebugView(int MultiplexerCount, int TargetMultiplexerCount, int HighestMultiplexerCount, string LastTimeout);
+	internal record CustomRedisCacheServiceDebugView(int MultiplexerCount, int TargetMultiplexerCount, int HighestMultiplexerCount, string LastTimeout);
 }

@@ -9,6 +9,9 @@ using SimpleCDN.Services.Implementations;
 
 namespace SimpleCDN.Configuration
 {
+	/// <summary>
+	/// Provides extension methods for configuring SimpleCDN.
+	/// </summary>
 	public static class ConfigurationExtensions
 	{
 		const string InvalidConfigurationMessage = "See the log meessages for details.";
@@ -117,14 +120,23 @@ namespace SimpleCDN.Configuration
 			ISimpleCDNBuilder ISimpleCDNBuilder.Configure(Action<CDNConfiguration> configure) => throw new NotImplementedException();
 			ISimpleCDNBuilder ISimpleCDNBuilder.ConfigureCaching(Action<CacheConfiguration> configure) => throw new NotImplementedException();
 		}
-
 	}
 
+	/// <summary>
+	/// Represents a SimpleCDN builder.
+	/// </summary>
 	public interface ISimpleCDNBuilder
 	{
 		internal IServiceCollection Services { get; }
 		internal IConfigurationManager Configuration { get; }
+		/// <summary>
+		/// Configures generic SimpleCDN settings.
+		/// </summary>
 		ISimpleCDNBuilder Configure(Action<CDNConfiguration> configure);
+
+		/// <summary>
+		/// Configures the caching used by SimpleCDN.
+		/// </summary>
 		ISimpleCDNBuilder ConfigureCaching(Action<CacheConfiguration> configure);
 	}
 }

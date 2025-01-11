@@ -4,6 +4,7 @@
 	/// Balances access to a collection of instances of <typeparamref name="T"/>.
 	/// </summary>
 	/// <param name="instanceFactory">How an instance should be created</param>
+	/// <param name="healthCheck">A function that determines if an instance is healthy</param>
 	internal sealed class ObjectAccessBalancer<T>(Func<T> instanceFactory, Func<T, bool>? healthCheck = null) : IDisposable, IAsyncDisposable
 	{
 		private readonly List<T> _instances = [];
