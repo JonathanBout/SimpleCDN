@@ -19,6 +19,7 @@
 		<RepositoryUrl>https://github.com/JonathanBout/SimpleCDN.git</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<PackageTags>cdn;static files;cache;aspnetcore</PackageTags>
+		<IsPackable>true</IsPackable>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)'=='Release'">
@@ -40,11 +41,13 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Content Include="logo.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
+
+	<ItemGroup>
 	  <None Include="..\README.md">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
-	  </None>
-	  <None Include="wwwroot\logo.png">
 	    <Pack>True</Pack>
 	    <PackagePath>\</PackagePath>
 	  </None>
@@ -58,6 +61,13 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="StackExchange.Redis" Version="2.8.24" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="logo.png">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
 	</ItemGroup>
 
 </Project>
