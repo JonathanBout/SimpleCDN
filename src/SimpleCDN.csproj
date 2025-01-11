@@ -20,6 +20,7 @@
 		<RepositoryType>git</RepositoryType>
 		<PackageTags>cdn;static files;cache;aspnetcore</PackageTags>
 		<IsPackable>true</IsPackable>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)'=='Release'">
