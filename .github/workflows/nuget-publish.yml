@@ -14,10 +14,6 @@ on:
         type: string
 
 env:
-  # Use docker.io for Docker Hub if empty
-  REGISTRY: ghcr.io
-  # github.repository as <account>/<repo>
-  IMAGE_NAME: ${{ github.repository }}
   VERSION_NAME: ${{ inputs.version_number || github.head_ref }}
 
 jobs:
@@ -29,10 +25,6 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v4
-    - name: Verify commit exists in origin/main
-      run: |
-        git fetch --no-tags --prune --depth=1 origin +refs/heads/*:refs/remotes/origin/*
-        git branch --remote --contains | grep origin/main
     - name: Setup Dotnet
       uses: actions/setup-dotnet@v4
       with:
