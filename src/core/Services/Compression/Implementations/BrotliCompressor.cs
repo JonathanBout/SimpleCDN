@@ -1,5 +1,4 @@
 ﻿using SimpleCDN.Helpers;
-using System.Diagnostics.CodeAnalysis;
 using System.IO.Compression;
 
 namespace SimpleCDN.Services.Compression.Implementations

@@ -1,6 +1,5 @@
 ﻿using SimpleCDN.Helpers;
 using System.IO.Compression;
-using System.Net.NetworkInformation;
 
 namespace SimpleCDN.Services.Compression.Implementations
 {

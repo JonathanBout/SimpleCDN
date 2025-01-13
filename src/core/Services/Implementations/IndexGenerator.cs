@@ -3,7 +3,6 @@ using SimpleCDN.Configuration;
 using SimpleCDN.Helpers;
 using System.Security;
 using System.Text;
-using System.Text.Encodings.Web;
 using System.Web;
 
 namespace SimpleCDN.Services.Implementations

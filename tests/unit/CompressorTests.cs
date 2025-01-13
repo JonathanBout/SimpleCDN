@@ -1,6 +1,4 @@
-﻿using SimpleCDN.Helpers;
-using SimpleCDN.Services;
-using SimpleCDN.Services.Compression;
+﻿using SimpleCDN.Services.Compression;
 using SimpleCDN.Services.Compression.Implementations;
 using System.Text;
 

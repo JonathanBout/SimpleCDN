@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Caching.Distributed;
 using SimpleCDN.Services.Caching;
-using SimpleCDN.Services.Caching.Implementations;
 
 namespace SimpleCDN.Tests.Mocks
 {

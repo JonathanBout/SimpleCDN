@@ -4,7 +4,6 @@ using SimpleCDN.Configuration;
 using SimpleCDN.Helpers;
 using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.IO.Pipes;
 
 namespace SimpleCDN.Services.Caching.Implementations
 {

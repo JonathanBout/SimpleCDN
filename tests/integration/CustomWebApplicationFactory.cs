@@ -1,8 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.Testing;
 using SimpleCDN.Configuration;
-using System.Net;
-using System.Net.NetworkInformation;
-using System.Reflection;
 
 namespace SimpleCDN.Tests.Integration
 {

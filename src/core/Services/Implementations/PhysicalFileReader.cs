@@ -1,8 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
-using Microsoft.Win32.SafeHandles;
 using SimpleCDN.Configuration;
 using SimpleCDN.Helpers;
-using System.Data;
 
 namespace SimpleCDN.Services.Implementations
 {

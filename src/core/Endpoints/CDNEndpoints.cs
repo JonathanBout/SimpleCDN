@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using SimpleCDN.Configuration;
 using SimpleCDN.Helpers;

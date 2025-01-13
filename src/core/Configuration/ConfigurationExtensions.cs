@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Caching.Distributed;
-using SimpleCDN.Helpers;
 using SimpleCDN.Services;
 using SimpleCDN.Services.Caching;
 using SimpleCDN.Services.Caching.Implementations;
@@ -7,7 +6,6 @@ using SimpleCDN.Services.Compression;
 using SimpleCDN.Services.Compression.Implementations;
 using SimpleCDN.Services.Implementations;
 using System.ComponentModel;
-using System.Runtime.CompilerServices;
 
 namespace SimpleCDN.Configuration
 {

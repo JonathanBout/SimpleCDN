@@ -65,7 +65,7 @@ namespace SimpleCDN.Helpers
 
 		private class MultipleEnumerator<T>(params IEnumerable<IEnumerator<T>> enumerators) : IEnumerator<T>
 		{
-			private readonly IList<IEnumerator<T>> _enumerators = [..enumerators];
+			private readonly IList<IEnumerator<T>> _enumerators = [.. enumerators];
 
 			private int _currentEnumerator = 0;
 

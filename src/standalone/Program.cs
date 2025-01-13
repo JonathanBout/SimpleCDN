@@ -1,9 +1,5 @@
-using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Options;
 using SimpleCDN.Configuration;
 using SimpleCDN.Endpoints;
-using SimpleCDN.Extensions.Redis;
 
 namespace SimpleCDN.Standalone
 {

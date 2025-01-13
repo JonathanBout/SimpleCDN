@@ -1,6 +1,4 @@
-﻿using System.Numerics;
-using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
 namespace SimpleCDN.Helpers
 {

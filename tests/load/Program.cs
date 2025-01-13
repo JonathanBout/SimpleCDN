@@ -1,9 +1,6 @@
-﻿using System;
-using System.Net.Http;
-using System.Threading.Tasks;
-using System.Diagnostics;
+﻿using System.Collections;
 using System.Collections.Concurrent;
-using System.Collections;
+using System.Diagnostics;
 
 namespace SimpleCDN.Tests.Load
 {
