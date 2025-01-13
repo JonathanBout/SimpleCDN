@@ -1,10 +1,14 @@
 ﻿using Microsoft.Extensions.Caching.Distributed;
+using SimpleCDN.Services.Caching;
+using SimpleCDN.Services.Caching.Implementations;
 
 namespace SimpleCDN.Tests.Mocks
 {
-	public class DistributedCacheMock : IDistributedCache
+	public class DistributedCacheMock : ICacheImplementationResolver, IDistributedCache
 	{
 		public Dictionary<string, byte[]> Values { get; set; } = [];
+
+		public IDistributedCache Implementation => this;
 
 		public byte[]? Get(string key) => Values[key];
 		public Task<byte[]?> GetAsync(string key, CancellationToken token = default)

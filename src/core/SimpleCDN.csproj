@@ -1,0 +1,46 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<Title>SimpleCDN</Title>
+		<Authors>JonathanBout</Authors>
+		<Company>SimpleCDN</Company>
+		<Description>A simple CDN server for serving static files, with a local in-memory cache and Redis support.</Description>
+		<Copyright>Contributors of SimpleCDN</Copyright>
+		<PackageProjectUrl>https://github.com/JonathanBout/SimpleCDN</PackageProjectUrl>
+		<PackageIcon>logo.png</PackageIcon>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<RepositoryUrl>https://github.com/JonathanBout/SimpleCDN.git</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>cdn;static files;cache;aspnetcore</PackageTags>
+		<IsPackable>true</IsPackable>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<OutputType>Library</OutputType>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <Content Include="logo.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+		<PackageReference Include="Roslynator.Analyzers" Version="4.12.10">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="StackExchange.Redis" Version="2.8.24" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="logo.png">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	</ItemGroup>
+
+</Project>

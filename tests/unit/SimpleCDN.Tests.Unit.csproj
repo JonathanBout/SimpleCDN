@@ -22,7 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\mocks\SimpleCDN.Tests.Mocks.csproj" />
-    <ProjectReference Include="..\..\src\SimpleCDN.csproj" />
+    <ProjectReference Include="..\..\src\core\SimpleCDN.csproj" />
   </ItemGroup>
 
   <ItemGroup>

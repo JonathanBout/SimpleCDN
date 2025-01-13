@@ -2,7 +2,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.13.35507.96
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleCDN", "src\SimpleCDN.csproj", "{9C7F11BA-ECF0-8CD1-D1F5-DB31D692724E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleCDN", "src\core\SimpleCDN.csproj", "{9C7F11BA-ECF0-8CD1-D1F5-DB31D692724E}"
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{81DDED9D-158B-E303-5F62-77A2896D2A5A}"
 EndProject
@@ -20,6 +20,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleCDN.Tests.Mocks", "tests\mocks\SimpleCDN.Tests.Mocks.csproj", "{53FD55C0-72A5-41DA-A62F-2338B4961B85}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleCDN.Tests.Load", "tests\load\SimpleCDN.Tests.Load.csproj", "{6B720195-AF3B-4B9D-8A25-16BB5563C902}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleCDN.Standalone", "src\standalone\SimpleCDN.Standalone.csproj", "{F2EC5A92-6CAC-43D2-88A3-32F69ECEF47C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleCDN.Extensions.Redis", "extensions\Redis\SimpleCDN.Extensions.Redis.csproj", "{74F7D48B-2E42-4522-AD82-DE613620082B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -55,6 +59,14 @@ Global
 		{6B720195-AF3B-4B9D-8A25-16BB5563C902}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6B720195-AF3B-4B9D-8A25-16BB5563C902}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6B720195-AF3B-4B9D-8A25-16BB5563C902}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2EC5A92-6CAC-43D2-88A3-32F69ECEF47C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2EC5A92-6CAC-43D2-88A3-32F69ECEF47C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2EC5A92-6CAC-43D2-88A3-32F69ECEF47C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2EC5A92-6CAC-43D2-88A3-32F69ECEF47C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{74F7D48B-2E42-4522-AD82-DE613620082B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{74F7D48B-2E42-4522-AD82-DE613620082B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{74F7D48B-2E42-4522-AD82-DE613620082B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{74F7D48B-2E42-4522-AD82-DE613620082B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

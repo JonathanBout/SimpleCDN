@@ -12,7 +12,7 @@ namespace SimpleCDN.Tests.Unit
 {
 	public class SizeLimitedCacheTests
 	{
-		private static SizeLimitedCache CreateCache(Action<InMemoryCacheConfiguration>? configure = null, Action<CacheConfiguration>? configureCache = null)
+		private static InMemoryCache CreateCache(Action<InMemoryCacheConfiguration>? configure = null, Action<CacheConfiguration>? configureCache = null)
 		{
 			var options = new InMemoryCacheConfiguration();
 			var cacheOptions = new CacheConfiguration();
@@ -23,13 +23,13 @@ namespace SimpleCDN.Tests.Unit
 			var optionsMock = new OptionsMock<InMemoryCacheConfiguration>(options);
 			var cacheOptionsMock = new OptionsMock<CacheConfiguration>(cacheOptions);
 
-			return new SizeLimitedCache(optionsMock, cacheOptionsMock, new MockLogger<SizeLimitedCache>());
+			return new InMemoryCache(optionsMock, cacheOptionsMock, new MockLogger<InMemoryCache>());
 		}
 
 		[Test]
 		public void Test_UnaddedFile_Misses()
 		{
-			SizeLimitedCache cache = CreateCache();
+			InMemoryCache cache = CreateCache();
 
 			Assert.Multiple(() =>
 			{
@@ -43,7 +43,7 @@ namespace SimpleCDN.Tests.Unit
 		[Test]
 		public void Test_AddedFile_Hits()
 		{
-			SizeLimitedCache cache = CreateCache();
+			InMemoryCache cache = CreateCache();
 			const string TEST_DATA = "Hello, World!";
 			const string TEST_PATH = "/hello.txt";
 			cache.Set(TEST_PATH, Encoding.UTF8.GetBytes(TEST_DATA), new DistributedCacheEntryOptions());
@@ -63,7 +63,7 @@ namespace SimpleCDN.Tests.Unit
 		[TestCase(10000, false)]
 		public void Test_AddedFile_TooLarge(int size, bool shouldPass)
 		{
-			SizeLimitedCache cache = CreateCache(options => options.MaxSize = 1);
+			InMemoryCache cache = CreateCache(options => options.MaxSize = 1);
 			const string TEST_PATH = "/hello.txt";
 			string testData = new string('*', size);
 			cache.Set(TEST_PATH, Encoding.UTF8.GetBytes(testData), new DistributedCacheEntryOptions());

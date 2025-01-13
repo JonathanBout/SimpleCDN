@@ -9,7 +9,7 @@ services:
     image: ghcr.io/jonathanbout/simplecdn:local-dev
     build:
       context: .
-      dockerfile: src/Dockerfile
+      dockerfile: src/standalone/Dockerfile
     volumes:
     - ../:/data
     ports:
@@ -18,4 +18,4 @@ services:
     - CDN_DATA_ROOT=/data
     - ASPNETCORE_ENVIRONMENT=Development
     - Cache__Redis__ConnectionString=redis:6379 # Only needed if Cache__Type=Redis
-    - Cache__Type=Redis # Redis, InMemory, or Disabled
+    - Cache__Type=InMemory # Redis, InMemory, or Disabled
