@@ -18,7 +18,7 @@ updates:
     schedule:
       interval: "weekly"
   - package-ecosystem: "docker"
-    directory: "/src"
+    directory: "/src/standalone"
     schedule:
       interval: "weekly"
   - package-ecosystem: "github-actions"
