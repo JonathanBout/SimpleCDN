@@ -33,7 +33,7 @@ ARG DOTNET_BUILD_PLATFORM=linux-x64
 WORKDIR /code
 COPY ["./src/standalone/SimpleCDN.Standalone.csproj", "src/standalone"]
 COPY ["./src/core/SimpleCDN.csproj", "src/core"]
-COPY ["./extensions/redis/SimpleCDN.Extensions.Redis.csproj", "extensions/redis"]
+COPY ["./extensions/Redis/SimpleCDN.Extensions.Redis.csproj", "extensions/Redis"]
 RUN dotnet restore "./src/standalone/SimpleCDN.Standalone.csproj"
 COPY . .
 WORKDIR "/src/standalone"
