@@ -16,12 +16,12 @@ updates:
     - "/tests/load"
     - "/benchmarks"
     schedule:
-      interval: "weekly"
+      interval: "daily"
   - package-ecosystem: "docker"
     directory: "/src/standalone"
     schedule:
-      interval: "weekly"
+      interval: "daily"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
