@@ -36,7 +36,7 @@ COPY ["./src/core/SimpleCDN.csproj", "src/core"]
 COPY ["./extensions/Redis/SimpleCDN.Extensions.Redis.csproj", "extensions/Redis"]
 RUN dotnet restore "./src/standalone/SimpleCDN.Standalone.csproj"
 COPY . .
-WORKDIR "/src/standalone"
+WORKDIR "/code/src/standalone"
 RUN dotnet build "./SimpleCDN.Standalone.csproj" -c $BUILD_CONFIGURATION -r $DOTNET_BUILD_PLATFORM -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
