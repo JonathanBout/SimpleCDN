@@ -7,14 +7,7 @@ version: 2
 updates:
   - package-ecosystem: "nuget" # See documentation for possible values
     directories: # Location of package manifests
-    - "/src/core"
-    - "/src/standalone"
-    - "/extensions/Redis"
-    - "/tests/integration"
-    - "/tests/unit"
-    - "/tests/mocks"
-    - "/tests/load"
-    - "/benchmarks"
+    - "/"
     schedule:
       interval: "daily"
   - package-ecosystem: "docker"
