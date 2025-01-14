@@ -53,7 +53,7 @@ jobs:
     - name: Set VERSION variable from tag or the input
       run: echo "VERSION=${VERSION_NAME#\/refs\/tags\/v/}" >> $GITHUB_ENV
     - name: Pack
-      run: dotnet pack --configuration Release --property:Version=${VERSION} --output . extensions/redis/SimpleCDN.Extensions.Redis.csproj
+      run: dotnet pack --configuration Release --property:Version=${VERSION} --output . extensions/Redis/SimpleCDN.Extensions.Redis.csproj
     - name: Push
       run: dotnet nuget push SimpleCDN.Extensions.Redis.${VERSION}.nupkg --api-key ${NUGET_API_KEY} --source https://api.nuget.org/v3/index.json
       env:

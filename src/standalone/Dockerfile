@@ -30,12 +30,14 @@ RUN apt-get update \
     clang zlib1g-dev
 ARG BUILD_CONFIGURATION=Release
 ARG DOTNET_BUILD_PLATFORM=linux-x64
-WORKDIR /src
-COPY ["./SimpleCDN.Standalone/SimpleCDN.Standalone.csproj", "SimpleCDN.Standalone/"]
-COPY ["./src/SimpleCDN.csproj", "src/"]
-RUN dotnet restore "./SimpleCDN.Standalone/SimpleCDN.Standalone.csproj"
+WORKDIR /code
+COPY ["./src/standalone/SimpleCDN.Standalone.csproj", "/code/src/standalone/"]
+COPY ["./src/core/SimpleCDN.csproj", "/code/src/core/"]
+COPY ["./extensions/Redis/SimpleCDN.Extensions.Redis.csproj", "/code/extensions/Redis/"]
+RUN find . -type f
+RUN dotnet restore "/code/src/standalone/SimpleCDN.Standalone.csproj"
 COPY . .
-WORKDIR "/src/SimpleCDN.Standalone"
+WORKDIR "/code/src/standalone"
 RUN dotnet build "./SimpleCDN.Standalone.csproj" -c $BUILD_CONFIGURATION -r $DOTNET_BUILD_PLATFORM -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage

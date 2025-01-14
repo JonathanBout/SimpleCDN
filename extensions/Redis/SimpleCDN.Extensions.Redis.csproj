@@ -1,13 +1,42 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+		<Title>SimpleCDN Redis Extension</Title>
+		<Description>An extension for using Redis with SimpleCDN, the static file server.</Description>
+		<PackageIcon>logo.png</PackageIcon>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<Authors>JonathanBout</Authors>
+		<Company>SimpleCDN</Company>
+		<Copyright>Contributors of SimpleCDN</Copyright>
+		<PackageProjectUrl>https://github.com/JonathanBout/SimpleCDN</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/JonathanBout/SimpleCDN.git</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>simplecdn-extension;redis</PackageTags>
+		<IsPackable>true</IsPackable>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\core\SimpleCDN.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="..\..\README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="..\..\logo.png">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="StackExchange.Redis" Version="2.8.24" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\src\core\SimpleCDN.csproj" />
+	</ItemGroup>
 
 </Project>
