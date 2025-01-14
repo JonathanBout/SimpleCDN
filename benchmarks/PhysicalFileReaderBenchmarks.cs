@@ -1,9 +1,7 @@
 ﻿using BenchmarkDotNet.Attributes;
 using SimpleCDN.Configuration;
-using SimpleCDN.Helpers;
-using SimpleCDN.Services;
-using SimpleCDN.Tests.Mocks;
 using SimpleCDN.Services.Implementations;
+using SimpleCDN.Tests.Mocks;
 
 namespace SimpleCDN.Benchmarks
 {

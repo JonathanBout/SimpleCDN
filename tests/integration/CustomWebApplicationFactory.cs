@@ -1,12 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc.Testing;
 using SimpleCDN.Configuration;
-using System.Net;
-using System.Net.NetworkInformation;
-using System.Reflection;
 
 namespace SimpleCDN.Tests.Integration
 {
-	internal class CustomWebApplicationFactory : WebApplicationFactory<Program>
+	internal class CustomWebApplicationFactory : WebApplicationFactory<SimpleCDN.Standalone.Program>
 	{
 		public const string GENERATED_INDEX_ID = "!GENERATED!INDEX!";
 

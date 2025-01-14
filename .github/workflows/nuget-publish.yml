@@ -17,7 +17,7 @@ env:
   VERSION_NAME: ${{ inputs.version_number || github.head_ref }}
 
 jobs:
-  build:
+  publish-core:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -32,8 +32,29 @@ jobs:
     - name: Set VERSION variable from tag or the input
       run: echo "VERSION=${VERSION_NAME#\/refs\/tags\/v/}" >> $GITHUB_ENV
     - name: Pack
-      run: dotnet pack --configuration Release --property:Version=${VERSION} --output . src/SimpleCDN.csproj
+      run: dotnet pack --configuration Release --property:Version=${VERSION} --output . src/core/SimpleCDN.csproj
     - name: Push
       run: dotnet nuget push SimpleCDN.${VERSION}.nupkg --api-key ${NUGET_API_KEY} --source https://api.nuget.org/v3/index.json
+      env:
+        NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+
+  publish-redis-extension:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Setup Dotnet
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: "9.0.x"
+    - name: Set VERSION variable from tag or the input
+      run: echo "VERSION=${VERSION_NAME#\/refs\/tags\/v/}" >> $GITHUB_ENV
+    - name: Pack
+      run: dotnet pack --configuration Release --property:Version=${VERSION} --output . extensions/redis/SimpleCDN.Extensions.Redis.csproj
+    - name: Push
+      run: dotnet nuget push SimpleCDN.Extensions.Redis.${VERSION}.nupkg --api-key ${NUGET_API_KEY} --source https://api.nuget.org/v3/index.json
       env:
         NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
