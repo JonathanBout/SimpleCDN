@@ -8,10 +8,9 @@
 		<Title>SimpleCDN</Title>
 		<Authors>JonathanBout</Authors>
 		<Company>SimpleCDN</Company>
-		<Description>A simple CDN server for serving static files, with a local in-memory cache and Redis support.</Description>
+		<Description>A simple CDN server for serving static files, with a local in-memory cache.</Description>
 		<Copyright>Contributors of SimpleCDN</Copyright>
 		<PackageProjectUrl>https://github.com/JonathanBout/SimpleCDN</PackageProjectUrl>
-		<PackageIcon>logo.png</PackageIcon>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/JonathanBout/SimpleCDN.git</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
@@ -19,15 +18,14 @@
 		<IsPackable>true</IsPackable>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<OutputType>Library</OutputType>
+		<PackageIcon>logo.png</PackageIcon>
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Content Include="logo.png">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	</ItemGroup>
-
-	<ItemGroup>
+	  <None Include="..\..\logo.png">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
 	  <None Include="..\..\README.md">
 	    <Pack>True</Pack>
 	    <PackagePath>\</PackagePath>
@@ -41,13 +39,6 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="StackExchange.Redis" Version="2.8.24" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <None Update="logo.png">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
-	  </None>
 	</ItemGroup>
 
 </Project>
