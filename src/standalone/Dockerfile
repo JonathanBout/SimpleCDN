@@ -31,10 +31,11 @@ RUN apt-get update \
 ARG BUILD_CONFIGURATION=Release
 ARG DOTNET_BUILD_PLATFORM=linux-x64
 WORKDIR /code
-COPY ["./src/standalone/SimpleCDN.Standalone.csproj", "src/standalone"]
-COPY ["./src/core/SimpleCDN.csproj", "src/core"]
-COPY ["./extensions/Redis/SimpleCDN.Extensions.Redis.csproj", "extensions/Redis"]
-RUN dotnet restore "./src/standalone/SimpleCDN.Standalone.csproj"
+COPY ["./src/standalone/SimpleCDN.Standalone.csproj", "/code/src/standalone/"]
+COPY ["./src/core/SimpleCDN.csproj", "/code/src/core/"]
+COPY ["./extensions/Redis/SimpleCDN.Extensions.Redis.csproj", "/code/extensions/Redis/"]
+RUN find . -type f
+RUN dotnet restore "/code/src/standalone/SimpleCDN.Standalone.csproj"
 COPY . .
 WORKDIR "/code/src/standalone"
 RUN dotnet build "./SimpleCDN.Standalone.csproj" -c $BUILD_CONFIGURATION -r $DOTNET_BUILD_PLATFORM -o /app/build
