@@ -35,8 +35,9 @@ namespace SimpleCDN.Helpers
 		}
 
 		/// <summary>
-		/// Normalizes a path by removing all . and .. segments in-place. When ready,
-		/// <paramref name="path"/> will be shortened to contain just the normalized path.
+		/// Normalizes a path by removing all . and .. segments in-place. Leading and trailing slashes
+		/// are also trimmed from the result. When ready, <paramref name="path"/> will be shortened
+		/// to contain just the normalized path.
 		/// </summary>
 		/// <param name="path">The path to normalize in-place.</param>
 		public static void Normalize(ref this Span<char> path)
@@ -109,6 +110,16 @@ namespace SimpleCDN.Helpers
 				path = path[..^length];
 
 				offset += length;
+			}
+
+			if (path.Length > 0 && path[0] == '/')
+			{
+				path = path[1..];
+			}
+
+			if (path.Length > 0 && path[^1] == '/')
+			{
+				path = path[..^1];
 			}
 		}
 

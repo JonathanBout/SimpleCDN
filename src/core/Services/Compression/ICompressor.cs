@@ -5,7 +5,7 @@ namespace SimpleCDN.Services.Compression
 	/// <summary>
 	/// Represents a compressor that can compress and decompress data using a specific <see cref="CompressionAlgorithm"/>.
 	/// </summary>
-	public interface ICompressor
+	internal interface ICompressor
 	{
 		/// <summary>
 		/// The compression algorithm used by this compressor.

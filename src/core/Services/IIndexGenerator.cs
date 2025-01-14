@@ -5,7 +5,7 @@ namespace SimpleCDN.Services
 	/// <summary>
 	/// Represents a service that generates an index file for a directory.
 	/// </summary>
-	public interface IIndexGenerator
+	internal interface IIndexGenerator
 	{
 		/// <summary>
 		/// Generates an index file for the directory at the given path.
