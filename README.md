@@ -3,8 +3,7 @@
 ![NuGet Version](https://img.shields.io/nuget/v/SimpleCDN)
 
 
-SimpleCDN is, well, a simple CDN server. Currently it is only tested for single-instance use, but I don't see any reasons why a load balancer wouldn't work. Be aware this CDN currently doesn't support any
-distributed caching, meaning both servers will build their own cache.
+SimpleCDN is, well, a simple CDN server. Currently it is only tested for single-instance use, but I don't see any reasons why a load balancer wouldn't work. With Redis you can make sure they have one single shared cache.
 
 ## How to run this?
 ### Using Docker
