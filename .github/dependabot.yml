@@ -9,7 +9,7 @@ updates:
     directories: # Location of package manifests
     - "/src/core"
     - "/src/standalone"
-    - "/extensions/redis"
+    - "/extensions/Redis"
     - "/tests/integration"
     - "/tests/unit"
     - "/tests/mocks"
