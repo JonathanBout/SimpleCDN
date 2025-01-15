@@ -1,11 +1,16 @@
 # SimpleCDN
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/JonathanBout/SimpleCDN/dotnet.yml?style=flat)
-![NuGet Version](https://img.shields.io/nuget/v/SimpleCDN)
 
 
 SimpleCDN is, well, a simple CDN server. Currently it is only tested for single-instance use, but I don't see any reasons why a load balancer wouldn't work. With Redis you can make sure they have one single shared cache.
 
-## How to run this?
+## How to use this in an existing project?
+### NuGet Packages
+SimpleCDN is available on NuGet:
+- ![SimpleCDN on NuGet](https://img.shields.io/nuget/v/SimpleCDN?style=flat&label=SimpleCDN&link=https%3A%2F%2Fwww.nuget.org%2Fpackages%2FSimpleCDN)
+- ![SimpleCDN.Extensions.Redis on NuGet](https://img.shields.io/nuget/v/SimpleCDN?style=flat&logo=redis&label=SimpleCDN.Extensions.Redis&link=https%3A%2F%2Fwww.nuget.org%2Fpackages%2FSimpleCDN.Extensions.Redis)
+
+## How to use SimpleCDN as a standalone application?
 ### Using Docker
 
 **Tags:**
@@ -42,8 +47,9 @@ services:
 > it's brought down to a minimum but failures still happen. The application will simply load the data from disk instead of using the cache.
 
 ### Using dotnet
+#### dotnet run
 ```
-# PublishAOT is not supported with dotnet run
+# PublishAOT is not supported with dotnet run so we need to disable it
 dotnet run --property:PublishAot=false -- --data-root <your_cdn_data>
 ```
 
