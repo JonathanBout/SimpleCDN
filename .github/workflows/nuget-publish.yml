@@ -36,7 +36,6 @@ jobs:
     - name: Push
       run: |
         dotnet nuget push SimpleCDN.${VERSION}.nupkg --api-key ${NUGET_API_KEY} --source https://api.nuget.org/v3/index.json
-        dotnet nuget push SimpleCDN.${VERSION}.snupkg --api-key ${NUGET_API_KEY} --source https://api.nuget.org/v3/index.json
       env:
         NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
 
@@ -59,6 +58,5 @@ jobs:
     - name: Push
       run: |
         dotnet nuget push SimpleCDN.Extensions.Redis.${VERSION}.nupkg --api-key ${NUGET_API_KEY} --source https://api.nuget.org/v3/index.json
-        dotnet nuget push SimpleCDN.Extensions.Redis.${VERSION}.snupkg --api-key ${NUGET_API_KEY} --source https://api.nuget.org/v3/index.json
       env:
         NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
