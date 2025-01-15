@@ -47,8 +47,9 @@ services:
 > it's brought down to a minimum but failures still happen. The application will simply load the data from disk instead of using the cache.
 
 ### Using dotnet
+#### dotnet run
 ```
-# PublishAOT is not supported with dotnet run
+# PublishAOT is not supported with dotnet run so we need to disable it
 dotnet run --property:PublishAot=false -- --data-root <your_cdn_data>
 ```
 
