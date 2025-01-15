@@ -14,8 +14,6 @@ name: "CodeQL Advanced"
 on:
   pull_request:
     branches: [ "main" ]
-    paths-ignore:
-    - "**.md"
   schedule:
     - cron: '43 4 */2 * *'
 
