@@ -112,14 +112,9 @@ namespace SimpleCDN.Helpers
 				offset += length;
 			}
 
-			if (path.Length > 0 && path[0] == '/')
+			if (path.Length > 1 && path[0] == '/')
 			{
 				path = path[1..];
-			}
-
-			if (path.Length > 0 && path[^1] == '/')
-			{
-				path = path[..^1];
 			}
 		}
 

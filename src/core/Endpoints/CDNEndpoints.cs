@@ -42,12 +42,14 @@ namespace SimpleCDN.Endpoints
 					ctx.Response.Headers["X-Robots-Tag"] = "noindex, nofollow";
 				}
 
-				if (route is not { Length: > 0 } && !ctx.Request.Path.ToString().EndsWith('/'))
+				route ??= "/";
+
+				// if the provided route is null or empty and the full path doesn't end with a slash either,
+				// redirect to the same route but ending in a slash, as this represents the root index file
+				if (route is not { Length: > 0 } && ctx.Request.Path.Value?.EndsWith('/') is false)
 				{
 					return Results.Redirect(ctx.Request.Path + "/", true);
 				}
-
-				route ??= "/";
 
 				try
 				{

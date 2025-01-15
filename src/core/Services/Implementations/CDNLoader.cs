@@ -4,6 +4,7 @@ using SimpleCDN.Cache;
 using SimpleCDN.Configuration;
 using SimpleCDN.Helpers;
 using SimpleCDN.Services.Caching;
+using System.IO;
 
 namespace SimpleCDN.Services.Implementations
 {
@@ -61,12 +62,6 @@ namespace SimpleCDN.Services.Implementations
 			// if the path is not a file, we attempt to serve an index file
 			if (!_fs.FileExists(filesystemPath))
 			{
-				if (!path.EndsWith('/'))
-				{
-					// require trailing slash for directories
-					return new RedirectCDNFile("/" + path + '/', false);
-				}
-
 				return GetIndexFile(filesystemPath, pathSpan);
 			}
 
@@ -146,6 +141,12 @@ namespace SimpleCDN.Services.Implementations
 		{
 			if (!_fs.DirectoryExists(absolutePath))
 				return null;
+
+			if (!requestPath.EndsWith('/'))
+			{
+				// require trailing slash for directories
+				return new RedirectCDNFile($"{requestPath}/", true);
+			}
 
 			var absoluteIndexHtml = Path.Join(absolutePath, "index.html");
 
