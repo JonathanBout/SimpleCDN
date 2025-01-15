@@ -4,7 +4,7 @@ using SimpleCDN.Endpoints;
 namespace SimpleCDN.Standalone
 {
 #pragma warning disable RCS1102 // This class can't be static because the integration tests want it as a type argument
-	internal class Program
+	public class Program
 	{
 		private static void Main(string[] args)
 		{
@@ -18,8 +18,8 @@ namespace SimpleCDN.Standalone
 				.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
 				.AddCommandLine(args);
 
-			builder.AddSimpleCDN()
-				.MapConfiguration();
+			builder.Services.AddSimpleCDN()
+				.MapConfiguration(builder.Configuration);
 
 			WebApplication app = builder.Build();
 

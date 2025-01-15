@@ -9,16 +9,16 @@ using System.IO;
 namespace SimpleCDN.Services.Implementations
 {
 	internal class CDNLoader(
-		IWebHostEnvironment environment,
 		IOptionsMonitor<CDNConfiguration> options,
 		IIndexGenerator generator,
 		ICacheManager cache,
 		ILogger<CDNLoader> logger,
-		IPhysicalFileReader fs) : ICDNLoader
+		IPhysicalFileReader fs,
+		ISystemFileReader systemFiles) : ICDNLoader
 	{
-		private readonly IWebHostEnvironment _environment = environment;
 		private readonly IIndexGenerator _indexGenerator = generator;
 		private readonly IPhysicalFileReader _fs = fs;
+		private readonly ISystemFileReader _systemFiles = systemFiles;
 		private readonly ICacheManager _cache = cache;
 		private readonly ILogger<CDNLoader> _logger = logger;
 
@@ -28,17 +28,11 @@ namespace SimpleCDN.Services.Implementations
 
 		public CDNFile? GetFile(string path, params IEnumerable<CompressionAlgorithm> acceptedCompression)
 		{
-			// as paths in index files are relative, we need the path to end in /.
-			// Thats why we redirect to the same path with a trailing slash if it's missing.
-			if (string.IsNullOrWhiteSpace(path))
-				return new RedirectCDNFile("/", true);
-
 			// normalize the path to remove any leading or trailing slashes
 			var pathChars = path.ToCharArray();
 			Span<char> pathSpan = pathChars.AsSpan();
 
 			pathSpan.Normalize();
-
 
 			// if the pathSpan starts with the system files root, we want to serve a system file
 			// if there are additional characters after the system files root, the first one must be a '/'
@@ -75,63 +69,7 @@ namespace SimpleCDN.Services.Implementations
 		/// <param name="acceptedAlgorithms">Compression algorithms the client accepts.</param>
 		private CDNFile? GetSystemFile(ReadOnlySpan<char> requestPath, params IEnumerable<CompressionAlgorithm> acceptedAlgorithms)
 		{
-			if (requestPath is "" or "/")
-			{
-				_logger.LogDebug("Rewriting '/' to system file 'index.html'");
-				return GetSystemFile("index.html");
-			}
-
-			var requestPathString = requestPath.ToString();
-
-			_logger.LogDebug("Requesting system file '{path}'", requestPathString.ForLog());
-
-			IFileInfo fileInfo = _environment.WebRootFileProvider.GetFileInfo(requestPathString);
-
-			if (!fileInfo.Exists || fileInfo.PhysicalPath is null || fileInfo.IsDirectory)
-			{
-				_cache.TryRemove(requestPathString);
-
-				_logger.LogDebug("System file '{path}' does not exist", requestPathString);
-
-				return null;
-			}
-
-			if (_cache.TryGetValue(requestPathString, out CachedFile? cachedFile) && cachedFile.LastModified >= fileInfo.LastModified)
-			{
-				_logger.LogDebug("Serving system file '{path}' from cache", requestPathString);
-				return new CDNFile(cachedFile.Content, cachedFile.MimeType.ToContentTypeString(), cachedFile.LastModified, cachedFile.Compression);
-			}
-
-			CompressionAlgorithm compression = CompressionAlgorithm.None;
-			var originalLength = fileInfo.Length;
-
-			var preferred = CompressionAlgorithm.MostPreferred(PerformancePreference.None, acceptedAlgorithms);
-
-			if (preferred != CompressionAlgorithm.None
-				&& _environment.WebRootFileProvider.GetFileInfo(requestPathString + preferred.FileExtension)
-					is { Exists: true, IsDirectory: false, PhysicalPath: not null } compressedFile)
-			{
-				fileInfo = compressedFile;
-				compression = preferred;
-			}
-
-			MimeType mediaType = MimeTypeHelpers.MimeTypeFromFileName(requestPath);
-
-			// if the file is too big to load into memory, we want to stream it directly	
-			if (!_fs.CanLoadIntoArray(fileInfo.Length))
-			{
-				_logger.LogDebug("System file '{path}' is too big to load into memory, streaming instead", requestPath.ForLog());
-				return new BigCDNFile(fileInfo.PhysicalPath, mediaType.ToContentTypeString(), fileInfo.LastModified, compression);
-			}
-
-			var content = _fs.LoadIntoArray(fileInfo.PhysicalPath);
-
-			DateTimeOffset lastModified = fileInfo.LastModified;
-
-			// unchecked cast is safe because we know the file is small enough
-			_cache.CacheFile(requestPathString, content, unchecked((int)originalLength), lastModified, mediaType, compression);
-
-			return new CDNFile(content, mediaType.ToContentTypeString(), lastModified, compression);
+			return _systemFiles.GetSystemFile(requestPath, acceptedAlgorithms);
 		}
 
 		/// <summary>

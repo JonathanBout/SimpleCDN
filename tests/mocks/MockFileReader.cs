@@ -1,10 +1,11 @@
-﻿using SimpleCDN.Services;
+﻿using SimpleCDN.Helpers;
+using SimpleCDN.Services;
 
 namespace SimpleCDN.Tests.Mocks
 {
 	public record MockFile(DateTimeOffset LastModified, byte[] Content);
 
-	public class MockPhysicalFileReader(Dictionary<string, MockFile> files) : IPhysicalFileReader
+	public class MockFileReader(Dictionary<string, MockFile> files) : IPhysicalFileReader, ISystemFileReader
 	{
 		// small threshold for easier testing
 		const int ARRAY_SIZE_THRESHOLD = 1000;
@@ -40,6 +41,13 @@ namespace SimpleCDN.Tests.Mocks
 		}
 
 		public DateTimeOffset GetLastModified(string path) => GetFile(path)?.LastModified ?? DateTimeOffset.MinValue;
+		public CDNFile? GetSystemFile(ReadOnlySpan<char> path, IEnumerable<CompressionAlgorithm> acceptedCompression)
+		{
+			var fullPath = path.ToString();
+			if (_files.TryGetValue(fullPath, out MockFile? file))
+				return new CDNFile(file.Content, MimeTypeHelpers.MimeTypeFromFileName(fullPath).ToContentTypeString(), file.LastModified, CompressionAlgorithm.None);
+			return null;
+		}
 
 		public bool IsDotFile(string path)
 		{

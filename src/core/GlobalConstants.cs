@@ -4,6 +4,7 @@
  */
 
 using SimpleCDN.Services.Caching.Implementations;
+using SimpleCDN.Services.Implementations;
 using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
 
@@ -21,12 +22,19 @@ namespace SimpleCDN
 	/// </summary>
 	internal static class GlobalConstants
 	{
-		// NOTE: when changing this value, make sure to also change the references in wwwroot/index.html
-		// and probably some other places (use the global search feature of your IDE!)
+		// NOTE: when changing this value, make sure to also change the references in
+		// other places like the Dockerfile health check (use the global search feature of your IDE!)
+		// but ultimately, this value should never change.
 		/// <summary>
 		/// The root URL for the system files, like the style sheet.
 		/// </summary>
 		public const string SystemFilesRelativePath = "_cdn";
+
+		/// <summary>
+		/// The key of the <see cref="HttpRequest.RouteValues"/> item that contains the CDN route.
+		/// This is used by the <see cref="CDNContext"/> to determine the base URL the CDN is placed at.
+		/// </summary>
+		public const string CDNRouteValueKey = "cdnRoute";
 	}
 
 	[JsonSourceGenerationOptions]

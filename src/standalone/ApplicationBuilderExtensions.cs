@@ -11,9 +11,9 @@ namespace SimpleCDN.Standalone
 		/// Maps the <see cref="CDNConfiguration"/> and <see cref="CacheConfiguration"/> classes to the
 		/// application configuration.
 		/// </summary>
-		internal static ISimpleCDNBuilder MapConfiguration(this ISimpleCDNBuilder builder)
+		internal static ISimpleCDNBuilder MapConfiguration(this ISimpleCDNBuilder builder, IConfiguration configuration)
 		{
-			CDNConfiguration? cdnConfig = builder.Configuration.GetSection("CDN").Get<CDNConfiguration>();
+			CDNConfiguration? cdnConfig = configuration.GetSection("CDN").Get<CDNConfiguration>();
 
 			builder.Services
 				.AddOptions<CDNConfiguration>()
@@ -49,10 +49,10 @@ namespace SimpleCDN.Standalone
 						settings.MaxAge = maxAgeArgument;
 				});
 
-			IConfigurationSection redisSection = builder.Configuration.GetSection("Redis");
-			IConfigurationSection inMemorySection = builder.Configuration.GetSection("InMemory");
+			IConfigurationSection redisSection = configuration.GetSection("Redis");
+			IConfigurationSection inMemorySection = configuration.GetSection("InMemory");
 
-			switch (builder.Configuration.GetSection("Cache:Type").Get<CacheType>())
+			switch (configuration.GetSection("Cache:Type").Get<CacheType>())
 			{
 				case CacheType.Redis:
 					builder.AddRedisCache(config => redisSection.Bind(config));

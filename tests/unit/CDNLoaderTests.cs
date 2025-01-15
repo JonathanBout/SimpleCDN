@@ -42,13 +42,15 @@ namespace SimpleCDN.Tests.Unit
 				configure(options.CurrentValue);
 			}
 
+			var fileReader = new MockFileReader(Files);
+
 			return new CDNLoader(
-				new MockWebHostEnvironment(),
 				options,
-				new IndexGenerator(options, new MockLogger<IndexGenerator>()),
+				new MockIndexGenerator(),
 				new MockCacheManager(),
 				new MockLogger<CDNLoader>(),
-				new MockPhysicalFileReader(Files));
+				fileReader,
+				fileReader);
 		}
 
 		[TestCase("../inaccesible.txt")]
