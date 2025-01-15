@@ -13,9 +13,6 @@ on:
         required: true
         type: string
 
-env:
-  VERSION_NAME: ${{ inputs.version_number || github.head_ref }}
-
 jobs:
   publish-core:
     runs-on: ubuntu-latest
@@ -29,10 +26,10 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: "9.0.x"
-    - name: Set VERSION variable from tag or the input
-      run: echo "VERSION=${VERSION_NAME#\/refs\/tags\/v/}" >> $GITHUB_ENV
     - name: Pack
       run: dotnet pack --configuration Release --property:Version=${VERSION} --output . src/core/SimpleCDN.csproj
+      env:
+        VERSION: ${{ inputs.version_number || github.ref_name }}
     - name: Push
       run: |
         dotnet nuget push SimpleCDN.${VERSION}.nupkg --api-key ${NUGET_API_KEY} --source https://api.nuget.org/v3/index.json
@@ -51,10 +48,10 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: "9.0.x"
-    - name: Set VERSION variable from tag or the input
-      run: echo "VERSION=${VERSION_NAME#\/refs\/tags\/v/}" >> $GITHUB_ENV
     - name: Pack
       run: dotnet pack --configuration Release --property:Version=${VERSION} --output . extensions/Redis/SimpleCDN.Extensions.Redis.csproj
+      env:
+        VERSION: ${{ inputs.version_number || github.ref_name }}
     - name: Push
       run: |
         dotnet nuget push SimpleCDN.Extensions.Redis.${VERSION}.nupkg --api-key ${NUGET_API_KEY} --source https://api.nuget.org/v3/index.json

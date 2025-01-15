@@ -1,9 +1,12 @@
 ﻿using Microsoft.Extensions.Options;
 using SimpleCDN.Configuration;
 using SimpleCDN.Helpers;
+using System;
+using System.Reflection;
 using System.Security;
 using System.Text;
 using System.Web;
+using System.Xml.Linq;
 
 namespace SimpleCDN.Services.Implementations
 {
@@ -62,37 +65,72 @@ namespace SimpleCDN.Services.Implementations
 				AppendRow(index, "..", "Parent Directory", "parent.svg", -1, parent.LastWriteTimeUtc);
 			}
 
+			int rowsAdded = 0;
+
 			try
 			{
-				foreach (DirectoryInfo subDirectory in directory.EnumerateDirectories())
+				rowsAdded += AppendDirectories(index, directory);
+
+				rowsAdded += AppendFiles(index, directory);
+
+			} catch (Exception ex) when (ex is SecurityException or UnauthorizedAccessException)
+			{
+				_logger.LogError(ex, "Access denied to publicly available directory {directory} while generating an index", directory.FullName.ForLog());
+			}
+
+			if (rowsAdded == 0)
+			{
+				index.Append("<tr><td colspan=\"4\">No files or directories to show</td></tr>");
+			}
+
+			index.AppendFormat("</tbody></table></main><footer>{0}</footer></body></html>", _options.CurrentValue.Footer);
+
+			return Encoding.UTF8.GetBytes(index.ToString());
+		}
+
+		private int AppendDirectories(StringBuilder sb, DirectoryInfo directory)
+		{
+			int rowsAdded = 0;
+			foreach (DirectoryInfo subDirectory in directory.EnumerateDirectories())
+			{
+				try
 				{
 					var name = subDirectory.Name;
 
 					if (name.StartsWith('.') && !_options.CurrentValue.ShowDotFiles)
 						continue;
 
-					AppendRow(index, name + "/", name, "folder.svg", -1, subDirectory.LastWriteTimeUtc);
-				}
-
-				foreach (FileInfo file in directory.EnumerateFiles())
+					AppendRow(sb, name + "/", name, "folder.svg", -1, subDirectory.LastWriteTimeUtc);
+					rowsAdded++;
+				} catch (Exception ex) when (ex is SecurityException or UnauthorizedAccessException)
 				{
+					_logger.LogError(ex, "Access denied to publicly available subdirectory {directory} while generating an index", subDirectory.FullName.ForLog());
+				}
+			}
+			return rowsAdded;
+		}
+
+		private int AppendFiles(StringBuilder sb, DirectoryInfo directory)
+		{
+			int rowsAdded = 0;
+			foreach (FileInfo file in directory.EnumerateFiles())
+			{
+				try
+				{
+
 					var name = file.Name;
 
 					if (name.StartsWith('.') && !_options.CurrentValue.ShowDotFiles)
 						continue;
 
-					AppendRow(index, name, name, "file.svg", file.Length, file.LastWriteTimeUtc);
+					AppendRow(sb, name, name, "file.svg", file.Length, file.LastWriteTimeUtc);
+					rowsAdded++;
+				} catch (Exception ex) when (ex is SecurityException or UnauthorizedAccessException)
+				{
+					_logger.LogError(ex, "Access denied to publicly available file {file} while generating an index", file.FullName.ForLog());
 				}
-			} catch (Exception ex) when (ex is SecurityException or UnauthorizedAccessException)
-			{
-				_logger.LogError(ex, "Access denied to publicly available directory {directory} while generating an index", directory.FullName.ForLog());
-
-				return null;
 			}
-
-			index.AppendFormat("</tbody></table></main><footer>{0}</footer></body></html>", _options.CurrentValue.Footer);
-
-			return Encoding.UTF8.GetBytes(index.ToString());
+			return rowsAdded;
 		}
 
 		private void AppendRow(StringBuilder index, string href, string name, string iconName, long size, DateTimeOffset lastModified)
