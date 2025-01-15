@@ -12,6 +12,7 @@ namespace SimpleCDN.Helpers
 			{
 				"html" or "htm" => MimeType.HTML,
 				"txt" => MimeType.Plain,
+				"md" => MimeType.Markdown,
 				"png" => MimeType.PNG,
 				"json" => MimeType.JSON,
 				"jpeg" or "jpg" => MimeType.JPEG,
@@ -48,10 +49,9 @@ namespace SimpleCDN.Helpers
 				MimeType.OTF => MediaTypeNames.Font.Otf,
 				MimeType.EOT => "application/vnd.ms-fontobject",
 				MimeType.ICO => MediaTypeNames.Image.Icon,
+				MimeType.Markdown => MediaTypeNames.Text.Markdown,
 				_ => MediaTypeNames.Application.Octet,
 			};
 		}
-
-		public static readonly (MimeType, byte[]?) Empty = (MimeType.Unknown, null);
 	}
 }

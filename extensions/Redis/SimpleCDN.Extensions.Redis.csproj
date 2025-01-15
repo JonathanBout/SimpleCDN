@@ -18,13 +18,11 @@
 		<PackageTags>simplecdn-extension;redis</PackageTags>
 		<IsPackable>true</IsPackable>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<IncludeSymbols>True</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<None Include="..\..\README.md">
-			<Pack>True</Pack>
-			<PackagePath>\</PackagePath>
-		</None>
 		<None Include="..\..\logo.png">
 			<Pack>True</Pack>
 			<PackagePath>\</PackagePath>
@@ -37,6 +35,13 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\src\core\SimpleCDN.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="README.md">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
 	</ItemGroup>
 
 </Project>

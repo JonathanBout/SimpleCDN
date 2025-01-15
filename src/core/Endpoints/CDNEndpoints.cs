@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using SimpleCDN.Configuration;
 using SimpleCDN.Helpers;
@@ -28,12 +30,13 @@ namespace SimpleCDN.Endpoints
 			builder.MapGet(GlobalConstants.SystemFilesRelativePath + "/server/cache", (ICacheManager cache) => cache.GetDebugView());
 
 #endif
-			builder.MapGet("{*route}",
-			(string? route,
+			builder.MapGet($"{{*{GlobalConstants.CDNRouteValueKey}}}",
+			([FromRoute(Name = GlobalConstants.CDNRouteValueKey)] string? route,
 				ICDNLoader loader,
 				HttpContext ctx,
 				ILogger<CDN> logger,
 				ICompressionManager compressionManager,
+				ICDNContext cdnContext,
 				IOptionsSnapshot<CDNConfiguration> options) =>
 			{
 				ctx.Response.Headers.Server = "SimpleCDN";
@@ -42,13 +45,28 @@ namespace SimpleCDN.Endpoints
 					ctx.Response.Headers["X-Robots-Tag"] = "noindex, nofollow";
 				}
 
-				route ??= "/";
+				string logoIcoPath = cdnContext.GetSystemFilePath("logo.ico");
+				string logoSvgPath = cdnContext.GetSystemFilePath("logo.svg");
 
-				// if the provided route is null or empty and the full path doesn't end with a slash either,
-				// redirect to the same route but ending in a slash, as this represents the root index file
-				if (route is not { Length: > 0 } && ctx.Request.Path.Value?.EndsWith('/') is false)
+				ctx.Response.Headers.Append("Link", new([
+					$"<{logoIcoPath}>; REL=\"shortcut icon\"; TYPE=\"image/x-icon\"",
+					$"<{logoIcoPath}>; REL=\"icon\"; TYPE=\"image/x-icon\"",
+					$"<{logoIcoPath}>; REL=\"apple-touch-icon\"; TYPE=\"image/x-icon\"",
+					$"<{logoSvgPath}>; REL=\"icon\"; TYPE=\"image/svg+xml\"",
+					$"<{logoSvgPath}>; REL=\"shortcut icon\"; TYPE=\"image/svg+xml\"",
+					$"<{logoSvgPath}>; REL=\"apple-touch-icon\"; TYPE=\"image/svg+xml\"",
+					$"<{logoSvgPath}>; REL=\"mask-icon\"; TYPE=\"image/svg+xml\""
+					]));
+
+				if (route is null)
 				{
-					return Results.Redirect(ctx.Request.Path + "/", true);
+					if (ctx.Request.Path.Value?.EndsWith('/') is true)
+					{
+						route = "/";
+					} else
+					{
+						route = "";
+					}
 				}
 
 				try

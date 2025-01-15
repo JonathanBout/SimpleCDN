@@ -14,6 +14,6 @@
 		/// The interval at which the cache is purged of expired items in Minutes. Default is 1 hour.
 		/// Set to 0 to disable automatic purging.
 		/// </summary>
-		public uint PurgeInterval { get; set; } = 60; // 1 hour
+		public uint PurgeInterval { get; set; } = 5; // 1 hour
 	}
 }

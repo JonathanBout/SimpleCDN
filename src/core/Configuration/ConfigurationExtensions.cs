@@ -30,10 +30,13 @@ namespace SimpleCDN.Configuration
 		{
 			builder.Services.ConfigureHttpJsonOptions(options => options.SerializerOptions.TypeInfoResolverChain.Add(SourceGenerationContext.Default));
 
-			builder.Services.AddSingleton<ICDNLoader, CDNLoader>();
-			builder.Services.AddSingleton<IIndexGenerator, IndexGenerator>();
-			builder.Services.AddSingleton<IPhysicalFileReader, PhysicalFileReader>();
+			builder.Services.AddHttpContextAccessor();
+			builder.Services.AddScoped<ICDNContext, CDNContext>();
+			builder.Services.AddScoped<IIndexGenerator, IndexGenerator>();
+			builder.Services.AddScoped<ICDNLoader, CDNLoader>();
 
+			builder.Services.AddSingleton<ISystemFileReader, SystemFileReader>();
+			builder.Services.AddSingleton<IPhysicalFileReader, PhysicalFileReader>();
 			builder.Services.AddSingleton<ICompressionManager, CompressionManager>();
 			builder.Services.AddSingleton<ICompressor, BrotliCompressor>();
 			builder.Services.AddSingleton<ICompressor, GZipCompressor>();

@@ -19,7 +19,11 @@ namespace SimpleCDN.Standalone
 				.AddCommandLine(args);
 
 			builder.AddSimpleCDN()
-				.MapConfiguration();
+				.MapConfiguration()
+				.AddInMemoryCache(options =>
+				{
+
+				});
 
 			WebApplication app = builder.Build();
 
@@ -28,7 +32,7 @@ namespace SimpleCDN.Standalone
 			// health check endpoint
 			app.MapGet("/" + GlobalConstants.SystemFilesRelativePath + "/server/health", () => "healthy");
 
-			app.MapGet("/favicon.ico", () => Results.Redirect("/" + GlobalConstants.SystemFilesRelativePath + "/logo.ico", true));
+			//app.MapGet("/favicon.ico", () => Results.Redirect("/" + GlobalConstants.SystemFilesRelativePath + "/logo.ico", true));
 
 			app.Run();
 		}

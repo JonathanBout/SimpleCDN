@@ -18,6 +18,10 @@
 		/// CSS text mime type.
 		/// </summary>
 		CSS,
+		/// <summary>
+		/// Markdown text mime type.
+		/// </summary>
+		Markdown,
 		// image
 		/// <summary>
 		/// PNG image mime type.

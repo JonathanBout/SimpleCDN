@@ -8,6 +8,6 @@
 		/// <summary>
 		/// The maximum time a cache entry may be unused before being deleted, in minutes.
 		/// </summary>
-		public uint MaxAge { get; set; }
+		public uint MaxAge { get; set; } = 60;
 	}
 }
