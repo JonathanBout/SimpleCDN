@@ -62,9 +62,11 @@ namespace SimpleCDN.Services.Implementations
 				AppendRow(index, "..", "Parent Directory", "parent.svg", -1, parent.LastWriteTimeUtc);
 			}
 
-			try
+			int rowsAdded = 0;
+
+			foreach (DirectoryInfo subDirectory in directory.EnumerateDirectories())
 			{
-				foreach (DirectoryInfo subDirectory in directory.EnumerateDirectories())
+				try
 				{
 					var name = subDirectory.Name;
 
@@ -72,22 +74,33 @@ namespace SimpleCDN.Services.Implementations
 						continue;
 
 					AppendRow(index, name + "/", name, "folder.svg", -1, subDirectory.LastWriteTimeUtc);
-				}
-
-				foreach (FileInfo file in directory.EnumerateFiles())
+					rowsAdded++;
+				} catch (Exception ex) when (ex is SecurityException or UnauthorizedAccessException)
 				{
+					_logger.LogError(ex, "Access denied to publicly available directory {directory} while generating an index", subDirectory.FullName.ForLog());
+				}
+			}
+
+			foreach (FileInfo file in directory.EnumerateFiles())
+			{
+				try
+				{
+
 					var name = file.Name;
 
 					if (name.StartsWith('.') && !_options.CurrentValue.ShowDotFiles)
 						continue;
 
 					AppendRow(index, name, name, "file.svg", file.Length, file.LastWriteTimeUtc);
+				} catch (Exception ex) when (ex is SecurityException or UnauthorizedAccessException)
+				{
+					_logger.LogError(ex, "Access denied to publicly available file {file} while generating an index", file.FullName.ForLog());
 				}
-			} catch (Exception ex) when (ex is SecurityException or UnauthorizedAccessException)
-			{
-				_logger.LogError(ex, "Access denied to publicly available directory {directory} while generating an index", directory.FullName.ForLog());
+			}
 
-				return null;
+			if (rowsAdded == 0)
+			{
+				index.Append("<tr><td colspan=\"4\">No files or directories to show</td></tr>");
 			}
 
 			index.AppendFormat("</tbody></table></main><footer>{0}</footer></body></html>", _options.CurrentValue.Footer);
