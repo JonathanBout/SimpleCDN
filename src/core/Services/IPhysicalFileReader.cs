@@ -3,7 +3,7 @@
 	/// <summary>
 	/// Interface for reading physical files.
 	/// </summary>
-	public interface IPhysicalFileReader
+	internal interface IPhysicalFileReader
 	{
 		/// <summary>
 		/// Determines if the file at the specified path can be loaded into an array.

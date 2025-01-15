@@ -31,7 +31,7 @@ namespace SimpleCDN.Services.Implementations
 					<meta charset="utf-8">
 					{{robotsMeta}}
 					<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0">
-					<meta name="description" content="Index of /{{_options.CurrentValue.PageTitle.Replace("\"", "")}}">
+					<meta name="description" content="Index of /{{HttpUtility.HtmlAttributeEncode(_options.CurrentValue.PageTitle)}}">
 					<svg style="display: none;" version="2.0">
 					<defs>
 						{{FOLDER_ICON}}

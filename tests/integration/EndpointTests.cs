@@ -41,6 +41,9 @@ namespace SimpleCDN.Tests.Integration
 		{
 			HttpClient client = _webApplicationFactory.CreateClient();
 			HttpResponseMessage response = await client.GetAsync("/");
+
+			Assert.True(response.IsSuccessStatusCode, response.StatusCode.ToString());
+
 			var content = await response.Content.ReadAsStringAsync();
 			Assert.Contains(CustomWebApplicationFactory.GENERATED_INDEX_ID, content);
 		}

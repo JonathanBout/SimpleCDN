@@ -3,7 +3,7 @@ using SimpleCDN.Configuration;
 
 namespace SimpleCDN.Tests.Integration
 {
-	internal class CustomWebApplicationFactory : WebApplicationFactory<SimpleCDN.Standalone.Program>
+	internal class CustomWebApplicationFactory : WebApplicationFactory<Standalone.Program>
 	{
 		public const string GENERATED_INDEX_ID = "!GENERATED!INDEX!";
 

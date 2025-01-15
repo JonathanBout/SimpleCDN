@@ -4,6 +4,7 @@ using SimpleCDN.Cache;
 using SimpleCDN.Configuration;
 using SimpleCDN.Helpers;
 using SimpleCDN.Services.Caching;
+using System.IO;
 
 namespace SimpleCDN.Services.Implementations
 {
@@ -27,23 +28,16 @@ namespace SimpleCDN.Services.Implementations
 
 		public CDNFile? GetFile(string path, params IEnumerable<CompressionAlgorithm> acceptedCompression)
 		{
+			// as paths in index files are relative, we need the path to end in /.
+			// Thats why we redirect to the same path with a trailing slash if it's missing.
 			if (string.IsNullOrWhiteSpace(path))
 				return new RedirectCDNFile("/", true);
 
+			// normalize the path to remove any leading or trailing slashes
 			var pathChars = path.ToCharArray();
 			Span<char> pathSpan = pathChars.AsSpan();
 
 			pathSpan.Normalize();
-
-			if (pathSpan.Length > 0 && pathSpan[0] == '/')
-			{
-				pathSpan = pathSpan[1..];
-			}
-
-			if (pathSpan.Length > 0 && pathSpan[^1] == '/')
-			{
-				pathSpan = pathSpan[..^1];
-			}
 
 
 			// if the pathSpan starts with the system files root, we want to serve a system file
@@ -57,7 +51,6 @@ namespace SimpleCDN.Services.Implementations
 				return GetSystemFile(pathSpan[GlobalConstants.SystemFilesRelativePath.Length..], acceptedCompression);
 			}
 
-			// trim the leading / from pathSpan to make sure we don't get a double slash
 			var filesystemPath = Path.Join(DataRoot.AsSpan(), pathSpan);
 
 			if (!_options.CurrentValue.AllowDotFileAccess && _fs.IsDotFile(filesystemPath))
@@ -66,25 +59,20 @@ namespace SimpleCDN.Services.Implementations
 				return null;
 			}
 
+			// if the path is not a file, we attempt to serve an index file
 			if (!_fs.FileExists(filesystemPath))
 			{
-				if (_fs.DirectoryExists(filesystemPath))
-				{
-					if (!path.EndsWith('/'))
-					{
-						// require trailing slash for directories
-						return new RedirectCDNFile("/" + path + '/', false);
-					}
-
-					return GetIndexFile(filesystemPath, pathSpan);
-				}
-
-				return null;
+				return GetIndexFile(filesystemPath, pathSpan);
 			}
 
 			return GetRegularFile(filesystemPath, pathSpan);
 		}
 
+		/// <summary>
+		/// Gets a system file from the CDN. System files are files that are part of the CDN itself, such as icons or stylesheets.
+		/// </summary>
+		/// <param name="requestPath">The path of the file to load, relative to the CDN root.</param>
+		/// <param name="acceptedAlgorithms">Compression algorithms the client accepts.</param>
 		private CDNFile? GetSystemFile(ReadOnlySpan<char> requestPath, params IEnumerable<CompressionAlgorithm> acceptedAlgorithms)
 		{
 			if (requestPath is "" or "/")
@@ -146,10 +134,19 @@ namespace SimpleCDN.Services.Implementations
 			return new CDNFile(content, mediaType.ToContentTypeString(), lastModified, compression);
 		}
 
+		/// <summary>
+		/// Gets an index file from the CDN. Index files are generated for directories that don't contain an index.html file.
+		/// </summary>
 		private CDNFile? GetIndexFile(string absolutePath, ReadOnlySpan<char> requestPath)
 		{
 			if (!_fs.DirectoryExists(absolutePath))
 				return null;
+
+			if (!requestPath.EndsWith('/'))
+			{
+				// require trailing slash for directories
+				return new RedirectCDNFile($"{requestPath}/", true);
+			}
 
 			var absoluteIndexHtml = Path.Join(absolutePath, "index.html");
 
@@ -171,6 +168,9 @@ namespace SimpleCDN.Services.Implementations
 			return new CDNFile(index, MimeType.HTML.ToContentTypeString(), _fs.GetLastModified(absolutePath), CompressionAlgorithm.None);
 		}
 
+		/// <summary>
+		/// Gets a regular content file from the CDN.
+		/// </summary>
 		private CDNFile? GetRegularFile(string absolutePath, ReadOnlySpan<char> requestPath)
 		{
 			if (!_fs.FileExists(absolutePath))
