@@ -55,7 +55,7 @@ cdnBuilder.ConfigureCaching(options => { ... });
 ### In-memory caching configuration
 This configuration is used by the in-memory cache provider.
 ```csharp
-cdnBuilder.ConfigureInMemoryCaching(options => { ... });
+cdnBuilder.AddInMemoryCache(options => { ... });
 ```
 - `options.MaxSize`: The maximum size of the cache in kB. Default is `500_000` (500MB). When this limit
   is passed, the least recently used files are removed from the cache until the size is below the limit.
