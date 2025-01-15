@@ -9,7 +9,7 @@ in for example a kubernetes cluster.
 
 ## Configuration
 ```csharp
-builder.AddSimpleCDN(...)
+builder.Services.AddSimpleCDN(...)
 	.AddRedisCache(options => { ... });
 ```
 

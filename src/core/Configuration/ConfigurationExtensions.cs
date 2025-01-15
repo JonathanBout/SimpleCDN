@@ -17,63 +17,60 @@ namespace SimpleCDN.Configuration
 		/// <summary>
 		/// Adds the SimpleCDN services to the application and configures them using the provided configuration.
 		/// </summary>
-		public static ISimpleCDNBuilder AddSimpleCDN(this IHostApplicationBuilder builder, Action<CDNConfiguration> configure)
+		public static ISimpleCDNBuilder AddSimpleCDN(this IServiceCollection services, Action<CDNConfiguration> configure)
 		{
-			return builder.AddSimpleCDN()
+			return services.AddSimpleCDN()
 				.Configure(configure);
 		}
 
 		/// <summary>
 		/// Adds the SimpleCDN services to the application.
 		/// </summary>
-		public static ISimpleCDNBuilder AddSimpleCDN(this IHostApplicationBuilder builder)
+		public static ISimpleCDNBuilder AddSimpleCDN(this IServiceCollection services)
 		{
-			builder.Services.ConfigureHttpJsonOptions(options => options.SerializerOptions.TypeInfoResolverChain.Add(SourceGenerationContext.Default));
+			services.ConfigureHttpJsonOptions(options => options.SerializerOptions.TypeInfoResolverChain.Add(SourceGenerationContext.Default));
 
-			builder.Services.AddHttpContextAccessor();
-			builder.Services.AddScoped<ICDNContext, CDNContext>();
-			builder.Services.AddScoped<IIndexGenerator, IndexGenerator>();
-			builder.Services.AddScoped<ICDNLoader, CDNLoader>();
+			services.AddHttpContextAccessor();
+			services.AddScoped<ICDNContext, CDNContext>();
+			services.AddScoped<IIndexGenerator, IndexGenerator>();
+			services.AddScoped<ICDNLoader, CDNLoader>();
 
-			builder.Services.AddSingleton<ISystemFileReader, SystemFileReader>();
-			builder.Services.AddSingleton<IPhysicalFileReader, PhysicalFileReader>();
-			builder.Services.AddSingleton<ICompressionManager, CompressionManager>();
-			builder.Services.AddSingleton<ICompressor, BrotliCompressor>();
-			builder.Services.AddSingleton<ICompressor, GZipCompressor>();
-			builder.Services.AddSingleton<ICompressor, DeflateCompressor>();
+			services.AddSingleton<ISystemFileReader, SystemFileReader>();
+			services.AddSingleton<IPhysicalFileReader, PhysicalFileReader>();
+			services.AddSingleton<ICompressionManager, CompressionManager>();
+			services.AddSingleton<ICompressor, BrotliCompressor>();
+			services.AddSingleton<ICompressor, GZipCompressor>();
+			services.AddSingleton<ICompressor, DeflateCompressor>();
 
-			builder.Services.AddOptionsWithValidateOnStart<CDNConfiguration>();
+			services.AddOptionsWithValidateOnStart<CDNConfiguration>();
 
-			return new SimpleCDNBuilder(builder);
+			return new SimpleCDNBuilder(services);
 		}
 
 		private class SimpleCDNBuilder : ISimpleCDNBuilder
 		{
-			private readonly IHostApplicationBuilder _applicationBuilder;
-
 			private Type _cacheImplementationType = typeof(DisabledCache);
 
-			public SimpleCDNBuilder(IHostApplicationBuilder applicationBuilder)
+			public SimpleCDNBuilder(IServiceCollection services)
 			{
-				_applicationBuilder = applicationBuilder;
+				Services = services;
 
 				Services.AddSingleton<IDistributedCache, DisabledCache>();
 				Services.AddSingleton<ICacheManager, CacheManager>();
 				Services.AddSingleton<ICacheImplementationResolver>(sp => new CacheImplementationResolver(sp, _cacheImplementationType));
 			}
 
-			public IServiceCollection Services => _applicationBuilder.Services;
-			public IConfigurationManager Configuration => _applicationBuilder.Configuration;
+			public IServiceCollection Services { get; }
 
 			public ISimpleCDNBuilder Configure(Action<CDNConfiguration> configure)
 			{
-				_applicationBuilder.Services.Configure(configure);
+				Services.Configure(configure);
 				return this;
 			}
 
 			public ISimpleCDNBuilder ConfigureCaching(Action<CacheConfiguration> configure)
 			{
-				_applicationBuilder.Services.Configure(configure);
+				Services.Configure(configure);
 				return this;
 			}
 
@@ -112,11 +109,6 @@ namespace SimpleCDN.Configuration
 		/// The service collection used to register services.
 		/// </summary>
 		IServiceCollection Services { get; }
-
-		/// <summary>
-		/// The configuration manager used to access configuration settings.
-		/// </summary>
-		IConfigurationManager Configuration { get; }
 
 		/// <summary>
 		/// Configures generic SimpleCDN settings.

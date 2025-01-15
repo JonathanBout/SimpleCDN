@@ -4,7 +4,7 @@ SimpleCDN is one of the simplest and easiest-to-use CDN servers. To use it, simp
 of code to your startup code:
 
 ```csharp
-var cdnBuilder = builder.AddSimpleCDN(options => options.DataRoot = "/var/static");
+var cdnBuilder = builder.Services.AddSimpleCDN(options => options.DataRoot = "/var/static");
 
 // ...
 
@@ -28,7 +28,7 @@ SimpleCDN is also available as a standalone application with a docker container:
 ### General configuration
 This configuration is for general settings for the CDN server.
 ```csharp
-var cdnBuilder = builder.AddSimpleCDN(options => { ... });
+var cdnBuilder = builder.Services.AddSimpleCDN(options => { ... });
 // or
 cdnBuilder.Configure(options => { ... });
 ```
