@@ -45,19 +45,6 @@ namespace SimpleCDN.Endpoints
 					ctx.Response.Headers["X-Robots-Tag"] = "noindex, nofollow";
 				}
 
-				string logoIcoPath = cdnContext.GetSystemFilePath("logo.ico");
-				string logoSvgPath = cdnContext.GetSystemFilePath("logo.svg");
-
-				ctx.Response.Headers.Append("Link", new([
-					$"<{logoIcoPath}>; REL=\"shortcut icon\"; TYPE=\"image/x-icon\"",
-					$"<{logoIcoPath}>; REL=\"icon\"; TYPE=\"image/x-icon\"",
-					$"<{logoIcoPath}>; REL=\"apple-touch-icon\"; TYPE=\"image/x-icon\"",
-					$"<{logoSvgPath}>; REL=\"icon\"; TYPE=\"image/svg+xml\"",
-					$"<{logoSvgPath}>; REL=\"shortcut icon\"; TYPE=\"image/svg+xml\"",
-					$"<{logoSvgPath}>; REL=\"apple-touch-icon\"; TYPE=\"image/svg+xml\"",
-					$"<{logoSvgPath}>; REL=\"mask-icon\"; TYPE=\"image/svg+xml\""
-					]));
-
 				if (route is null)
 				{
 					if (ctx.Request.Path.Value?.EndsWith('/') is true)
