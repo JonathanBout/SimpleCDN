@@ -15,15 +15,10 @@ on:
 
 jobs:
   unit-test:
-    strategy:
-      matrix:
-       include:
-        - runner: "ubuntu-22.04-arm"
-        - runner: "ubuntu-22.04"
     concurrency:
-      group: ${{ github.workflow }}-${{ github.ref_name }}-${{ matrix.runner }}
+      group: ${{ github.workflow }}-${{ github.ref_name }}-unit-tests
       cancel-in-progress: true
-    runs-on: ${{ matrix.runner }}
+    runs-on: ubuntu-24.04
     name: Unit Tests
     steps:
     - uses: actions/checkout@v4
@@ -41,7 +36,10 @@ jobs:
       run: dotnet test tests/unit/SimpleCDN.Tests.Unit.csproj --no-build --verbosity normal -p:TreatWarningsAsErrors=true
 
   integration-test:
-    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref_name }}-integration-tests
+      cancel-in-progress: true
+    runs-on: ubuntu-24.04
     name: Integration Tests
     steps:
     - uses: actions/checkout@v4
