@@ -23,7 +23,7 @@ jobs:
        include:
         - arch: "linux/arm64"
           dotnet_rid: "linux-arm64"
-          runner: "buildjet-2vcpu-ubuntu-2204-arm"
+          runner: "ubuntu-22.04-arm"
         - arch: "linux/amd64"
           dotnet_rid: "linux-amd64"
           runner: "ubuntu-22.04"
