@@ -23,10 +23,10 @@ jobs:
        include:
         - arch: "linux/arm64"
           dotnet_rid: "linux-arm64"
-          runner: "ubuntu-22.04-arm"
+          runner: "ubuntu-24.04-arm"
         - arch: "linux/amd64"
           dotnet_rid: "linux-amd64"
-          runner: "ubuntu-22.04"
+          runner: "ubuntu-24.04"
     concurrency:
       group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}-${{ matrix.arch }}
       cancel-in-progress: true
