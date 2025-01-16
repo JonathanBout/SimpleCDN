@@ -13,8 +13,11 @@
 		private readonly Func<T, bool>? _healthCheck = healthCheck;
 
 		private int _index;
+#if NET9_0_OR_GREATER
 		private readonly Lock _lock = new();
-
+#else
+		private readonly object _lock = new();
+#endif
 		/// <summary>
 		/// The number of instances currently in use in the balancer.
 		/// </summary>
@@ -66,8 +69,10 @@
 				}
 
 				if (instance is null || instance.Equals(default(T)) || _instances.Count == 0)
+				{
 					// all instances are unhealthy, clear the list and add a new instance
 					instance = AddInstance();
+				}
 
 				return instance;
 			}

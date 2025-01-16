@@ -135,7 +135,11 @@ namespace SimpleCDN.Endpoints
 				} catch (Exception ex)
 				{
 					logger.LogError(ex, "Failed loading file or index at '{path}'", route.ForLog());
+#if NET9_0_OR_GREATER
 					return Results.InternalServerError();
+#else
+					return Results.StatusCode(StatusCodes.Status500InternalServerError);
+#endif
 				}
 
 				return Results.NotFound();

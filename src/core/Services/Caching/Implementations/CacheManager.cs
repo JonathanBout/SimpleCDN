@@ -14,7 +14,11 @@ namespace SimpleCDN.Services.Caching.Implementations
 		private readonly IOptionsMonitor<CacheConfiguration> _options = options;
 		private readonly ILogger<CacheManager> _logger = logger;
 #if DEBUG
+#if NET9_0_OR_GREATER
 		private readonly Lock _durationsLock = new();
+#else
+		private readonly object _durationsLock = new();
+#endif
 		private readonly List<ushort> _durations = new(100);
 		private ulong _hitCount = 0;
 		private ulong _missCount = 0;
