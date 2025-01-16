@@ -42,7 +42,7 @@ namespace SimpleCDN.Helpers
 		/// <param name="path">The path to normalize in-place.</param>
 		public static void Normalize(ref this Span<char> path)
 		{
-			MemoryExtensions.SpanSplitEnumerator<char> segments = MemoryExtensions.Split(path, '/');
+			IEnumerable<Range> segments = path.SplitToPathSegments();
 
 			var rangesToRemove = new List<Range>();
 
@@ -52,12 +52,7 @@ namespace SimpleCDN.Helpers
 
 			foreach (Range segment in segments)
 			{
-				if (segment.GetOffsetAndLength(originalLength).Length == 0)
-				{
-					continue;
-				}
-
-				if (path[segment] is ['.', '.'])
+				if (path[segment] is "..")
 				{
 					if (resultRanges.TryPop(out Range lastSegment))
 					{
@@ -65,7 +60,7 @@ namespace SimpleCDN.Helpers
 					}
 
 					rangesToRemove.Add(segment);
-				} else if (path[segment] is ['.'])
+				} else if (path[segment] is ".")
 				{
 					// if the segment is . it should be removed
 					rangesToRemove.Add(segment);
@@ -142,41 +137,6 @@ namespace SimpleCDN.Helpers
 			var intFlag = flag.ToInt64(null);
 
 			return (intValue & intFlag) == 0;
-		}
-
-		public static bool StartsWithAll(this Span<char> input, params IEnumerable<ReadOnlySpan<char>> prefixes)
-		{
-			int prefixIndex = 0;
-			using IEnumerator<ReadOnlySpan<char>> prefixesEnumerator = prefixes.GetEnumerator();
-			if (!prefixesEnumerator.MoveNext())
-			{
-				return true; // no prefixes to check
-			}
-			for (int i = 0; i < input.Length; i++)
-			{
-				// compare the current character to the current prefix
-				if (prefixesEnumerator.Current[prefixIndex] == input[i])
-				{
-					// move to the next character in the prefix
-					prefixIndex++;
-					if (prefixIndex == prefixesEnumerator.Current.Length)
-					{
-						// we've reached the end of the current prefix
-						if (!prefixesEnumerator.MoveNext())
-						{
-							return true;
-						}
-						// reset the prefix index to 0
-						prefixIndex = 0;
-					}
-				} else
-				{
-					return false;
-				}
-			}
-
-			// we've reached the end of the input, but we still have prefixes to check
-			return false;
 		}
 
 		public static void RemoveWhere<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, Func<KeyValuePair<TKey, TValue>, bool> predicate)

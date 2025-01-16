@@ -80,7 +80,7 @@ namespace SimpleCDN.Services.Implementations
 			if (!_fs.DirectoryExists(absolutePath))
 				return null;
 
-			if (!requestPath.EndsWith('/'))
+			if (!requestPath.EndsWith(['/']))
 			{
 				// require trailing slash for directories
 				return new RedirectCDNFile($"{requestPath}/", true);

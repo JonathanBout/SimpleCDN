@@ -87,16 +87,18 @@ namespace SimpleCDN.Services.Implementations
 
 			pathSpan = pathSpan[_options.CurrentValue.DataRoot.Length..];
 
-			foreach (Range section in pathSpan.SplitAny(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar))
+			foreach (Range section in pathSpan.SplitToPathSegments())
 			{
-				if (section.GetOffsetAndLength(pathSpan.Length) is not { Length: > 0, Offset: int offset })
-					continue;
-
-				if (pathSpan[offset..].StartsWith('.'))
+				if (StartsWithDot(pathSpan[section.Start..section.End]))
 					return true;
 			}
 
 			return false;
+		}
+
+		private static bool StartsWithDot(ReadOnlySpan<char> span)
+		{
+			return span.Length > 0 && span[0] == '.';
 		}
 	}
 }
