@@ -70,7 +70,9 @@ jobs:
     - name: Setup .NET Core SDK
       uses: actions/setup-dotnet@v4.1.0
       with:
-        dotnet-version: 9.0.x
+        dotnet-version: |
+          8.0.x
+          9.0.x
     - name: Build the project
       shell: bash
       run: |
