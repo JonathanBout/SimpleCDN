@@ -12,9 +12,8 @@ on:
         description: "Package version, e.g. 1.10.5"
         required: true
         type: string
-
 env:
-  VERSION_NAME: ${{ inputs.version_number || github.head_ref }}
+  VERSION: ${{ inputs.version_number || github.ref_name }}
 
 jobs:
   publish-core:
@@ -29,13 +28,12 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: "9.0.x"
-    - name: Set VERSION variable from tag or the input
-      run: echo "VERSION=${VERSION_NAME#\/refs\/tags\/v/}" >> $GITHUB_ENV
     - name: Pack
-      run: dotnet pack --configuration Release --property:Version=${VERSION} --output . src/core/SimpleCDN.csproj
+      run: |
+        dotnet pack --configuration Release --property:Version=${VERSION#v} --output . src/core/SimpleCDN.csproj
     - name: Push
       run: |
-        dotnet nuget push SimpleCDN.${VERSION}.nupkg --api-key ${NUGET_API_KEY} --source https://api.nuget.org/v3/index.json
+        dotnet nuget push SimpleCDN.${VERSION#v}.nupkg --api-key ${NUGET_API_KEY} --source https://api.nuget.org/v3/index.json
       env:
         NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
 
@@ -51,12 +49,11 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: "9.0.x"
-    - name: Set VERSION variable from tag or the input
-      run: echo "VERSION=${VERSION_NAME#\/refs\/tags\/v/}" >> $GITHUB_ENV
     - name: Pack
-      run: dotnet pack --configuration Release --property:Version=${VERSION} --output . extensions/Redis/SimpleCDN.Extensions.Redis.csproj
+      run: |
+        dotnet pack --configuration Release --property:Version=${VERSION#v} --output . extensions/Redis/SimpleCDN.Extensions.Redis.csproj
     - name: Push
       run: |
-        dotnet nuget push SimpleCDN.Extensions.Redis.${VERSION}.nupkg --api-key ${NUGET_API_KEY} --source https://api.nuget.org/v3/index.json
+        dotnet nuget push SimpleCDN.Extensions.Redis.${VERSION#v}.nupkg --api-key ${NUGET_API_KEY} --source https://api.nuget.org/v3/index.json
       env:
         NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}

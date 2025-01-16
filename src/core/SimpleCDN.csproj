@@ -22,6 +22,8 @@
 		<PackageIcon>logo.png</PackageIcon>
 		<IncludeSymbols>True</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<IsAotCompatible>true</IsAotCompatible>
+		<EnableRequestDelegateGenerator>true</EnableRequestDelegateGenerator>
 	</PropertyGroup>
 
 	<ItemGroup>

@@ -36,7 +36,6 @@ namespace SimpleCDN.Endpoints
 				HttpContext ctx,
 				ILogger<CDN> logger,
 				ICompressionManager compressionManager,
-				ICDNContext cdnContext,
 				IOptionsSnapshot<CDNConfiguration> options) =>
 			{
 				ctx.Response.Headers.Server = "SimpleCDN";
