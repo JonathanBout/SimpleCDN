@@ -87,6 +87,8 @@ jobs:
           outputs: type=image,"name=${{ env.DOCKER_REPO }}",push-by-digest=true,name-canonical=true,push=true
           provenance: false
           sbom: false
+          cache-to: type=gha,scope=image-${{ matrix.dotnet_rid }}
+          cache-from: type=gha,scope=image-${{ matrix.dotnet_rid }}
           build-args: |
             DOTNET_BUILD_PLATFORM=${{ matrix.dotnet_rid }}
             
@@ -105,7 +107,7 @@ jobs:
           retention-days: 1
 
   merge:
-    runs-on: ubuntu-latest
+    runs-on: 'ubuntu-24.04'
     if: ${{ github.event_name != 'pull_request' }}
     needs:
       - build
