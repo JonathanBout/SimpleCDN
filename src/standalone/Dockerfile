@@ -8,7 +8,7 @@ ARG FINAL_BASE_IMAGE=${LAUNCHING_FROM_VS:+aotdebug}
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 USER $APP_UID
 WORKDIR /app
-ENV CDN_DATA_ROOT=/data
+ENV CDN__DataRoot=/data
 ENV ASPNETCORE_URLS=http://+:8080
 
 EXPOSE 8080
@@ -53,7 +53,7 @@ FROM ${FINAL_BASE_IMAGE:-mcr.microsoft.com/dotnet/runtime-deps:9.0} AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 
-ENV CDN_DATA_ROOT=/data
+ENV CDN__DataRoot=/data
 ENV ASPNETCORE_URLS=http://+:8080
 
 # install curl for healthchecks

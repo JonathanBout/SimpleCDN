@@ -37,10 +37,9 @@ services:
     - <your_cdn_data>:/data:ro # :ro to make the bind mount read-only
     ports:
     - <your_port>:8080
-    environment:
-    - ASPNETCORE_URLS=http://+:8080
 
 # === use below only if you want to use redis ===
+    environment:
     - Cache__Redis__ConnectionString=redis:6379
   redis:
     image: redis
@@ -50,7 +49,7 @@ services:
 #### dotnet run
 ```
 # PublishAOT is not supported with dotnet run so we need to disable it
-dotnet run --property:PublishAot=false -- --data-root <your_cdn_data>
+dotnet run --property:PublishAot=false -- --CDN:DataRoot <your_cdn_data>
 ```
 
 ### Variables:
@@ -78,6 +77,7 @@ Caching:
 | `Cache:Redis:ConnectionString` | A redis connection string` | None. Required when using Redis | How to connect to your Redis instance |
 | `Cache:Redis:ClientName` | A string, without spaces | `SimpleCDN` | How this client should be identified to Redis. |
 | `Cache:Redis:KeyPrefix` | A string | `SimpleCDN` | A string to prepend to Redis entry keys. |
+
 #### Overriding the defaults:
 - With an environment variable, e.g. `CDN__DataRoot=/mnt/data`
 - With an appsettings.json file, e.g.
@@ -92,28 +92,13 @@ Caching:
 
 > [!NOTE]  
 > Command line arguments have precedence over appsettings.json and appsettings.json has precedence environment variables.
-
-more options are available, for a full overview look at the models in the [SimpleCDN/Configuration](https://github.com/JonathanBout/SimpleCDN/tree/main/SimpleCDN/Configuration) folder.
-- For command line arguments, use `--<section name>:<property name> "<property value>"` (section separator is `:`)
-- For environment variables, use `<section name>__<property name>=<property value>` (section separator is `__`, double underscore)
-- In appsettings.json, use the following structure:
-  ```json
-  {
-    "<section name>": {
-      "<property name>": "<property value>"
-    }
-  }
-  ```
-Where section name is one of the following:
-- `CDN` - common CDN options corresponding to [CDNConfiguration.cs](https://github.com/JonathanBout/SimpleCDN/tree/main/SimpleCDN/Configuration/CDNConfiguration.cs)
-- `Cache` - caching options corresponding to [CacheConfiguration.cs](https://github.com/JonathanBout/SimpleCDN/tree/main/SimpleCDN/Configuration/CacheConfiguration.cs)
-  - `Cache` > `Redis` - Redis-specific options, corresponding to [RedisCacheConfiguration.cs](https://github.com/JonathanBout/SimpleCDN/tree/main/SimpleCDN/Configuration/RedisCacheConfiguration.cs)
-  - `Cache` > `InMemory` - Redis-specific options, corresponding to [InMemoryCacheConfiguration.cs](https://github.com/JonathanBout/SimpleCDN/tree/main/SimpleCDN/Configuration/InMemoryCacheConfiguration.cs)
-  When any options in the Redis section are defined, SimpleCDN will assume you want to use Redis. To overwrite this, use the `Cache` > `Type` property to use `InMemory` or no (`Disabled`) cache. 
  
 ## Development
 
-Contributions are always welcome! Feel free to create an issue if you encounter problems. If you know a fix, a Pull Request is even better! 
+Contributions are always welcome! Feel free to create an issue if you encounter problems. If you know a fix, a Pull Request is even better!
+
+If you want to build a custom caching provider, take a look at the
+[extensions/README.md file](https://github.com/jonathanbout/simplecdn/tree/main/extensions/README.md).
 
 ### Building the docker image
 Building a docker image can be done easily with `docker build`:
