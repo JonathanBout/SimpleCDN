@@ -15,6 +15,13 @@ namespace SimpleCDN.Services.Implementations
 		private readonly IOptionsMonitor<CDNConfiguration> _options = options;
 		private readonly ILogger<IndexGenerator> _logger = logger;
 		private readonly ICDNContext _context = context;
+
+		private static readonly EnumerationOptions _enumerationOptions = new()
+		{
+			IgnoreInaccessible = true,
+			ReturnSpecialDirectories = false,
+			RecurseSubdirectories = false
+		};
 		public byte[]? GenerateIndex(string absolutePath, string rootRelativePath)
 		{
 			if (!Directory.Exists(absolutePath))
@@ -72,7 +79,6 @@ namespace SimpleCDN.Services.Implementations
 				rowsAdded += AppendDirectories(index, directory);
 
 				rowsAdded += AppendFiles(index, directory);
-
 			} catch (Exception ex) when (ex is SecurityException or UnauthorizedAccessException)
 			{
 				_logger.LogError(ex, "Access denied to publicly available directory {directory} while generating an index", directory.FullName.ForLog());
@@ -91,21 +97,15 @@ namespace SimpleCDN.Services.Implementations
 		private int AppendDirectories(StringBuilder sb, DirectoryInfo directory)
 		{
 			int rowsAdded = 0;
-			foreach (DirectoryInfo subDirectory in directory.EnumerateDirectories())
+			foreach (DirectoryInfo subDirectory in directory.EnumerateDirectories("*", _enumerationOptions))
 			{
-				try
-				{
-					var name = subDirectory.Name;
+				var name = subDirectory.Name;
 
-					if (name.StartsWith('.') && !_options.CurrentValue.ShowDotFiles)
-						continue;
+				if (name.StartsWith('.') && !_options.CurrentValue.ShowDotFiles)
+					continue;
 
-					AppendRow(sb, name + "/", name, "folder.svg", -1, subDirectory.LastWriteTimeUtc);
-					rowsAdded++;
-				} catch (Exception ex) when (ex is SecurityException or UnauthorizedAccessException)
-				{
-					_logger.LogError(ex, "Access denied to publicly available subdirectory {directory} while generating an index", subDirectory.FullName.ForLog());
-				}
+				AppendRow(sb, name + "/", name, "folder.svg", -1, subDirectory.LastWriteTimeUtc);
+				rowsAdded++;
 			}
 			return rowsAdded;
 		}
@@ -113,23 +113,17 @@ namespace SimpleCDN.Services.Implementations
 		private int AppendFiles(StringBuilder sb, DirectoryInfo directory)
 		{
 			int rowsAdded = 0;
-			foreach (FileInfo file in directory.EnumerateFiles())
+			foreach (FileInfo file in directory.EnumerateFiles("*", _enumerationOptions))
 			{
-				try
-				{
+				var name = file.Name;
 
-					var name = file.Name;
+				if (name.StartsWith('.') && !_options.CurrentValue.ShowDotFiles)
+					continue;
 
-					if (name.StartsWith('.') && !_options.CurrentValue.ShowDotFiles)
-						continue;
-
-					AppendRow(sb, name, name, "file.svg", file.Length, file.LastWriteTimeUtc);
-					rowsAdded++;
-				} catch (Exception ex) when (ex is SecurityException or UnauthorizedAccessException)
-				{
-					_logger.LogError(ex, "Access denied to publicly available file {file} while generating an index", file.FullName.ForLog());
-				}
+				AppendRow(sb, name, name, "file.svg", file.Length, file.LastWriteTimeUtc);
+				rowsAdded++;
 			}
+
 			return rowsAdded;
 		}
 

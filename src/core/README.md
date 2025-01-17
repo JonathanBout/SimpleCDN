@@ -1,27 +1,31 @@
-# ![](https://raw.githubusercontent.com/JonathanBout/SimpleCDN/refs/heads/main/src/core/SystemFiles/logo.svg) SimpleCDN
+# SimpleCDN
 
-SimpleCDN is one of the simplest and easiest-to-use CDN servers. To use it, simply add two lines
-of code to your startup code:
+SimpleCDN is one of the simplest and easiest-to-use CDN servers. All you need for a basic setup is two
+extra lines in your startup code:
 
-```csharp
-var cdnBuilder = builder.Services.AddSimpleCDN(options => options.DataRoot = "/var/static");
+```diff,cs
+var builder = WebApplication.CreateBuilder();
++ var cdnBuilder = builder.Services.AddSimpleCDN(options => options.DataRoot = "/var/www/static");
 
-// ...
+var app = builder.Build();
 
-app.MapGroup("/cdn").MapSimpleCDN();
++ app.MapGroup("/cdn").MapSimpleCDN();
 ```
 
-This will map the SimpleCDN endpoint to `/cdn` and serve files from `/var/static`.
+This will map the SimpleCDN endpoint to `/cdn` and serve files from `/var/www/static`.
 
 ## Features
-- In-memory caching
 - Automatic compression (currently supported: gzip, deflate, brotli)
-- Redis caching for multiple instances or a cluster, with the
+- In-memory caching
+- Redis caching, with the
   [SimpleCDN.Extensions.Redis](https://www.nuget.org/packages/SimpleCDN.Extensions.Redis/) package.
+  Although t's a few milliseconds slower than the in-memory cache, but saves a load of memory with multiple instances.
+> [!WARNING]  
+> **While Redis support is available, it is not very stable**, especially in high-load scenario's (tens of requests per second). By implementing a custom connection manager,
+> it's brought down to a minimum but failures still happen. In such cases, SimpleCDN will load the data from disk instead of using the cache.
 
 SimpleCDN is also available as a standalone application with a docker container:
-	[ghcr.io/jonathanbout/simplecdn](https://ghcr.io/jonathanbout/simplecdn)
-
+	[ghcr.io/jonathanbout/simplecdn](https://ghcr.io/jonathanbout/simplecdn).
 
 ## Configuration
 

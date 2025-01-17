@@ -17,40 +17,15 @@ namespace SimpleCDN.Standalone
 
 			builder.Services
 				.AddOptions<CDNConfiguration>()
-				.Configure<IConfiguration>((settings, configuration) =>
-				{
-					IConfigurationSection cdnSection = configuration.GetSection("CDN");
-
-					// First, try to bind to ENV variables
-					settings.DataRoot = configuration["CDN_DATA_ROOT"] ?? settings.DataRoot;
-
-					// Then, try to bind to the configuration file (possibly overwriting environment variables)
-					cdnSection.Bind(settings);
-
-					// Finally, try to bind to the command line arguments (possibliy overwriting environment variables and configuration file)
-					settings.DataRoot = configuration["data-root"] ?? settings.DataRoot;
-				})
+				.BindConfiguration("CDN")
 				.Validate((CDNConfiguration config, ILogger<CDNConfiguration> logger) => config.Validate(logger), InvalidConfigurationMessage);
 
 			builder.Services
 				.AddOptions<CacheConfiguration>()
-				.Configure<IConfiguration>((settings, configuration) =>
-				{
-					IConfigurationSection cacheSection = configuration.GetSection("Cache");
-					// First, try to bind to ENV variables
-					if (configuration["CDN_CACHE_MAX_AGE"] is string maxAgeEnvironmentString && uint.TryParse(maxAgeEnvironmentString, out uint maxAgeEnvironment))
-						settings.MaxAge = maxAgeEnvironment;
+				.BindConfiguration("Cache");
 
-					// Then, try to bind to the configuration file (possibly overwriting environment variables)
-					cacheSection.Bind(settings);
-
-					// Finally, try to bind to the command line arguments (possibliy overwriting environment variables and configuration file)
-					if (configuration["max-age"] is string maxAgeArgumentString && uint.TryParse(maxAgeArgumentString, out uint maxAgeArgument))
-						settings.MaxAge = maxAgeArgument;
-				});
-
-			IConfigurationSection redisSection = configuration.GetSection("Redis");
-			IConfigurationSection inMemorySection = configuration.GetSection("InMemory");
+			IConfigurationSection redisSection = configuration.GetSection("Cache:Redis");
+			IConfigurationSection inMemorySection = configuration.GetSection("Cache:InMemory");
 
 			switch (configuration.GetSection("Cache:Type").Get<CacheType>())
 			{
