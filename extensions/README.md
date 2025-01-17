@@ -6,7 +6,7 @@ To make sure this is possible, the Redis extension is already built this way.
 A few tips to help extension developers:
 - The provider should be a singleton service, implementing the `IDistributedCache` interface.
 - Registering a typical extension looks like this:
-```
+```cs
 public static class SimpleCDNBuilderExtensions
 {
     public static ISimpleCDNBuilder AddSomeCachingProvider(this ISimpleCDNBuilder builder)
