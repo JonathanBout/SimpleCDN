@@ -151,11 +151,12 @@ jobs:
         uses: docker/metadata-action@v5.6.1
         with:
           images: ${{ env.DOCKER_REPO }}
-            # latest tag always represents latest stable release
+            # latest tag always represents latest stable release.
+            # (if the tag contains a dash, it's a prerelease, e.g. refs/tags/v0.8.0-rc6. Those should not be considered stable)
             # include git commit SHA, git branch name, git tag name
             # when a semver tag, e.g. '1.2.3', add tags '1', '1.2' and '1.2.3'
           tags: |
-            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/') }}
+            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/') && !contains(github.ref, '-') }}
             type=sha,format=long
             type=ref,event=branch
             type=semver,pattern={{version}}
