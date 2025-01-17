@@ -52,9 +52,9 @@ services:
 dotnet run --property:PublishAot=false -- --CDN:DataRoot <your_cdn_data>
 ```
 
-### Variables:
+### Variables
 
-Generic:
+#### Generic
 | key | value type | default value | description |
 |--|--|--|--|
 | `CDN:DataRoot` | a local path | `/data` when using the Docker image, otherwise required. | The data root, where the files to be served are stored. |
@@ -62,19 +62,19 @@ Generic:
 | `CDN:AllowDotFileAccess` | `true` or `false` | `false` | Whether to allow access to dotfiles and directories. |
 | `CDN:ShowDotFiles` | `true` or `false` | `false` | Whether to show dotfiles in generated index files. When `AllowDotFileAccess` is `false`, `ShowDotFiles` is ignored. |
 | `CDN:BlockRobots` | `true` or `false` | `true` | Whether to request robots to not index CDN files. Its still up to the robots to adhere to this rule. |
-| `CDN:Footer` | Any HTML | `Powered by SimpleCDN` (with a link to this GitHub repo) | The text to place at the bottom of generated index files |
-| `CDN:PageTitle` | Any <title> compatible string | `SimpleCDN` | The text to display in the browser's title bar |
+| `CDN:Footer` | Any HTML | `Powered by SimpleCDN` (with a link to this GitHub repo) | The text to place at the bottom of generated index files. |
+| `CDN:PageTitle` | Any <title> compatible string | `SimpleCDN` | The text to display in the browser's title bar. |
 
-Caching:
+#### Caching
 | key | value type | default value | description |
 |--|--|--|--|
 | `Cache:MaxAge` | A time in minutes | `60` | How long an item may be stale (read nor written) before being removed. |
-| `Cache:Type` | `InMemory`, `Redis` or `Disabled` | `InMemory`, or if Redis has been configured, `Redis` | What cache provider to use, if any |
+| `Cache:Type` | `InMemory`, `Redis` or `Disabled` | `InMemory`, or if Redis has been configured, `Redis` | What cache provider to use, if any. |
 | **In-Memory Options** |
 | `Cache:InMemory:MaxSize` | A size in kB | `500_000` | How big the cache may grow. When an entry is added, the oldest entries will be removed until this limit is met. |
 | `Cache:InMemory:PurgeInterval` | A time in minutes | `5` | How often the purge loop should wake up, to remove stale items older than `Cache:MaxAge` |
 | **Redis Options** |
-| `Cache:Redis:ConnectionString` | A redis connection string` | None. Required when using Redis | How to connect to your Redis instance |
+| `Cache:Redis:ConnectionString` | A redis connection string | None. Required when using Redis | How to connect to your Redis instance. |
 | `Cache:Redis:ClientName` | A string, without spaces | `SimpleCDN` | How this client should be identified to Redis. |
 | `Cache:Redis:KeyPrefix` | A string | `SimpleCDN` | A string to prepend to Redis entry keys. |
 
@@ -103,13 +103,13 @@ If you want to build a custom caching provider, take a look at the
 ### Building the docker image
 Building a docker image can be done easily with `docker build`:
 ```
-docker build . -f SimpleCDN/Dockerfile -t simplecdn:local
+docker build . -f src/standalone/Dockerfile -t simplecdn:local
 ```
-Be aware the build context has to be the root of the repo, whilst the dockerfile is in the SimpleCDN folder.
+Be aware the build context has to be the root of the repo, whilst the dockerfile is in the `src/standalone` folder.
 
 ### Running tests
 Executing the Unit tests can be done with just a single command:
 ```
 dotnet test SimpleCDN.sln
 ```
-This will run the NUnit tests in the SimpleCDN.Tests project.
+This will run the NUnit Unit Tests and the XUnit Integration Tests in the tests folder.
