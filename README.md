@@ -2,25 +2,25 @@
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/JonathanBout/SimpleCDN/dotnet.yml?style=flat-square&logo=.net&label=tests&labelColor=%23512BD4&link=https%3A%2F%2Fgithub.com%2FJonathanBout%2FSimpleCDN%2Factions%2Fworkflows%2Fdotnet.yml)
 
 
-SimpleCDN is, well, a simple CDN server. Currently it is only tested for single-instance use, but I don't see any reasons why a load balancer wouldn't work. With Redis you can make sure they have one single shared cache.
+SimpleCDN is, well, a simple CDN server. Built with relatively high r/w latency in mind (think NAS mount), it provides efficiënt ways to cache files, either using the built-in in-memory cache, or the Redis extension.
 
 ## How to use this in an existing project?
 ### NuGet Packages
 SimpleCDN is available on NuGet:
-- ![SimpleCDN on NuGet](https://img.shields.io/nuget/v/SimpleCDN?style=flat-square&logo=nuget&label=SimpleCDN&link=https%3A%2F%2Fwww.nuget.org%2Fpackages%2FSimpleCDN)
-- ![SimpleCDN.Extensions.Redis on NuGet](https://img.shields.io/nuget/v/SimpleCDN?style=flat-square&logo=redis&label=SimpleCDN.Extensions.Redis&link=https%3A%2F%2Fwww.nuget.org%2Fpackages%2FSimpleCDN.Extensions.Redis)
+- [![SimpleCDN on NuGet](https://img.shields.io/nuget/v/SimpleCDN?style=flat-square&logo=nuget&label=SimpleCDN&link=https%3A%2F%2Fwww.nuget.org%2Fpackages%2FSimpleCDN)](https://NuGet.org/packages/SimpleCDN)
+- [![SimpleCDN.Extensions.Redis on NuGet](https://img.shields.io/nuget/v/SimpleCDN?style=flat-square&logo=redis&label=SimpleCDN.Extensions.Redis&link=https%3A%2F%2Fwww.nuget.org%2Fpackages%2FSimpleCDN.Extensions.Redis)](https://nuget.org/packages/SimpleCDN.Extensions.Redis)
 
 ## How to use SimpleCDN as a standalone application?
 ### Using Docker
 
 **Tags:**
-- `latest`: the latest stable release
-- `main`: the latest build of the main branch, usually on the last commit. Not recommended for production as it may contain bugs or break.
-- `vX.X.X`: pin to a specific version. Recommended for production scenarios. Supported versions can be found in the [tags listing](https://github.com/JonathanBout/SimpleCDN/tags).
+- `latest`: the latest stable release, useful for quickly testing SimpleCDN.
+- `main`: the latest build of the main branch, usually on the last commit. Not recommended for anything as it may contain bugs or break.
+- `X.X[.X]`: pin to a specific minor or patch version. This provides higher precision and is recommended for production scenarios, especially with multi-instance environments. Supported versions can be found in the [tags listing](https://github.com/JonathanBout/SimpleCDN/tags). Note that the docker tag does not have the `v` prefix, so Git tag `v0.7.1` is Docker tag `0.7` or `0.7.1`.
 
 #### with `docker run`
 ```
-docker run -p "<your_port>:8080" -v "<your_cdn_data>:/data:ro" ghcr.io/jonathanbout/simplecdn
+docker run -p "<your_port>:8080" -v "<your_cdn_data>:/data:ro" ghcr.io/jonathanbout/simplecdn[:<version>]
 ```
 This will pull and run the latest stable build of SimpleCDN.
 
@@ -28,7 +28,7 @@ This will pull and run the latest stable build of SimpleCDN.
 ```yml
 services:
   server:
-    image: ghcr.io/jonathanbout/simplecdn
+    image: ghcr.io/jonathanbout/simplecdn[:<version>]
     volumes:
     - <your_cdn_data>:/data:ro # :ro to make the bind mount read-only
     ports:
