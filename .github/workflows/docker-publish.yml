@@ -87,6 +87,8 @@ jobs:
           outputs: type=image,"name=${{ env.DOCKER_REPO }}",push-by-digest=true,name-canonical=true,push=true
           provenance: false
           sbom: false
+          cache-to: gha
+          cache-from: gha,scope=${{ matrix.dotnet_rid }}
           build-args: |
             DOTNET_BUILD_PLATFORM=${{ matrix.dotnet_rid }}
             
