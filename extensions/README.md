@@ -21,4 +21,4 @@ public static class SimpleCDNBuilderExtensions
     }
 }
 ```
-For a real-life example, look at[Redis/SimpleCDNBuilderExtensions.cs](https://github.com/jonathanbout/simplecdn/tree/main/extensions/Redis/SimpleCDNBuilderExtensions.cs).
+For a real-life example, look at [Redis/SimpleCDNBuilderExtensions.cs](https://github.com/jonathanbout/simplecdn/tree/main/extensions/Redis/SimpleCDNBuilderExtensions.cs).
