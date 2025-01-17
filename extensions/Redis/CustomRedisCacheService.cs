@@ -30,7 +30,7 @@ namespace SimpleCDN.Extensions.Redis
 			_redisConnectionMultiplexers = new(
 				() => ConnectionMultiplexer.Connect(
 							_redisOptions.CurrentValue.ConnectionString,
-							options => options.ClientName = redisOptions.CurrentValue.InstanceName),
+							options => options.ClientName = redisOptions.CurrentValue.ClientName),
 				instance => instance.IsConnected && !instance.IsConnecting);
 		}
 
