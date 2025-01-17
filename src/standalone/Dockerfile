@@ -48,14 +48,14 @@ WORKDIR "/code/src/standalone"
 RUN dotnet build "./SimpleCDN.Standalone.csproj" --no-restore -c $BUILD_CONFIGURATION \
     -r $DOTNET_BUILD_PLATFORM --nologo -v:m
 
-# This stage is used to publish the app.
+# now use the build output to publish the app into its final form
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 ARG DOTNET_BUILD_PLATFORM=linux-x64
 RUN dotnet publish "./SimpleCDN.Standalone.csproj" --no-build -c $BUILD_CONFIGURATION \
     -r $DOTNET_BUILD_PLATFORM -o /app/publish -p:UseAppHost=true --nologo -v:m
 
-# This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
+# This stage copies just the published output into a new image
 FROM ${FINAL_BASE_IMAGE:-mcr.microsoft.com/dotnet/runtime-deps:9.0} AS final
 WORKDIR /app
 
