@@ -13,20 +13,13 @@ namespace SimpleCDN.Tests.Load
 		static async Task Main(string[] args)
 		{
 			Console.Clear();
-			if (args.Length != 2)
+			if (args.Length != 1)
 			{
-				Console.WriteLine("Usage: SimpleCDN.Tests.Load <url> <requests per second>");
+				Console.WriteLine("Usage: SimpleCDN.Tests.Load <url>");
 				return;
 			}
 
-			var url = args[0];
-			if (!int.TryParse(args[1], out var requestsPerSecond))
-			{
-				Console.WriteLine("Invalid number of requests.");
-				return;
-			}
-
-			if (!Uri.TryCreate(url, UriKind.Absolute, out Uri? uriResult))
+			if (!Uri.TryCreate(args[0], UriKind.Absolute, out Uri? url))
 			{
 				Console.WriteLine("Invalid URL.");
 				return;
@@ -34,7 +27,7 @@ namespace SimpleCDN.Tests.Load
 
 			HttpClient CreateClient() => new()
 			{
-				BaseAddress = uriResult,
+				BaseAddress = url,
 				DefaultRequestHeaders = {
 					{ "User-Agent", "SimpleCDN Load Testing" }
 				}
@@ -64,10 +57,24 @@ namespace SimpleCDN.Tests.Load
 
 				lock (_consoleLock)
 				{
+					double average;
+					int max;
+					int min;
+
+					if (durations.IsEmpty)
+					{
+						average = max = min = 0;
+					} else
+					{
+						average = durations.Average();
+						max = durations.Max();
+						min = durations.Min();
+					}
+
 					Console.SetCursorPosition(left, top);
-					Console.WriteLine("Average request duration: {0:0.##} ms          ", durations.Average());
-					Console.WriteLine("Max request duration: {0:0.##} ms          ", durations.Max());
-					Console.WriteLine("Min request duration: {0:0.##} ms          ", durations.Min());
+					Console.WriteLine("Average request duration: {0:0.##} ms          ", average);
+					Console.WriteLine("Max request duration: {0:0.##} ms          ", max);
+					Console.WriteLine("Min request duration: {0:0.##} ms          ", min);
 					Console.WriteLine("Total requests: {0}          ", durations.Count);
 					Console.WriteLine("Failed requests: {0}          ", errors);
 					Console.WriteLine("                                                                    ");
@@ -81,7 +88,10 @@ namespace SimpleCDN.Tests.Load
 				}
 			}
 
-			await Parallel.ForEachAsync(new InfiniteEnumerable(), async (_, ct) =>
+			await Parallel.ForEachAsync(new InfiniteEnumerable(), new ParallelOptions
+			{
+				MaxDegreeOfParallelism = Environment.ProcessorCount * 2
+			}, async (_, ct) =>
 			{
 				using HttpClient client = CreateClient();
 				var start = Stopwatch.GetTimestamp();
@@ -96,6 +106,11 @@ namespace SimpleCDN.Tests.Load
 
 		static double Percentile(this ConcurrentBag<int> durations, double percentile)
 		{
+			if (durations.IsEmpty)
+			{
+				return 0;
+			}
+
 			var sorted = durations.Order().ToArray();
 			int index = (int)(percentile * sorted.Length);
 			return sorted[index];

@@ -17,4 +17,4 @@ services:
     environment:
     - ASPNETCORE_ENVIRONMENT=Development
     - Cache__Redis__ConnectionString=redis:6379 # Only needed if Cache__Type=Redis
-    - Cache__Type=Redis # Redis, InMemory, or Disabled
+    - Cache__Type=InMemory # Redis, InMemory, or Disabled

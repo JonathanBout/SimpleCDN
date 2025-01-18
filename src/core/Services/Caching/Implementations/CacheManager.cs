@@ -61,7 +61,7 @@ namespace SimpleCDN.Services.Caching.Implementations
 #endif
 			if (bytes is null || bytes.Length == 0)
 			{
-				_logger.LogDebug("Cache MISS for {Key} in {Duration:0} ms", key, elapsed.TotalMilliseconds);
+				_logger.LogInformation("Cache MISS for {Key} in {Duration:0} ms", key, elapsed.TotalMilliseconds);
 				value = null;
 				return false;
 			}
