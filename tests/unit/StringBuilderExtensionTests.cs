@@ -9,22 +9,27 @@ namespace SimpleCDN.Tests.Unit
 {
 	public class StringBuilderExtensionTests
 	{
-		public record TestInput(string[] Parts, Encoding Encoding)
+		public record TestInput(string[] Parts, (string, object[])[] formattedParts, Encoding Encoding)
 		{
 			public override string ToString() => $"{Parts.Length} parts, {Encoding.EncodingName}";
 		}
 
-		internal static TestInput[] ToByteArray_HasSameResultAs_Manual_TestCases()
+		private static TestInput[] ToByteArray_HasSameResultAs_Manual_TestCases()
 		{
+			(string, object[])[] formattedParts = [("Test {0}", [new { aa = "bb" }])];
+			string[] shortArray = ["Hello, ", "world!"];
+			string[] longArray = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j",
+				"k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
+
 			return [
-				new TestInput(["Hello, ", "world!"], Encoding.UTF8),
-				new TestInput(["Hello, ", "world!"], Encoding.Unicode),
-				new TestInput(["Hello, ", "world!"], Encoding.ASCII),
-				new TestInput(["Hello, ", "world!"], Encoding.UTF32),
-				new TestInput(["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"], Encoding.UTF8),
-				new TestInput(["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"], Encoding.Unicode),
-				new TestInput(["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"], Encoding.ASCII),
-				new TestInput(["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"], Encoding.UTF32)
+				new TestInput(shortArray, [], Encoding.UTF8),
+				new TestInput(shortArray, [], Encoding.Unicode),
+				new TestInput(shortArray, [], Encoding.ASCII),
+				new TestInput(shortArray, [], Encoding.UTF32),
+				new TestInput(longArray, formattedParts, Encoding.UTF8),
+				new TestInput(longArray, formattedParts, Encoding.Unicode),
+				new TestInput(longArray, formattedParts, Encoding.ASCII),
+				new TestInput(longArray, formattedParts, Encoding.UTF32)
 				];
 		}
 
@@ -32,12 +37,17 @@ namespace SimpleCDN.Tests.Unit
 		[TestCaseSource(nameof(ToByteArray_HasSameResultAs_Manual_TestCases))]
 		public void ToByteArray_HasSameResultAs_Manual(TestInput input)
 		{
-			(string[] parts, Encoding encoding) = input;
+			(string[] parts, (string, object[])[] formattedParts, Encoding encoding) = input;
 
 			var sb = new StringBuilder();
 			foreach (var part in parts)
 			{
 				sb.Append(part);
+			}
+
+			foreach ((string format, object[] args) in formattedParts)
+			{
+				sb.AppendFormat(format, args);
 			}
 
 			var manual = sb.ToByteArray(encoding);

@@ -48,8 +48,10 @@ namespace SimpleCDN.Services.Caching.Implementations
 			{
 				if (_durations.Count == int.MaxValue - 10)
 				{
+					// if we are about to run out of space,
 					// remove about half of the durations to make room for new ones.
-					// this has the nice side effect of newer values being more important
+					// this has the nice side effect of newer values having a greater
+					// impact on the end result
 					_durations.RemoveAll(_ => Random.Shared.NextDouble() > .5);
 				}
 

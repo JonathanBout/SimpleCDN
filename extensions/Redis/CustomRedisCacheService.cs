@@ -27,7 +27,7 @@ namespace SimpleCDN.Extensions.Redis
 		private RedisCacheConfiguration Configuration => options.CurrentValue;
 		private CacheConfiguration CacheConfiguration => cacheOptions.CurrentValue;
 
-		private IDatabase Database => _redisConnection.GetDatabase().WithKeyPrefix(Configuration.KeyPrefix + "::");
+		private IDatabase Database => _redisConnection.GetDatabase().WithKeyPrefix(Configuration.KeyPrefix);
 
 		public byte[]? Get(string key)
 		{

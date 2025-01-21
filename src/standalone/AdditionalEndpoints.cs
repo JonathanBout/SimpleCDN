@@ -10,13 +10,20 @@ namespace SimpleCDN.Standalone
 #if DEBUG
 			if (app.Configuration.GetSection("Cache:Type").Get<CacheType>() == CacheType.InMemory)
 			{
-				app.MapGet("/" + GlobalConstants.SystemFilesRelativePath + "/server/cache/clear", (HttpContext ctx, ICacheImplementationResolver cacheResolver) =>
+				// if the cache used is the in-memory implementation, add an endpoint to clear it
+				// as there is no other way to clear it without restarting the server,
+				// opposed to for example the Redis implementation which has the Redis CLI
+				app.MapGet("/" + GlobalConstants.SystemFilesRelativePath + "/server/cache/clear", (ICacheImplementationResolver cacheResolver) =>
 				{
-					ctx.Response.Headers.Clear();
+					// TODO: currently, the browser makes a request to favicon.ico after the cache is cleared,
+					// which means there is a new cache entry created for the favicon.ico file.
+					// This is not a problem, but it would be nice to prevent this from happening.
 
 					if (cacheResolver.Implementation is InMemoryCache imc)
 					{
 						imc.Clear();
+						// force garbage collection to make sure all memory
+						// used by the cached files is properly released
 						GC.Collect();
 						return Results.Ok();
 					}

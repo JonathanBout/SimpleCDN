@@ -18,9 +18,9 @@ namespace SimpleCDN.Extensions.Redis
 		public string ClientName { get; set; } = "SimpleCDN";
 
 		/// <summary>
-		/// A prefix to be added to all keys stored in Redis. Default is SimpleCDN. An empty value is allowed.
+		/// A prefix to be added to all keys stored in Redis. Default is <c>SimpleCDN::</c>. An empty value is allowed.
 		/// </summary>
-		public string KeyPrefix { get; set; } = "SimpleCDN";
+		public string KeyPrefix { get; set; } = "SimpleCDN::";
 
 		/// <summary>
 		/// Validates the configuration settings.

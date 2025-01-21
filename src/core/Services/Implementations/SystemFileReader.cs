@@ -8,6 +8,7 @@ namespace SimpleCDN.Services.Implementations
 	internal class SystemFileReader(ILogger<SystemFileReader> logger, ICacheManager cache) : ISystemFileReader
 	{
 		const string SystemFilesNamespace = "SimpleCDN.SystemFiles";
+		const string CacheKeyPrefix = "/" + GlobalConstants.SystemFilesRelativePath + "::";
 
 		private readonly ILogger<SystemFileReader> _logger = logger;
 		private readonly ICacheManager _cache = cache;
@@ -18,20 +19,22 @@ namespace SimpleCDN.Services.Implementations
 		{
 			var requestPathString = requestPath.TrimStart('/').ToString();
 
+			var cacheKey = CacheKeyPrefix + requestPathString;
+
 			_logger.LogDebug("Requesting system file '{path}'", requestPathString.ForLog());
 
 			IFileInfo fileInfo = _systemFilesProvider.GetFileInfo(requestPathString);
 
 			if (!fileInfo.Exists || fileInfo.IsDirectory)
 			{
-				_cache.TryRemove(requestPathString);
+				_cache.TryRemove(cacheKey);
 
 				_logger.LogDebug("System file '{path}' does not exist", requestPathString);
 
 				return null;
 			}
 
-			if (_cache.TryGetValue(requestPathString, out CachedFile? cachedFile) && cachedFile.LastModified >= fileInfo.LastModified)
+			if (_cache.TryGetValue(cacheKey, out CachedFile? cachedFile) && cachedFile.LastModified >= fileInfo.LastModified)
 			{
 				_logger.LogDebug("Serving system file '{path}' from cache", requestPathString);
 				return new CDNFile(cachedFile.Content, cachedFile.MimeType.ToContentTypeString(), cachedFile.LastModified, cachedFile.Compression);
@@ -62,7 +65,7 @@ namespace SimpleCDN.Services.Implementations
 			DateTimeOffset lastModified = fileInfo.LastModified;
 
 			// unchecked cast is safe because we know the file is small enough
-			_cache.CacheFile(requestPathString, content, unchecked((int)originalLength), lastModified, mediaType, compression);
+			_cache.CacheFile(cacheKey, content, unchecked((int)originalLength), lastModified, mediaType, compression);
 
 			return new CDNFile(content, mediaType.ToContentTypeString(), lastModified, compression);
 		}
