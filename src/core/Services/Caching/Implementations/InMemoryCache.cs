@@ -155,7 +155,13 @@ namespace SimpleCDN.Services.Caching.Implementations
 
 		public Task StopAsync(CancellationToken cancellationToken)
 		{
+#if NETSTANDARD2_0
+			// .NET Standard 2.0 does not support CancellationTokenSource.CancelAsync
+			_backgroundCTS?.Cancel();
+			return Task.CompletedTask;
+#else
 			return _backgroundCTS?.CancelAsync() ?? Task.CompletedTask;
+#endif
 		}
 		#endregion
 

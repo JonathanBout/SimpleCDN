@@ -1,8 +1,5 @@
-using Microsoft.Extensions.Configuration;
 using SimpleCDN.Configuration;
 using SimpleCDN.Endpoints;
-using SimpleCDN.Services.Caching;
-using SimpleCDN.Services.Caching.Implementations;
 
 namespace SimpleCDN.Standalone
 {

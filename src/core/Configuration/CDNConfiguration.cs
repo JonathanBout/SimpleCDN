@@ -66,18 +66,30 @@
 				isValid = false;
 			}
 
-			if (MaxCachedItemSize < 1 || MaxCachedItemSize > Array.MaxLength)
+#if NETSTANDARD2_1
+#pragma warning disable IDE0078 // Use pattern matching
+			const int maxArrayLength = 0X7FFFFFC7; // hardcoded value of Array.MaxLength
+#else
+			int maxArrayLength = Array.MaxLength;
+#endif
+
+			if (MaxCachedItemSize < 1 || MaxCachedItemSize > maxArrayLength)
 			{
 				logger.LogCritical("MaxCachedItemSize must be greater than 0 and smaller than Array.MaxLength ({max array length} in this case)", Array.MaxLength);
 				isValid = false;
 			}
 
-			// warn if MaxCachedItemSize is greater than a third of system memory
-			GCMemoryInfo gcMemoryInfo = GC.GetGCMemoryInfo();
+#if NETSTANDARD2_1
+#pragma warning restore IDE0078 // Use pattern matching
+			long availableMemory = Environment.WorkingSet;
+#else
+			long availableMemory = GC.GetGCMemoryInfo().TotalAvailableMemoryBytes;
+#endif
 
-			if (MaxCachedItemSize > gcMemoryInfo.TotalAvailableMemoryBytes / 3)
+			// warn if MaxCachedItemSize is greater than a third of system memory
+			if (MaxCachedItemSize > availableMemory / 3)
 			{
-				logger.LogWarning($$"""{{nameof(MaxCachedItemSize)}} is greater than a third of available memory ({availableMemory} MB). Are you sure this is a good idea?""", gcMemoryInfo.TotalAvailableMemoryBytes / 1_000_000);
+				logger.LogWarning($$"""{{nameof(MaxCachedItemSize)}} is greater than a third of available memory ({availableMemory} MB). Are you sure this is a good idea?""", availableMemory / 1_000_000);
 			}
 
 			return isValid;

@@ -3,6 +3,20 @@
  * In here, we also have the Globals class for constant Assembly-wide values.
  */
 
+global using Microsoft.AspNetCore.Builder;
+global using Microsoft.AspNetCore.Http;
+global using Microsoft.Extensions.Configuration;
+global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Hosting;
+global using Microsoft.Extensions.Logging;
+global using System;
+global using System.Collections.Generic;
+global using System.IO;
+global using System.Linq;
+global using System.Threading;
+global using System.Threading.Tasks;
+
+
 using SimpleCDN.Services.Caching.Implementations;
 using SimpleCDN.Services.Implementations;
 using System.Runtime.CompilerServices;
