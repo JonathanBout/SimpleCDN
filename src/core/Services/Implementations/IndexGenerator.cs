@@ -12,6 +12,8 @@ namespace SimpleCDN.Services.Implementations
 {
 	internal class IndexGenerator(IOptionsMonitor<CDNConfiguration> options, ILogger<IndexGenerator> logger, ICDNContext context) : IIndexGenerator
 	{
+		const string ROBOTS_META = "<meta name=\"robots\" content=\"noindex, nofollow\">";
+
 		private readonly IOptionsMonitor<CDNConfiguration> _options = options;
 		private readonly ILogger<IndexGenerator> _logger = logger;
 		private readonly ICDNContext _context = context;
@@ -22,6 +24,7 @@ namespace SimpleCDN.Services.Implementations
 			ReturnSpecialDirectories = false,
 			RecurseSubdirectories = false
 		};
+
 		public byte[]? GenerateIndex(string absolutePath, string rootRelativePath)
 		{
 			if (!Directory.Exists(absolutePath))
@@ -29,9 +32,7 @@ namespace SimpleCDN.Services.Implementations
 
 			var directory = new DirectoryInfo(absolutePath);
 
-			var index = new StringBuilder();
-
-			var robotsMeta = _options.CurrentValue.BlockRobots ? "<meta name=\"robots\" content=\"noindex, nofollow\">" : "";
+			var robotsMeta = _options.CurrentValue.BlockRobots ? ROBOTS_META : string.Empty;
 
 			// if the path is a single slash, we want to remove it
 			// to show "Index of /" instead of "Index of //"
@@ -40,6 +41,7 @@ namespace SimpleCDN.Services.Implementations
 				rootRelativePath = "";
 			}
 
+			var index = new StringBuilder();
 			index.Append(
 				$$"""
 				<!DOCTYPE html>
@@ -47,6 +49,7 @@ namespace SimpleCDN.Services.Implementations
 				<head>
 					<meta charset="utf-8">
 					{{robotsMeta}}
+					<link rel="icon" href="{{_context.GetSystemFilePath("logo.svg")}}" />
 					<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0">
 					<meta name="description" content="Index of /{{HttpUtility.HtmlAttributeEncode(_options.CurrentValue.PageTitle)}}">
 					<link rel="stylesheet" href="{{_context.GetSystemFilePath("styles.css")}}">

@@ -19,6 +19,7 @@ namespace SimpleCDN.Services.Caching.Implementations
 		private readonly ConcurrentDictionary<string, ValueWrapper> _dictionary = new(StringComparer.OrdinalIgnoreCase);
 		public long MaxSize => _options.CurrentValue.MaxSize * 1000; // convert from kB to B
 		private readonly ILogger<InMemoryCache> _logger = logger;
+
 		public long Size => _dictionary.Values.Sum(wrapper => (long)wrapper.Size);
 
 		public int Count => _dictionary.Count;
@@ -29,11 +30,8 @@ namespace SimpleCDN.Services.Caching.Implementations
 		{
 			if (_dictionary.TryGetValue(key, out ValueWrapper? wrapper))
 			{
-				_logger.LogDebug("Cache HIT {key}", key.ForLog());
 				return wrapper.Value;
 			}
-
-			_logger.LogDebug("Cache MISS {key}", key.ForLog());
 
 			return null;
 		}
@@ -84,6 +82,11 @@ namespace SimpleCDN.Services.Caching.Implementations
 
 			Set(key, value, options);
 			return Task.CompletedTask;
+		}
+
+		internal void Clear()
+		{
+			_dictionary.Clear();
 		}
 
 		#region Automated Purging

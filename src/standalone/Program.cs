@@ -1,5 +1,8 @@
+using Microsoft.Extensions.Configuration;
 using SimpleCDN.Configuration;
 using SimpleCDN.Endpoints;
+using SimpleCDN.Services.Caching;
+using SimpleCDN.Services.Caching.Implementations;
 
 namespace SimpleCDN.Standalone
 {
@@ -21,16 +24,11 @@ namespace SimpleCDN.Standalone
 			builder.Services.AddSimpleCDN()
 				.MapConfiguration(builder.Configuration);
 
-			WebApplication app = builder.Build();
-
-			app.MapSimpleCDN();
-
-			// health check endpoint
-			app.MapGet("/" + GlobalConstants.SystemFilesRelativePath + "/server/health", () => "healthy");
-
-			app.MapGet("/favicon.ico", () => Results.Redirect("/" + GlobalConstants.SystemFilesRelativePath + "/logo.ico", true));
-
-			app.Run();
+			builder
+				.Build()
+				.MapSimpleCDN()
+				.MapAdditionalEndpoints()
+				.Run();
 		}
 	}
 }
