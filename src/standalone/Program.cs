@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using SimpleCDN.Configuration;
@@ -5,8 +6,11 @@ using SimpleCDN.Endpoints;
 using SimpleCDN.Extensions.Redis;
 using SimpleCDN.Services.Caching;
 using SimpleCDN.Services.Caching.Implementations;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Eventing.Reader;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using TomLonghurst.ReadableTimeSpan;
 
 namespace SimpleCDN.Standalone
@@ -17,6 +21,7 @@ namespace SimpleCDN.Standalone
 		private static void Main(string[] args)
 		{
 			ReadableTimeSpan.EnableConfigurationBinding();
+
 
 			WebApplicationBuilder builder = WebApplication.CreateSlimBuilder(args);
 
@@ -31,13 +36,18 @@ namespace SimpleCDN.Standalone
 			builder.Services.AddSimpleCDN()
 				.MapConfiguration(builder.Configuration);
 
+			builder.Services.ConfigureHttpJsonOptions(options => options.SerializerOptions.TypeInfoResolverChain.Add(ExtraSourceGenerationContext.Default));
+
 			WebApplication app = builder
 				.Build();
 #if DEBUG
 			// useful for debugging configuration issues
 			if (args.Contains("--dump-config"))
 			{
-				DumpConfiguration(app);
+				if (RuntimeFeature.IsDynamicCodeSupported)
+				{
+					DumpConfiguration(app);
+				}
 				return;
 			}
 #endif
@@ -50,7 +60,6 @@ namespace SimpleCDN.Standalone
 #if DEBUG
 		private static void DumpConfiguration(WebApplication app)
 		{
-
 			IOptions<CDNConfiguration> cdnConfig = app.Services.GetRequiredService<IOptions<CDNConfiguration>>();
 			IOptions<CacheConfiguration> cacheConfig = app.Services.GetRequiredService<IOptions<CacheConfiguration>>();
 			IOptions<InMemoryCacheConfiguration> inMemoryConfig = app.Services.GetRequiredService<IOptions<InMemoryCacheConfiguration>>();
@@ -59,13 +68,13 @@ namespace SimpleCDN.Standalone
 			var jsonConfig = new JsonSerializerOptions { WriteIndented = true };
 
 			Console.WriteLine("CDN Configuration:");
-			Console.WriteLine(JsonSerializer.Serialize(cdnConfig.Value, jsonConfig));
+			Console.WriteLine(JsonSerializer.Serialize(cdnConfig.Value, ExtraSourceGenerationContext.Default.CDNConfiguration));
 			Console.WriteLine("Cache Configuration:");
-			Console.WriteLine(JsonSerializer.Serialize(cacheConfig.Value, jsonConfig));
+			Console.WriteLine(JsonSerializer.Serialize(cacheConfig.Value, ExtraSourceGenerationContext.Default.CacheConfiguration));
 			Console.WriteLine("InMemory Cache Configuration:");
-			Console.WriteLine(JsonSerializer.Serialize(inMemoryConfig.Value, jsonConfig));
+			Console.WriteLine(JsonSerializer.Serialize(inMemoryConfig.Value, ExtraSourceGenerationContext.Default.InMemoryCacheConfiguration));
 			Console.WriteLine("Redis Cache Configuration:");
-			Console.WriteLine(JsonSerializer.Serialize(redisConfig.Value, jsonConfig));
+			Console.WriteLine(JsonSerializer.Serialize(redisConfig.Value, ExtraSourceGenerationContext.Default.RedisCacheConfiguration));
 
 			Console.WriteLine();
 			Console.Write("Selected cache implementation: ");

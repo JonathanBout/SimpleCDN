@@ -30,8 +30,6 @@ namespace SimpleCDN.Configuration
 		/// </summary>
 		public static ISimpleCDNBuilder AddSimpleCDN(this IServiceCollection services)
 		{
-			services.ConfigureHttpJsonOptions(options => options.SerializerOptions.TypeInfoResolverChain.Add(SourceGenerationContext.Default));
-
 			services.AddHttpContextAccessor();
 			services.AddScoped<ICDNContext, CDNContext>();
 			services.AddScoped<IIndexGenerator, IndexGenerator>();
