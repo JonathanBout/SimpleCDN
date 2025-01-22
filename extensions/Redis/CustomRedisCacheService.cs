@@ -19,32 +19,65 @@ namespace SimpleCDN.Extensions.Redis
 		private RedisCacheConfiguration Configuration => options.CurrentValue;
 		private CacheConfiguration CacheConfiguration => cacheOptions.CurrentValue;
 
+		private readonly SemaphoreSlim _redisConnectionLock = new(1);
+
 		/// <summary>
 		/// Checks if the Redis connection is still valid and creates a new one if necessary.
 		/// </summary>
 		private ConnectionMultiplexer GetRedisConnection()
 		{
-			if (_redisConnection is not { IsConnected: true } or { IsConnecting: true })
-			{
-				_redisConnection?.Dispose();
-				_redisConnection = null;
-			}
+			_redisConnectionLock.Wait();
 
-			return _redisConnection ??= ConnectionMultiplexer.Connect(
-				Configuration.ConnectionString,
-				config => config.ClientName = Configuration.ClientName
-				);
+			try
+			{
+				if (_redisConnection is not { IsConnected: true } or { IsConnecting: true })
+				{
+					_redisConnection?.Dispose();
+					_redisConnection = null;
+				}
+
+				return _redisConnection ??= ConnectionMultiplexer.Connect(
+					Configuration.ConnectionString,
+					config => config.ClientName = Configuration.ClientName
+					);
+			} finally
+			{
+				_redisConnectionLock.Release();
+			}
 		}
-		private IDatabase Database => GetRedisConnection().GetDatabase().WithKeyPrefix(Configuration.KeyPrefix);
+		private async Task<ConnectionMultiplexer> GetRedisConnectionAsync()
+		{
+			await _redisConnectionLock.WaitAsync();
+			try
+			{
+
+				if (_redisConnection is not { IsConnected: true } or { IsConnecting: true })
+				{
+					_redisConnection?.Dispose();
+					_redisConnection = null;
+				}
+
+				return _redisConnection ??= await ConnectionMultiplexer.ConnectAsync(
+					Configuration.ConnectionString,
+					config => config.ClientName = Configuration.ClientName
+					);
+			} finally
+			{
+				_redisConnectionLock.Release();
+			}
+		}
+
+		private IDatabase GetDatabase() => GetRedisConnection().GetDatabase().WithKeyPrefix(Configuration.KeyPrefix);
+		private async Task<IDatabaseAsync> GetDatabaseAsync() => (await GetRedisConnectionAsync()).GetDatabase().WithKeyPrefix(Configuration.KeyPrefix);
 
 		public byte[]? Get(string key)
 		{
-			return Database.StringGetSetExpiry(key, CacheConfiguration.MaxAge);
+			return GetDatabase().StringGetSetExpiry(key, CacheConfiguration.MaxAge);
 		}
 
 		public async Task<byte[]?> GetAsync(string key, CancellationToken token = default)
 		{
-			return await Database.StringGetSetExpiryAsync(key, CacheConfiguration.MaxAge);
+			return await (await GetDatabaseAsync()).StringGetSetExpiryAsync(key, CacheConfiguration.MaxAge);
 		}
 
 		public void Refresh(string key) { }
@@ -52,22 +85,22 @@ namespace SimpleCDN.Extensions.Redis
 		public Task RefreshAsync(string key, CancellationToken token = default) => token.IsCancellationRequested ? Task.FromCanceled(token) : Task.CompletedTask;
 		public void Remove(string key)
 		{
-			Database.KeyDelete(key);
+			GetDatabase().KeyDelete(key);
 		}
 
-		public Task RemoveAsync(string key, CancellationToken token = default)
+		public async Task RemoveAsync(string key, CancellationToken token = default)
 		{
-			return Database.KeyDeleteAsync(key);
+			await (await GetDatabaseAsync()).KeyDeleteAsync(key);
 		}
 
 		public void Set(string key, byte[] value, DistributedCacheEntryOptions options)
 		{
-			Database.StringSet(key, value, CacheConfiguration.MaxAge);
+			GetDatabase().StringSet(key, value, CacheConfiguration.MaxAge);
 		}
 
-		public Task SetAsync(string key, byte[] value, DistributedCacheEntryOptions options, CancellationToken token = default)
+		public async Task SetAsync(string key, byte[] value, DistributedCacheEntryOptions options, CancellationToken token = default)
 		{
-			return Database.StringSetAsync(key, value, CacheConfiguration.MaxAge);
+			await (await GetDatabaseAsync()).StringSetAsync(key, value, CacheConfiguration.MaxAge);
 		}
 
 		public ValueTask DisposeAsync()
