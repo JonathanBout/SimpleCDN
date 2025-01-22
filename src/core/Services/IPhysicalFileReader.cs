@@ -6,20 +6,6 @@
 	internal interface IPhysicalFileReader
 	{
 		/// <summary>
-		/// Determines if the file at the specified path can be loaded into an array.
-		/// </summary>
-		/// <param name="path">The path of the file.</param>
-		/// <returns>True if the file can be loaded into an array, otherwise false.</returns>
-		bool CanLoadIntoArray(string path);
-
-		/// <summary>
-		/// Determines if a file of the specified size can be loaded into an array.
-		/// </summary>
-		/// <param name="size">The size of the file.</param>
-		/// <returns>True if the file can be loaded into an array, otherwise false.</returns>
-		bool CanLoadIntoArray(long size);
-
-		/// <summary>
 		/// Checks if the directory at the specified path exists.
 		/// </summary>
 		/// <param name="path">The path of the directory.</param>
@@ -75,5 +61,12 @@
 		/// <param name="path">The path of the file.</param>
 		/// <returns>True if the file is a dot file, otherwise false.</returns>
 		bool IsDotFile(string path);
+
+		/// <summary>
+		/// Gets the size of the file at the specified path.
+		/// </summary>
+		/// <param name="path">The path to the file</param>
+		/// <returns>The size of the file, or <see cref="long.MaxValue"/> if any error occurs.</returns>
+		long GetSize(string path);
 	}
 }

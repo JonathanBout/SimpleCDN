@@ -81,7 +81,7 @@ namespace SimpleCDN.Services.Caching.Implementations
 			{
 				// Use sliding expiration if max age is set.
 				// Because cached file is automatically invalidated when the file is updated, we can do this safely
-				SlidingExpiration = _options.CurrentValue.MaxAge > 0 ? TimeSpan.FromMinutes(_options.CurrentValue.MaxAge) : null,
+				SlidingExpiration = _options.CurrentValue.MaxAge > TimeSpan.Zero ? _options.CurrentValue.MaxAge : null,
 			};
 			Cache.SetAsync(path, file.GetBytes(), itemConfig);
 		}
@@ -105,6 +105,7 @@ namespace SimpleCDN.Services.Caching.Implementations
 			Cache.Remove(key);
 			return true;
 		}
+
 		public bool TryRemove(string key, [NotNullWhen(true)] out CachedFile? value)
 		{
 			if (TryGetValue(key, out value))
@@ -112,7 +113,9 @@ namespace SimpleCDN.Services.Caching.Implementations
 			return false;
 		}
 
-#if DEBUG
+		public bool CanCache(long size) => size < _options.CurrentValue.MaxItemSize * 1000; // * 1000 to convert from kB to B
+
+#if DEBUG // These methods and classes are used to provide a debug view of the cache manager
 		public object GetDebugView()
 		{
 			lock (_durationsLock)
@@ -131,16 +134,15 @@ namespace SimpleCDN.Services.Caching.Implementations
 						_hitCount, _missCount);
 			}
 		}
-#endif
 	}
 
-#if DEBUG
 	internal class BasicDebugView(string implementation, ulong hitCount, ulong missCount)
 	{
 		public string Implementation { get; } = implementation;
 		public ulong HitCount { get; } = hitCount;
 		public ulong MissCount { get; } = missCount;
 	}
+
 	internal class DetailedDebugView : BasicDebugView
 	{
 		public double AverageDuration { get; }
@@ -190,26 +192,6 @@ namespace SimpleCDN.Services.Caching.Implementations
 						  ulong missCount) : DetailedDebugView(implementation, durations, hitCount, missCount)
 	{
 		public object Details { get; } = details;
-	}
 #endif
-
-	/// <summary>
-	/// Resolves the selected cache implementation from the registered services.
-	/// </summary>
-	internal class CacheImplementationResolver(IServiceProvider services, Type implementationType) : ICacheImplementationResolver
-	{
-		private IDistributedCache? _impl;
-		public IDistributedCache Implementation
-		{
-			get
-			{
-				_impl ??= services.GetServices<IDistributedCache>().FirstOrDefault(s => s.GetType() == implementationType);
-
-				if (_impl is null)
-					throw new InvalidOperationException($"The specified cache implementation ({implementationType.Name}) is not registered.");
-
-				return _impl;
-			}
-		}
 	}
 }

@@ -92,15 +92,14 @@ namespace SimpleCDN.Services.Caching.Implementations
 
 		private void Purge()
 		{
-			var maxAge = TimeSpan.FromMinutes(_cacheOptions.CurrentValue.MaxAge);
-			_dictionary.RemoveWhere(kvp => Stopwatch.GetElapsedTime(kvp.Value.AccessedAt) < maxAge);
+			_dictionary.RemoveWhere(kvp => Stopwatch.GetElapsedTime(kvp.Value.AccessedAt) < _cacheOptions.CurrentValue.MaxAge);
 		}
 
 		private async Task PurgeLoop()
 		{
 			while (_backgroundCTS?.Token.IsCancellationRequested is false)
 			{
-				await Task.Delay(TimeSpan.FromMinutes(_options.CurrentValue.PurgeInterval), _backgroundCTS.Token);
+				await Task.Delay(_options.CurrentValue.PurgeInterval, _backgroundCTS.Token);
 
 				if (_backgroundCTS.Token.IsCancellationRequested)
 					break;
@@ -111,15 +110,14 @@ namespace SimpleCDN.Services.Caching.Implementations
 			}
 		}
 
-
 		public Task StartAsync(CancellationToken cancellationToken)
 		{
 			// register the options change event to restart the background task
 			_optionsOnChange ??= _options.OnChange(_ => StartAsync(default));
 
-			if (_cacheOptions.CurrentValue.MaxAge == 0 || _options.CurrentValue.PurgeInterval == 0)
+			if (_cacheOptions.CurrentValue.MaxAge == TimeSpan.Zero || _options.CurrentValue.PurgeInterval == TimeSpan.Zero)
 			{
-				// automatic expiration and purging are disabled,
+				// automatic expiration and purging are disabled.
 				// stop the background task if it's running and return
 				_backgroundCTS?.Dispose();
 				_backgroundCTS = null;
@@ -152,6 +150,7 @@ namespace SimpleCDN.Services.Caching.Implementations
 
 		public Task StopAsync(CancellationToken cancellationToken)
 		{
+			_optionsOnChange?.Dispose();
 			return _backgroundCTS?.CancelAsync() ?? Task.CompletedTask;
 		}
 		#endregion

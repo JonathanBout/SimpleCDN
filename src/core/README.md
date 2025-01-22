@@ -41,8 +41,6 @@ cdnBuilder.Configure(options => { ... });
 - `options.Footer`: Set a custom footer for generated index pages. Default is `Powered by SimpleCDN`,
   with a link to the github repo.
 - `options.PageTitle`: Set a custom title for generated index pages. Default is `SimpleCDN`.
-- `options.MaxCachedItemSize`: The maximum size of a file to cache in kB, other files will be streamed
-  directly from disk. Default is `8_000` (8MB).
 - `options.AllowDotfileAccess`: Whether to allow access to files starting with a dot. Default is `false`.
 - `options.ShowDotFiles`: Whether to show files starting with a dot. Default is `false`.
   If `options.AllowDotfileAccess` is `false`, this option is ignored.
@@ -53,8 +51,10 @@ This configuration is used by the Cache Manager and uses it to configure the cac
 ```csharp
 cdnBuilder.ConfigureCaching(options => { ... });
 ```
-- `options.MaxAge`: The maximum time a file can be unused before it is removed from the cache, in minutes.
-  Default is `60` (1 hour).
+- `options.MaxAge`: The maximum time a file can be unused before it is removed from the cache.
+  Default is 1 hour.
+- `options.MaxItemSize`: The maximum size of a file to cache in kB. When the size of a file exceeds
+  this threshold, it will be streamed directly from disk. Default is `8_000` (8 MB).
 
 ### In-memory caching configuration
 This configuration is used by the in-memory cache provider.

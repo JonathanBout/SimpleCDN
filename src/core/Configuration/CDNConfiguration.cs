@@ -21,11 +21,6 @@
 		/// </summary>
 		public string PageTitle { get; set; } = "SimpleCDN";
 
-		/// <summary>
-		/// The maximum size of a cached item in kB. Default is 8000 (8 MB).
-		/// </summary>
-		public int MaxCachedItemSize { get; set; } = 8_000;
-
 		private bool _showDotFiles;
 
 		/// <summary>
@@ -64,20 +59,6 @@
 			{
 				logger.LogCritical($"{nameof(DataRoot)} must be set");
 				isValid = false;
-			}
-
-			if (MaxCachedItemSize < 1 || MaxCachedItemSize > Array.MaxLength)
-			{
-				logger.LogCritical("MaxCachedItemSize must be greater than 0 and smaller than Array.MaxLength ({max array length} in this case)", Array.MaxLength);
-				isValid = false;
-			}
-
-			// warn if MaxCachedItemSize is greater than a third of system memory
-			GCMemoryInfo gcMemoryInfo = GC.GetGCMemoryInfo();
-
-			if (MaxCachedItemSize > gcMemoryInfo.TotalAvailableMemoryBytes / 3)
-			{
-				logger.LogWarning($$"""{{nameof(MaxCachedItemSize)}} is greater than a third of available memory ({availableMemory} MB). Are you sure this is a good idea?""", gcMemoryInfo.TotalAvailableMemoryBytes / 1_000_000);
 			}
 
 			return isValid;

@@ -68,33 +68,6 @@ namespace SimpleCDN.Tests.Unit
 		}
 
 		[Test]
-		public void Test_BigFile_DoesNotLoadIntoArray()
-		{
-			string filePath = Path.Combine(fileRoot, "file.txt");
-
-			options.MaxCachedItemSize = 10;
-
-			using (FileStream stream = File.Create(filePath))
-			{
-				stream.SetLength(options.MaxCachedItemSize * 1001); // 10 kB * 1001 = 10.01 MB
-			}
-
-			Assert.That(reader.CanLoadIntoArray(filePath), Is.False);
-		}
-
-		[Test]
-		public void Test_SmallFile_LoadsIntoArray()
-		{
-			string filePath = Path.Combine(fileRoot, "file.txt");
-			options.MaxCachedItemSize = 100;
-			using (FileStream stream = File.Create(filePath))
-			{
-				stream.SetLength(options.MaxCachedItemSize - 10);
-			}
-			Assert.That(reader.CanLoadIntoArray(filePath), Is.True);
-		}
-
-		[Test]
 		public void Test_File_Exists()
 		{
 			string filePath = Path.Combine(fileRoot, "file.txt");

@@ -42,7 +42,11 @@ namespace SimpleCDN.Configuration
 			services.AddSingleton<ICompressor, GZipCompressor>();
 			services.AddSingleton<ICompressor, DeflateCompressor>();
 
-			services.AddOptionsWithValidateOnStart<CDNConfiguration>();
+			services.AddOptionsWithValidateOnStart<CDNConfiguration>()
+				.Validate<ILogger<CDNConfiguration>>(static (config, logger) => config.Validate(logger));
+
+			services.AddOptionsWithValidateOnStart<CacheConfiguration>()
+				.Validate<ILogger<CacheConfiguration>>(static (config, logger) => config.Validate(logger));
 
 			return new SimpleCDNBuilder(services);
 		}
