@@ -5,20 +5,15 @@ namespace SimpleCDN.Standalone
 {
 	public static class ApplicationBuilderExtensions
 	{
-		const string InvalidConfigurationMessage = "See the log meessages for details.";
-
 		/// <summary>
 		/// Maps the <see cref="CDNConfiguration"/> and <see cref="CacheConfiguration"/> classes to the
 		/// application configuration.
 		/// </summary>
 		internal static ISimpleCDNBuilder MapConfiguration(this ISimpleCDNBuilder builder, IConfiguration configuration)
 		{
-			CDNConfiguration? cdnConfig = configuration.GetSection("CDN").Get<CDNConfiguration>();
-
 			builder.Services
 				.AddOptions<CDNConfiguration>()
-				.BindConfiguration("CDN")
-				.Validate((CDNConfiguration config, ILogger<CDNConfiguration> logger) => config.Validate(logger), InvalidConfigurationMessage);
+				.BindConfiguration("CDN");
 
 			builder.Services
 				.AddOptions<CacheConfiguration>()
@@ -35,6 +30,14 @@ namespace SimpleCDN.Standalone
 				case CacheType.InMemory:
 					builder.AddInMemoryCache(config => inMemorySection.Bind(config));
 					break;
+				case CacheType.Unspecified:
+					// if no provider is explicitly specified, we look at what is configured,
+					// to determine which cache provider to use.
+					if (redisSection.Exists())
+					{
+						goto case CacheType.Redis;
+					}
+					goto case CacheType.InMemory;
 			}
 
 			return builder;
@@ -43,9 +46,13 @@ namespace SimpleCDN.Standalone
 
 	public enum CacheType
 	{
-		// fallback to in-memory cache if no type is specified
-		InMemory = 0,
-		Redis = 1,
-		Disabled = 2
+		/// <summary>
+		/// The cache type is unspecified. The cache type will be determined by the configuration.
+		/// If Redis is configured, Redis will be used. Otherwise, InMemory will be used.
+		/// </summary>
+		Unspecified = 0,
+		InMemory = 1,
+		Redis = 2,
+		Disabled = 3
 	}
 }

@@ -8,17 +8,18 @@ namespace SimpleCDN.Extensions.Redis
 	public class RedisCacheConfiguration
 	{
 		/// <summary>
-		/// The connection string to the Redis server. Default is localhost.
+		/// The connection string to the Redis server. Default is <c>localhost:6379</c>.
 		/// </summary>
-		public string ConnectionString { get; set; } = "localhost";
+		public string ConnectionString { get; set; } = "localhost:6379";
 
 		/// <summary>
-		/// How this client should be identified to Redis. Default is SimpleCDN.
+		/// How this client should be identified to Redis. Default is <c>SimpleCDN</c>.
 		/// </summary>
 		public string ClientName { get; set; } = "SimpleCDN";
 
 		/// <summary>
-		/// A prefix to be added to all keys stored in Redis. Default is <c>SimpleCDN::</c>. An empty value is allowed.
+		/// A prefix to be added to all keys stored in Redis. Default is <c>SimpleCDN::</c>.
+		/// An empty value is allowed if you don't want a prefix.
 		/// </summary>
 		public string KeyPrefix { get; set; } = "SimpleCDN::";
 

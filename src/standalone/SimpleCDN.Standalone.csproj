@@ -5,7 +5,6 @@
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-		<PublishAot>true</PublishAot>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<Title>SimpleCDN</Title>
 		<Authors>JonathanBout</Authors>
@@ -31,6 +30,7 @@
 		<EventSourceSupport>false</EventSourceSupport>
 		<HttpActivityPropagationSupport>false</HttpActivityPropagationSupport>
 		<MetadataUpdaterSupport>false</MetadataUpdaterSupport>
+		<PublishAot>true</PublishAot>
 	</PropertyGroup>
 
 

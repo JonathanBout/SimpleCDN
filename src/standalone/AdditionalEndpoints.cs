@@ -1,12 +1,15 @@
-﻿using SimpleCDN.Services.Caching;
+﻿using SimpleCDN.Endpoints;
+using SimpleCDN.Services.Caching;
 using SimpleCDN.Services.Caching.Implementations;
 
 namespace SimpleCDN.Standalone
 {
 	public static class AdditionalEndpoints
 	{
-		public static WebApplication MapAdditionalEndpoints(this WebApplication app)
+		public static WebApplication MapEndpoints(this WebApplication app)
 		{
+			app.MapSimpleCDN();
+
 #if DEBUG
 			if (app.Configuration.GetSection("Cache:Type").Get<CacheType>() == CacheType.InMemory)
 			{

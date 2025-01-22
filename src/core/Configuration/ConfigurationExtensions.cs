@@ -14,6 +14,8 @@ namespace SimpleCDN.Configuration
 	/// </summary>
 	public static class ConfigurationExtensions
 	{
+		const string InvalidConfigurationMessage = "See the log meessages for details.";
+
 		/// <summary>
 		/// Adds the SimpleCDN services to the application and configures them using the provided configuration.
 		/// </summary>
@@ -43,10 +45,10 @@ namespace SimpleCDN.Configuration
 			services.AddSingleton<ICompressor, DeflateCompressor>();
 
 			services.AddOptionsWithValidateOnStart<CDNConfiguration>()
-				.Validate<ILogger<CDNConfiguration>>(static (config, logger) => config.Validate(logger));
+				.Validate<ILogger<CDNConfiguration>>(static (config, logger) => config.Validate(logger), InvalidConfigurationMessage);
 
 			services.AddOptionsWithValidateOnStart<CacheConfiguration>()
-				.Validate<ILogger<CacheConfiguration>>(static (config, logger) => config.Validate(logger));
+				.Validate<ILogger<CacheConfiguration>>(static (config, logger) => config.Validate(logger), InvalidConfigurationMessage);
 
 			return new SimpleCDNBuilder(services);
 		}
