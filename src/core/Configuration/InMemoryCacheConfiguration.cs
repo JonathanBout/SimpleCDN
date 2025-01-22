@@ -14,6 +14,6 @@
 		/// The interval at which the cache is purged of expired items in Minutes. Default is 5 minutes.
 		/// Set to 0 to disable automatic purging.
 		/// </summary>
-		public uint PurgeInterval { get; set; } = 5; // 5 minutes
+		public TimeSpan PurgeInterval { get; set; } = TimeSpan.FromMinutes(5); // 5 minutes
 	}
 }

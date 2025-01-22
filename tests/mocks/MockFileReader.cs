@@ -41,6 +41,8 @@ namespace SimpleCDN.Tests.Mocks
 		}
 
 		public DateTimeOffset GetLastModified(string path) => GetFile(path)?.LastModified ?? DateTimeOffset.MinValue;
+		public long GetSize(string path) => GetFile(path)?.Content.LongLength ?? long.MaxValue;
+
 		public CDNFile? GetSystemFile(ReadOnlySpan<char> path, IEnumerable<CompressionAlgorithm> acceptedCompression)
 		{
 			var fullPath = path.ToString();

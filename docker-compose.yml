@@ -6,7 +6,7 @@ services:
     - "6379:6379" # Expose Redis on the host machine so it can be accessed by for example a dashboard
 
   simplecdn:
-    image: ghcr.io/jonathanbout/simplecdn:local-dev
+    image: simplecdn:local-dev
     build:
       context: .
       dockerfile: src/standalone/Dockerfile

@@ -58,24 +58,24 @@ dotnet run --property:PublishAot=false -- --CDN:DataRoot <your_cdn_data>
 | key | value type | default value | description |
 |--|--|--|--|
 | `CDN:DataRoot` | a local path | `/data` when using the Docker image, otherwise required. | The data root, where the files to be served are stored. |
-| `CDN:MaxCachedItemSize` | A size in kB within your devices memory. | `8_000` | The maximum size of a file to be cached. If the size exceeds this value, the file is streamed directly from the disk. |
 | `CDN:AllowDotFileAccess` | `true` or `false` | `false` | Whether to allow access to dotfiles and directories. |
 | `CDN:ShowDotFiles` | `true` or `false` | `false` | Whether to show dotfiles in generated index files. When `AllowDotFileAccess` is `false`, `ShowDotFiles` is ignored. |
 | `CDN:BlockRobots` | `true` or `false` | `true` | Whether to request robots to not index CDN files. Its still up to the robots to adhere to this rule. |
 | `CDN:Footer` | Any HTML | `Powered by SimpleCDN` (with a link to this GitHub repo) | The text to place at the bottom of generated index files. |
-| `CDN:PageTitle` | Any <title> compatible string | `SimpleCDN` | The text to display in the browser's title bar. |
+| `CDN:PageTitle` | Any `<title>` compatible string | `SimpleCDN` | The text to display in the browser's title bar. |
 
 #### Caching
 | key | value type | default value | description |
 |--|--|--|--|
-| `Cache:MaxAge` | A time in minutes | `60` | How long an item may be stale (read nor written) before being removed. |
+| `Cache:MaxAge` | A TimeSpan | One hour | How long an item may be stale (read nor written) before being removed. |
+| `Cache:MaxItemSize` | A size in kB within your devices memory. | `8_000` | The maximum size of a file to be cached. If the size exceeds this value, the file is streamed directly from the disk. |
 | `Cache:Type` | `InMemory`, `Redis` or `Disabled` | `InMemory`, or if Redis has been configured, `Redis` | What cache provider to use, if any. |
 | **In-Memory Options** |
 | `Cache:InMemory:MaxSize` | A size in kB | `500_000` | How big the cache may grow. When an entry is added, the oldest entries will be removed until this limit is met. |
-| `Cache:InMemory:PurgeInterval` | A time in minutes | `5` | How often the purge loop should wake up, to remove stale items older than `Cache:MaxAge` |
+| `Cache:InMemory:PurgeInterval` | A TimeSpan | 5 minutes | How often the purge loop should wake up, to remove stale items older than `Cache:MaxAge` |
 | **Redis Options** |
-| `Cache:Redis:ConnectionString` | A redis connection string | None. Required when using Redis | How to connect to your Redis instance. |
-| `Cache:Redis:ClientName` | A string, without spaces | `SimpleCDN` | How this client should be identified to Redis. |
+| `Cache:Redis:ConnectionString` | A redis connection string | None. Required when using Redis | How SimpleCDN should connect to your Redis instance. |
+| `Cache:Redis:ClientName` | A string, without spaces | `SimpleCDN` | How SimpleCDN should identify itself to Redis. |
 | `Cache:Redis:KeyPrefix` | A string | `SimpleCDN` | A string to prepend to Redis entry keys. |
 
 #### Overriding the defaults:
@@ -89,6 +89,8 @@ dotnet run --property:PublishAot=false -- --CDN:DataRoot <your_cdn_data>
 }
 ```
 - with a command line argument, e.g. `--CDN:MaxCachedItemSize 10000`
+
+_tip: see [github.com/thomhurst/ReadableTimeSpan](https://github.com/thomhurst/ReadableTimeSpan) for the supported TimeSpan formats_
 
 > [!NOTE]  
 > Command line arguments have precedence over appsettings.json and appsettings.json has precedence environment variables.

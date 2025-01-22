@@ -33,6 +33,13 @@ namespace SimpleCDN.Services.Caching
 		/// <returns><see langword="true"/> when the file was succesfully removed.</returns>
 		bool TryRemove(string path, [NotNullWhen(true)] out CachedFile? value);
 
+		/// <summary>
+		/// Determines if a file of the specified size can be cached.
+		/// </summary>
+		/// <param name="size">The size of the file, in bytes</param>
+		/// <returns>Whether the file is small enough to be cached</returns>
+		bool CanCache(long size);
+
 #if DEBUG
 		/// <summary>
 		/// Gets a debug view of the cache.

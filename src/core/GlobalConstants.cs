@@ -39,7 +39,7 @@ namespace SimpleCDN
 
 	[JsonSourceGenerationOptions]
 	[JsonSerializable(typeof(SizeLimitedCacheDebugView))]
-#if DEBUG
+#if DEBUG // only generate serializers for debug views in debug mode
 	[JsonSerializable(typeof(BasicDebugView))]
 	[JsonSerializable(typeof(DebugView))]
 	[JsonSerializable(typeof(DetailedDebugView))]

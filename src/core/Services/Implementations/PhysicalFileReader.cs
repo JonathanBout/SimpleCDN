@@ -9,23 +9,6 @@ namespace SimpleCDN.Services.Implementations
 		private readonly ILogger<PhysicalFileReader> _logger = logger;
 		private readonly IOptionsMonitor<CDNConfiguration> _options = options;
 
-		public bool CanLoadIntoArray(string path)
-		{
-			try
-			{
-				var file = new FileInfo(path);
-				return file.Exists && CanLoadIntoArray(file.Length);
-			} catch
-			{
-				return false;
-			}
-		}
-
-		public bool CanLoadIntoArray(long size)
-		{
-			return size <= _options.CurrentValue.MaxCachedItemSize * 1000; // convert kB to B
-		}
-
 		public byte[] LoadIntoArray(string path)
 		{
 			try
@@ -99,6 +82,18 @@ namespace SimpleCDN.Services.Implementations
 		private static bool StartsWithDot(ReadOnlySpan<char> span)
 		{
 			return span.Length > 0 && span[0] == '.';
+		}
+
+		public long GetSize(string path)
+		{
+			try
+			{
+				return new FileInfo(path).Length;
+			} catch (Exception ex)
+			{
+				_logger.LogError(ex, "Failed to get size of file '{path}'", path.ForLog());
+				return long.MaxValue;
+			}
 		}
 	}
 }

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace SimpleCDN.Tests.Unit
 {
-	public class SizeLimitedCacheTests
+	public class InMemoryCacheTests
 	{
 		private static InMemoryCache CreateCache(Action<InMemoryCacheConfiguration>? configure = null, Action<CacheConfiguration>? configureCache = null)
 		{
@@ -83,6 +83,42 @@ namespace SimpleCDN.Tests.Unit
 				});
 				Assert.That(cache.Get(TEST_PATH), Is.Null);
 			}
+		}
+
+		[Test]
+		public async Task Test_OldItems_AreEvicted()
+		{
+			var purgeInterval = TimeSpan.FromSeconds(1);
+			InMemoryCache cache = CreateCache(options => options.PurgeInterval = purgeInterval);
+
+			const string TEST_PATH = "/hello.txt";
+			const string TEST_DATA = "Hello, World!";
+
+			var bytes = Encoding.UTF8.GetBytes(TEST_DATA);
+
+			var weakRef = new WeakReference(bytes);
+
+			Assert.That(weakRef.IsAlive, Is.True);
+
+			cache.Set(TEST_PATH, bytes, new DistributedCacheEntryOptions());
+
+			Assert.That(cache.Get(TEST_PATH), Is.Not.Null);
+
+			await cache.StartAsync(CancellationToken.None);
+
+			await Task.Delay(purgeInterval + TimeSpan.FromSeconds(1)); // wait for the purge interval with a small margin
+			Assert.That(cache.Get(TEST_PATH), Is.Null);
+
+#if RELEASE
+			// Also test if we don't have any memory leaks, by forcing a GC and waiting for it to finish
+			// due to some trickery that happens in Debug mode, this test would always fail in Debug mode
+			GC.Collect();
+			GC.WaitForPendingFinalizers();
+
+			Assert.That(weakRef.IsAlive, Is.False);
+#endif
+
+			await cache.StopAsync(CancellationToken.None);
 		}
 	}
 }

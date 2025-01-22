@@ -116,12 +116,20 @@ namespace SimpleCDN.Services.Implementations
 
 			var requestPathString = requestPath.ToString();
 
-			if (_cache.TryGetValue(requestPathString, out CachedFile? cachedFile) && cachedFile.LastModified > _fs.GetLastModified(absolutePath))
+			long size = _fs.GetSize(absolutePath);
+
+			bool canLoadIntoArray = _cache.CanCache(size);
+
+			if (canLoadIntoArray
+				&& _cache.TryGetValue(requestPathString, out CachedFile? cachedFile)
+				&& cachedFile.LastModified > _fs.GetLastModified(absolutePath))
+			{
 				return new CDNFile(cachedFile.Content, cachedFile.MimeType.ToContentTypeString(), cachedFile.LastModified, cachedFile.Compression);
+			}
 
 			MimeType mediaType = MimeTypeHelpers.MimeTypeFromFileName(requestPathString);
 
-			if (!_fs.CanLoadIntoArray(absolutePath))
+			if (!canLoadIntoArray)
 			{
 				_logger.LogDebug("File '{path}' is too big to load into memory, streaming instead", requestPath.ForLog());
 				return new BigCDNFile(absolutePath, mediaType.ToContentTypeString(), _fs.GetLastModified(absolutePath), CompressionAlgorithm.None);
