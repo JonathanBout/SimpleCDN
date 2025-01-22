@@ -23,7 +23,10 @@ namespace SimpleCDN.Endpoints
 		/// <summary>
 		/// Maps the SimpleCDN endpoints to the provided builder.
 		/// </summary>
-		public static IEndpointRouteBuilder MapSimpleCDN(this IEndpointRouteBuilder builder)
+		/// <returns>
+		/// The <typeparamref name="T"/> after mapping the SimpleCDN endpoints.
+		/// </returns>
+		public static T MapSimpleCDN<T>(this T builder) where T : IEndpointRouteBuilder
 		{
 #if DEBUG
 			// cache debug view. Only available in debug builds, as it exposes internal cache data

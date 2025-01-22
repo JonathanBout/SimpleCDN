@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Text;
+using System.Text.RegularExpressions;
 
 namespace SimpleCDN.Helpers
 {
@@ -116,12 +117,33 @@ namespace SimpleCDN.Helpers
 		/// <summary>
 		/// Sanitizes a string for use in log messages, by replacing all whitespace (including newlines, tabs, ...) with a single space.
 		/// </summary>
-		public static string ForLog(this string? input) => input is null ? "" : WhitespaceRegex().Replace(input, " ");
+		public static string ForLog(this string? input) => ForLog(input.AsSpan());
 
-		public static string ForLog(this ReadOnlySpan<char> input) => ForLog(input.ToString());
-
-		[GeneratedRegex(@"\s+", RegexOptions.Multiline | RegexOptions.Compiled)]
-		private static partial Regex WhitespaceRegex();
+		public static string ForLog(this ReadOnlySpan<char> input)
+		{
+			if (input.IsEmpty)
+			{
+				return "";
+			}
+			var builder = new StringBuilder(input.Length);
+			bool lastWasWhitespace = false;
+			foreach (char c in input)
+			{
+				if (char.IsWhiteSpace(c))
+				{
+					if (!lastWasWhitespace)
+					{
+						builder.Append(' ');
+						lastWasWhitespace = true;
+					}
+				} else
+				{
+					lastWasWhitespace = false;
+					builder.Append(c);
+				}
+			}
+			return builder.ToString();
+		}
 
 		public static bool HasAnyFlag<T>(this T enumValue, T flag) where T : Enum, IConvertible
 		{

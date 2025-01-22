@@ -19,4 +19,4 @@ var cdnBuilder = builder.Services.AddSimpleCDN();
 
 - `options.ConnectionString`: The configuration string for the Redis server. This is a required property.
 - `options.ClientName`: How the client should be identified to Redis. Default is `SimpleCDN`. This value can't contain whitespace.
-- `options.KeyPrefix`: A string to prepend to all keys SimpleCDN inserts. Default is `SimpleCDN`. An empty value is allowed, meaning no prefix is added.
+- `options.KeyPrefix`: A string to prepend to all keys SimpleCDN inserts. Default is `SimpleCDN::`. An empty value is allowed, meaning no prefix is added.

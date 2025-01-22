@@ -3,7 +3,6 @@ using SimpleCDN.Configuration;
 using SimpleCDN.Endpoints;
 using SimpleCDN.Services.Caching;
 using SimpleCDN.Services.Caching.Implementations;
-using TomLonghurst.ReadableTimeSpan;
 
 namespace SimpleCDN.Standalone
 {
@@ -12,8 +11,6 @@ namespace SimpleCDN.Standalone
 	{
 		private static void Main(string[] args)
 		{
-			ReadableTimeSpan.EnableConfigurationBinding();
-
 			WebApplicationBuilder builder = WebApplication.CreateSlimBuilder(args);
 
 			// reconfigure the configuration to make sure we're using the right sources in the right order
