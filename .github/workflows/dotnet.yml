@@ -31,9 +31,9 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore tests/unit/SimpleCDN.Tests.Unit.csproj
     - name: Build
-      run: dotnet build tests/unit/SimpleCDN.Tests.Unit.csproj --no-restore -p:TreatWarningsAsErrors=true
+      run: dotnet build -c Release tests/unit/SimpleCDN.Tests.Unit.csproj --no-restore -p:TreatWarningsAsErrors=true
     - name: Test
-      run: dotnet test tests/unit/SimpleCDN.Tests.Unit.csproj --no-build --verbosity normal -p:TreatWarningsAsErrors=true
+      run: dotnet test -c Release tests/unit/SimpleCDN.Tests.Unit.csproj --no-build --verbosity normal -p:TreatWarningsAsErrors=true
 
   integration-test:
     concurrency:
@@ -50,6 +50,6 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore tests/integration/SimpleCDN.Tests.Integration.csproj
     - name: Build
-      run: dotnet build tests/integration/SimpleCDN.Tests.Integration.csproj --no-restore
+      run: dotnet build -c Release tests/integration/SimpleCDN.Tests.Integration.csproj --no-restore
     - name: Test
-      run: dotnet test tests/integration/SimpleCDN.Tests.Integration.csproj --no-build --verbosity normal
+      run: dotnet test -c Release tests/integration/SimpleCDN.Tests.Integration.csproj --no-build --verbosity normal
