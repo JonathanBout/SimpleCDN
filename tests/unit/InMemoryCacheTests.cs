@@ -6,7 +6,7 @@ using System.Text;
 
 namespace SimpleCDN.Tests.Unit
 {
-	public class SizeLimitedCacheTests
+	public class InMemoryCacheTests
 	{
 		private static InMemoryCache CreateCache(Action<InMemoryCacheConfiguration>? configure = null, Action<CacheConfiguration>? configureCache = null)
 		{
@@ -83,6 +83,25 @@ namespace SimpleCDN.Tests.Unit
 				});
 				Assert.That(cache.Get(TEST_PATH), Is.Null);
 			}
+		}
+
+		[Test]
+		public async Task Test_OldItems_AreEvicted()
+		{
+			var purgeInterval = TimeSpan.FromSeconds(1);
+			InMemoryCache cache = CreateCache(options => options.PurgeInterval = purgeInterval);
+
+			const string TEST_PATH = "/hello.txt";
+			const string TEST_DATA = "Hello, World!";
+			cache.Set(TEST_PATH, Encoding.UTF8.GetBytes(TEST_DATA), new DistributedCacheEntryOptions());
+			Assert.That(cache.Get(TEST_PATH), Is.Not.Null);
+
+			await cache.StartAsync(CancellationToken.None);
+
+			await Task.Delay(purgeInterval + TimeSpan.FromSeconds(1)); // wait for the purge interval with a small margin
+			Assert.That(cache.Get(TEST_PATH), Is.Null);
+
+			await cache.StopAsync(CancellationToken.None);
 		}
 	}
 }

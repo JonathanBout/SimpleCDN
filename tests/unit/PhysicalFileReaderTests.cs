@@ -5,6 +5,8 @@ using System.Text;
 
 namespace SimpleCDN.Tests.Unit
 {
+	// due to disk IO, these tests are not parallelizable
+	[NonParallelizable]
 	public class PhysicalFileReaderTests
 	{
 		private string fileRoot = null!;
