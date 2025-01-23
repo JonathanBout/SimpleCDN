@@ -19,13 +19,12 @@ This will map the SimpleCDN endpoint to `/cdn` and serve files from `/var/www/st
 - In-memory caching
 - Redis caching, with the
   [SimpleCDN.Extensions.Redis](https://www.nuget.org/packages/SimpleCDN.Extensions.Redis/) package.
-  Although t's a few milliseconds slower than the in-memory cache, but saves a load of memory with multiple instances.
+  Although it's a few milliseconds slower than the in-memory cache, it saves a load of memory with multiple instances.
 > [!WARNING]  
-> **While Redis support is available, it is not very stable**, especially in high-load scenario's (tens of requests per second). By implementing a custom connection manager,
-> it's brought down to a minimum but failures still happen. In such cases, SimpleCDN will load the data from disk instead of using the cache.
+> **While Redis support is available, it may be unstable**, especially in high-load scenario's (tens of requests per second). By implementing a custom connection manager,
+> it's brought down to a minimum but failures still happen. In such cases, SimpleCDN will load the data from disk directly instead of using the cache.
 
-SimpleCDN is also available as a standalone application with a docker container:
-	[ghcr.io/jonathanbout/simplecdn](https://ghcr.io/jonathanbout/simplecdn).
+SimpleCDN is also available as a standalone application with a docker container: [ghcr.io/jonathanbout/simplecdn](https://ghcr.io/jonathanbout/simplecdn).
 
 ## Configuration
 
