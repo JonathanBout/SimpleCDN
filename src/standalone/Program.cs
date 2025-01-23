@@ -1,16 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
 using SimpleCDN.Configuration;
-using SimpleCDN.Endpoints;
-using SimpleCDN.Extensions.Redis;
-using SimpleCDN.Services.Caching;
-using SimpleCDN.Services.Caching.Implementations;
-using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Eventing.Reader;
-using System.Runtime.CompilerServices;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using TomLonghurst.ReadableTimeSpan;
 
 namespace SimpleCDN.Standalone
@@ -21,7 +9,6 @@ namespace SimpleCDN.Standalone
 		private static void Main(string[] args)
 		{
 			ReadableTimeSpan.EnableConfigurationBinding();
-
 
 			WebApplicationBuilder builder = WebApplication.CreateSlimBuilder(args);
 
@@ -36,11 +23,10 @@ namespace SimpleCDN.Standalone
 			builder.Services.AddSimpleCDN()
 				.MapConfiguration(builder.Configuration);
 
-			builder.Services.ConfigureHttpJsonOptions(options => options.SerializerOptions.TypeInfoResolverChain.Add(ExtraSourceGenerationContext.Default));
-
 			WebApplication app = builder
 				.Build();
 #if DEBUG
+			builder.Services.ConfigureHttpJsonOptions(options => options.SerializerOptions.TypeInfoResolverChain.Add(ExtraSourceGenerationContext.Default));
 			// useful for debugging configuration issues
 			if (args.Contains("--dump-config"))
 			{

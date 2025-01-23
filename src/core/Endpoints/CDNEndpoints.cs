@@ -1,11 +1,9 @@
-﻿using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using SimpleCDN.Configuration;
 using SimpleCDN.Helpers;
 using SimpleCDN.Services;
-using SimpleCDN.Services.Caching;
 using SimpleCDN.Services.Compression;
 
 namespace SimpleCDN.Endpoints

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SimpleCDN.Tests.Unit
+﻿namespace SimpleCDN.Tests.Unit
 {
 	/*
 	 * It might be slightly overkill, but these tests are here to ensure that the constants are valid.

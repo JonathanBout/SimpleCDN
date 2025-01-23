@@ -1,10 +1,8 @@
-﻿using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using SimpleCDN.Cache;
 using SimpleCDN.Configuration;
 using SimpleCDN.Helpers;
 using SimpleCDN.Services.Caching;
-using System.IO;
 
 namespace SimpleCDN.Services.Implementations
 {

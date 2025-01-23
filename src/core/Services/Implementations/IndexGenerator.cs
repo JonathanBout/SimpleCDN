@@ -1,12 +1,9 @@
 ﻿using Microsoft.Extensions.Options;
 using SimpleCDN.Configuration;
 using SimpleCDN.Helpers;
-using System;
-using System.Reflection;
 using System.Security;
 using System.Text;
 using System.Web;
-using System.Xml.Linq;
 
 namespace SimpleCDN.Services.Implementations
 {

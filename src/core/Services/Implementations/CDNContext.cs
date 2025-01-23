@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Server.HttpSys;
-
-namespace SimpleCDN.Services.Implementations
+﻿namespace SimpleCDN.Services.Implementations
 {
 	internal class CDNContext : ICDNContext
 	{
