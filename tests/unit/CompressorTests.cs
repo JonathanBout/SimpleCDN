@@ -4,7 +4,6 @@ using System.Text;
 
 namespace SimpleCDN.Tests.Unit;
 
-[TestFixture()]
 public class CompressorTests
 {
 	[TestCase(JSON_CONTENT, 0u)]

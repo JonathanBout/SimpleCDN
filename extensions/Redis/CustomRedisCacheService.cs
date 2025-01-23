@@ -1,11 +1,8 @@
 ﻿using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SimpleCDN.Configuration;
 using StackExchange.Redis;
 using StackExchange.Redis.KeyspaceIsolation;
-using System.Collections.Concurrent;
-using System.Diagnostics;
 
 namespace SimpleCDN.Extensions.Redis
 {
