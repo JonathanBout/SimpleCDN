@@ -14,5 +14,6 @@ using System.Text.Json.Serialization;
 [JsonSerializable(typeof(CDNConfiguration))]
 [JsonSerializable(typeof(RedisCacheConfiguration))]
 [JsonSerializable(typeof(InMemoryCacheConfiguration))]
-internal partial class ExtraSourceGenerationContext : JsonSerializerContext;
 #endif
+internal partial class ExtraSourceGenerationContext : JsonSerializerContext;
+
