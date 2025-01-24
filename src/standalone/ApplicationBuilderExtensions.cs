@@ -25,10 +25,24 @@ namespace SimpleCDN.Standalone
 			switch (configuration.GetSection("Cache:Type").Get<CacheType>())
 			{
 				case CacheType.Redis:
-					builder.AddRedisCache(config => redisSection.Bind(config));
+					builder.AddRedisCache(config =>
+					{
+						if (redisSection.Exists())
+						{
+							redisSection.Bind(config);
+						}
+					});
+					builder.Services.AddHealthChecks()
+						.AddRedis(sp => sp.GetRequiredService<CustomRedisCacheService>().GetRedisConnection(), "Redis");
 					break;
 				case CacheType.InMemory:
-					builder.AddInMemoryCache(config => inMemorySection.Bind(config));
+					builder.AddInMemoryCache(config =>
+					{
+						if (inMemorySection.Exists())
+						{
+							inMemorySection.Bind(config);
+						}
+					});
 					break;
 				case CacheType.Unspecified:
 					// if no provider is explicitly specified, we look at what is configured,

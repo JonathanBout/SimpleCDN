@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SimpleCDN.Configuration;
+using StackExchange.Redis;
 
 namespace SimpleCDN.Extensions.Redis
 {
@@ -17,7 +18,10 @@ namespace SimpleCDN.Extensions.Redis
 		/// </summary>
 		public static ISimpleCDNBuilder AddRedisCache(this ISimpleCDNBuilder builder, Action<RedisCacheConfiguration> configure)
 		{
-			builder.Services.AddSingleton<IDistributedCache, CustomRedisCacheService>();
+			builder.Services.AddSingleton<CustomRedisCacheService>();
+
+			builder.Services.AddSingleton<IDistributedCache>(sp => sp.GetRequiredService<CustomRedisCacheService>());
+
 			builder.Services.AddOptionsWithValidateOnStart<RedisCacheConfiguration>()
 				.Configure(configure)
 				.Validate<ILogger<RedisCacheConfiguration>>((config, logger) => config.Validate(logger), InvalidConfigurationMessage);
