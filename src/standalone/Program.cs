@@ -1,9 +1,12 @@
+using Microsoft.AspNetCore.Http.Json;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 using SimpleCDN.Configuration;
 using SimpleCDN.Extensions.Redis;
 using SimpleCDN.Services.Caching;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using TomLonghurst.ReadableTimeSpan;
 
 namespace SimpleCDN.Standalone
@@ -28,47 +31,53 @@ namespace SimpleCDN.Standalone
 			builder.Services.AddSimpleCDN()
 				.MapConfiguration(builder.Configuration);
 
-#if DEBUG
-			builder.Services.ConfigureHttpJsonOptions(options => options.SerializerOptions.TypeInfoResolverChain.Add(ExtraSourceGenerationContext.Default));
-#endif
+			builder.Services.ConfigureHttpJsonOptions(options =>
+			{
+				options.SerializerOptions.TypeInfoResolverChain.Add(ExtraSourceGenerationContext.Default);
+				options.SerializerOptions.Converters.Add(new JsonStringEnumConverter<HealthStatus>());
+			});
+
+			builder.Services.AddHealthChecks()
+				.AddCheck("Self", () => HealthCheckResult.Healthy());
 
 			WebApplication app = builder
 				.Build();
-#if DEBUG
+
 			// useful for debugging configuration issues
 			if (args.Contains("--dump-config"))
 			{
-				if (RuntimeFeature.IsDynamicCodeSupported)
-				{
-					DumpConfiguration(app);
-				}
+				DumpConfiguration(app);
 				return;
 			}
-#endif
 
 			app
 				.MapEndpoints()
 				.Run();
 		}
 
-#if DEBUG
 		private static void DumpConfiguration(WebApplication app)
 		{
 			IOptions<CDNConfiguration> cdnConfig = app.Services.GetRequiredService<IOptions<CDNConfiguration>>();
 			IOptions<CacheConfiguration> cacheConfig = app.Services.GetRequiredService<IOptions<CacheConfiguration>>();
 			IOptions<InMemoryCacheConfiguration> inMemoryConfig = app.Services.GetRequiredService<IOptions<InMemoryCacheConfiguration>>();
 			IOptions<RedisCacheConfiguration> redisConfig = app.Services.GetRequiredService<IOptions<RedisCacheConfiguration>>();
+			IOptions<JsonOptions> jsonOptions = app.Services.GetRequiredService<IOptions<JsonOptions>>();
 
-			var jsonConfig = new JsonSerializerOptions { WriteIndented = true };
+			var jsonConfig = new JsonSerializerOptions(jsonOptions.Value.SerializerOptions)
+			{
+				WriteIndented = true
+			};
 
+#pragma warning disable IL2026, IL3050 // requires unreferenced code, but the TypeInfoResolverChain actually provides the necessary context
 			Console.WriteLine("CDN Configuration:");
-			Console.WriteLine(JsonSerializer.Serialize(cdnConfig.Value, ExtraSourceGenerationContext.Default.CDNConfiguration));
+			Console.WriteLine(JsonSerializer.Serialize(cdnConfig.Value, jsonConfig));
 			Console.WriteLine("Cache Configuration:");
-			Console.WriteLine(JsonSerializer.Serialize(cacheConfig.Value, ExtraSourceGenerationContext.Default.CacheConfiguration));
+			Console.WriteLine(JsonSerializer.Serialize(cacheConfig.Value, jsonConfig));
 			Console.WriteLine("InMemory Cache Configuration:");
-			Console.WriteLine(JsonSerializer.Serialize(inMemoryConfig.Value, ExtraSourceGenerationContext.Default.InMemoryCacheConfiguration));
+			Console.WriteLine(JsonSerializer.Serialize(inMemoryConfig.Value, jsonConfig));
 			Console.WriteLine("Redis Cache Configuration:");
-			Console.WriteLine(JsonSerializer.Serialize(redisConfig.Value, ExtraSourceGenerationContext.Default.RedisCacheConfiguration));
+			Console.WriteLine(JsonSerializer.Serialize(redisConfig.Value, jsonConfig));
+#pragma warning restore IL2026, IL3050
 
 			Console.WriteLine();
 			Console.Write("Selected cache implementation: ");
@@ -76,8 +85,6 @@ namespace SimpleCDN.Standalone
 			var cache = app.Services.GetRequiredService<ICacheImplementationResolver>().Implementation.GetType().Name;
 			Console.WriteLine(cache);
 		}
-#endif
-
 	}
 }
 #pragma warning restore RCS1102 // Make class static

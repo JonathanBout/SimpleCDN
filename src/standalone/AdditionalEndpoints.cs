@@ -1,6 +1,11 @@
-﻿using SimpleCDN.Endpoints;
+﻿using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Http.Json;
+using Microsoft.Extensions.Options;
+using SimpleCDN.Endpoints;
 using SimpleCDN.Services.Caching;
 using SimpleCDN.Services.Caching.Implementations;
+using System.Net.Mime;
+using System.Text.Json.Serialization;
 
 namespace SimpleCDN.Standalone
 {
@@ -9,7 +14,6 @@ namespace SimpleCDN.Standalone
 		public static WebApplication MapEndpoints(this WebApplication app)
 		{
 			app.MapSimpleCDN();
-
 #if DEBUG
 			if (app.Configuration.GetSection("Cache:Type").Get<CacheType>() == CacheType.InMemory)
 			{
@@ -28,16 +32,35 @@ namespace SimpleCDN.Standalone
 						// force garbage collection to make sure all memory
 						// used by the cached files is properly released
 						GC.Collect();
+
 						return Results.Ok();
 					}
+
 					return Results.NotFound();
 				});
 			}
 #endif
-			// health check endpoint
-			app.MapGet("/" + GlobalConstants.SystemFilesRelativePath + "/server/health", () => "healthy");
+			app.MapHealthChecks();
 
 			app.MapGet("/favicon.ico", () => Results.Redirect("/" + GlobalConstants.SystemFilesRelativePath + "/logo.ico", true));
+
+			return app;
+		}
+
+		private static WebApplication MapHealthChecks(this WebApplication app)
+		{
+			app.MapHealthChecks("/" + GlobalConstants.SystemFilesRelativePath + "/server/health", new HealthCheckOptions
+			{
+				ResponseWriter = async (ctx, health) =>
+				{
+					JsonOptions jsonOptions = ctx.RequestServices.GetRequiredService<IOptionsSnapshot<JsonOptions>>().Value;
+					ctx.Response.ContentType = MediaTypeNames.Application.Json;
+#pragma warning disable IL2026, IL3050 // it thinks it requires unreferenced code,
+					// but the TypeInfoResolverChain actually provides the necessary context
+					await ctx.Response.WriteAsJsonAsync(health);
+#pragma warning restore IL2026, IL3050
+				}
+			});
 
 			return app;
 		}

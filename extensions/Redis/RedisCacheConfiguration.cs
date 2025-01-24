@@ -10,7 +10,7 @@ namespace SimpleCDN.Extensions.Redis
 		/// <summary>
 		/// The connection string to the Redis server. Default is <c>localhost:6379</c>.
 		/// </summary>
-		public string ConnectionString { get; set; } = "localhost:6379";
+		public string ConnectionString { get; set; } = null!;
 
 		/// <summary>
 		/// How this client should be identified to Redis. Default is <c>SimpleCDN</c>.

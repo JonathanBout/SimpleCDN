@@ -6,7 +6,7 @@ using StackExchange.Redis.KeyspaceIsolation;
 
 namespace SimpleCDN.Extensions.Redis
 {
-	internal sealed class CustomRedisCacheService(IOptionsMonitor<RedisCacheConfiguration> options, IOptionsMonitor<CacheConfiguration> cacheOptions)
+	public sealed class CustomRedisCacheService(IOptionsMonitor<RedisCacheConfiguration> options, IOptionsMonitor<CacheConfiguration> cacheOptions)
 		: IDistributedCache, IAsyncDisposable, IDisposable
 	{
 		private readonly IOptionsMonitor<RedisCacheConfiguration> options = options;
@@ -21,7 +21,7 @@ namespace SimpleCDN.Extensions.Redis
 		/// <summary>
 		/// Checks if the Redis connection is still valid and creates a new one if necessary.
 		/// </summary>
-		private ConnectionMultiplexer GetRedisConnection()
+		public ConnectionMultiplexer GetRedisConnection()
 		{
 			_redisConnectionLock.Wait();
 
@@ -42,12 +42,15 @@ namespace SimpleCDN.Extensions.Redis
 				_redisConnectionLock.Release();
 			}
 		}
-		private async Task<ConnectionMultiplexer> GetRedisConnectionAsync()
+
+		/// <summary>
+		/// Checks if the Redis connection is still valid and creates a new one if necessary.
+		/// </summary>
+		public async Task<ConnectionMultiplexer> GetRedisConnectionAsync()
 		{
 			await _redisConnectionLock.WaitAsync();
 			try
 			{
-
 				if (_redisConnection is not { IsConnected: true } or { IsConnecting: true })
 				{
 					_redisConnection?.Dispose();

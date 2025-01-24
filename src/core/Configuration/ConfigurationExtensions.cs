@@ -62,6 +62,7 @@ namespace SimpleCDN.Configuration
 				Services.AddSingleton<IDistributedCache, DisabledCache>();
 				Services.AddSingleton<ICacheManager, CacheManager>();
 				Services.AddSingleton<ICacheImplementationResolver>(sp => new CacheImplementationResolver(sp, _cacheImplementationType));
+				Services.ConfigureHttpJsonOptions(options => options.SerializerOptions.TypeInfoResolverChain.Add(SourceGenerationContext.Default));
 			}
 
 			public IServiceCollection Services { get; }

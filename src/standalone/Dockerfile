@@ -72,7 +72,7 @@ USER app
 
 COPY --from=publish /app/publish .
 
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 CMD curl --silent --fail http://localhost:8080/_cdn/server/health || exit 1
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 CMD curl http://localhost:8080/_cdn/server/health -s | grep -v "Unhealthy"
 
 EXPOSE 8080
 
