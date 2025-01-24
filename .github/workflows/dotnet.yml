@@ -25,6 +25,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
+        cache-dependency-path: '**/package-lock.json'
         dotnet-version: |
           9.0.x
           8.0.x
@@ -47,6 +48,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
+        cache-dependency-path: '**/package-lock.json'
         dotnet-version: 9.0.x
         cache: true
     - name: Restore dependencies
