@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "dependencies": {
+    "net8.0": {
+      "simplecdn": {
+        "type": "Project"
+      }
+    },
+    "net9.0": {
+      "simplecdn": {
+        "type": "Project"
+      }
+    }
+  }
+}

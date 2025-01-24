@@ -25,9 +25,11 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
+        cache-dependency-path: '**/packages.lock.json'
         dotnet-version: |
           9.0.x
           8.0.x
+        cache: true
     - name: Restore dependencies
       run: dotnet restore tests/unit/SimpleCDN.Tests.Unit.csproj
     - name: Build
@@ -46,7 +48,9 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
+        cache-dependency-path: '**/packages.lock.json'
         dotnet-version: 9.0.x
+        cache: true
     - name: Restore dependencies
       run: dotnet restore tests/integration/SimpleCDN.Tests.Integration.csproj
     - name: Build

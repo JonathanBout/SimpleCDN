@@ -17,6 +17,7 @@
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/JonathanBout/SimpleCDN.git</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
+		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)'=='Release'">
@@ -39,7 +40,7 @@
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
 		<PackageReference Include="TomLonghurst.ReadableTimeSpan" Version="1.0.5" />
 	</ItemGroup>
-	
+
 	<ItemGroup>
 		<ProjectReference Include="..\..\extensions\Redis\SimpleCDN.Extensions.Redis.csproj" />
 		<ProjectReference Include="..\core\SimpleCDN.csproj" />
