@@ -4,6 +4,7 @@ using Microsoft.Net.Http.Headers;
 using SimpleCDN.Configuration;
 using SimpleCDN.Helpers;
 using SimpleCDN.Services;
+using SimpleCDN.Services.Caching;
 using SimpleCDN.Services.Compression;
 
 namespace SimpleCDN.Endpoints

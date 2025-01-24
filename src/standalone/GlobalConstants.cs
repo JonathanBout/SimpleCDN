@@ -2,7 +2,10 @@
  * This file is basically AssemblyInfo.cs, but with the option to add global suppressions,
  * or global constants.
 */
+using SimpleCDN.Configuration;
+using SimpleCDN.Extensions.Redis;
 using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization;
 
 [assembly: InternalsVisibleTo("SimpleCDN.Tests.Integration")]
 
