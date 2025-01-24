@@ -1,4 +1,6 @@
 ﻿using SimpleCDN.Endpoints;
+using SimpleCDN.Services.Caching;
+using SimpleCDN.Services.Caching.Implementations;
 
 namespace SimpleCDN.Standalone
 {
