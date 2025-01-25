@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.Extensions.Options;
 using SimpleCDN.Endpoints;
@@ -15,30 +15,29 @@ namespace SimpleCDN.Standalone
 		{
 			app.MapSimpleCDN();
 #if DEBUG
-			if (app.Configuration.GetSection("Cache:Type").Get<CacheType>() == CacheType.InMemory)
+			// if the cache used is the in-memory implementation, add an endpoint to clear it
+			// as there is no other way to clear it without restarting the server,
+			// opposed to for example the Redis implementation which has the Redis CLI
+			app.MapGet("/" + GlobalConstants.SystemFilesRelativePath + "/server/cache/clear", (ICacheImplementationResolver cacheResolver) =>
 			{
-				// if the cache used is the in-memory implementation, add an endpoint to clear it
-				// as there is no other way to clear it without restarting the server,
-				// opposed to for example the Redis implementation which has the Redis CLI
-				app.MapGet("/" + GlobalConstants.SystemFilesRelativePath + "/server/cache/clear", (ICacheImplementationResolver cacheResolver) =>
+				// TODO: currently, the browser makes a request to favicon.ico after the cache is cleared,
+				// which means there is a new cache entry created for the favicon.ico file.
+				// This is not a problem, but it would be nice to prevent this from happening.
+
+				if (cacheResolver.Implementation is InMemoryCache imc)
 				{
-					// TODO: currently, the browser makes a request to favicon.ico after the cache is cleared,
-					// which means there is a new cache entry created for the favicon.ico file.
-					// This is not a problem, but it would be nice to prevent this from happening.
+					imc.Clear();
+					// force garbage collection to make sure all memory
+					// used by the cached files is properly released
+					GC.Collect();
+					GC.WaitForPendingFinalizers();
+					GC.Collect();
 
-					if (cacheResolver.Implementation is InMemoryCache imc)
-					{
-						imc.Clear();
-						// force garbage collection to make sure all memory
-						// used by the cached files is properly released
-						GC.Collect();
+					return Results.Ok();
+				}
+				return Results.NotFound();
+			});
 
-						return Results.Ok();
-					}
-
-					return Results.NotFound();
-				});
-			}
 #endif
 			app.MapHealthChecks();
 

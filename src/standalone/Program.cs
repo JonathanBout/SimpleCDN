@@ -77,7 +77,7 @@ namespace SimpleCDN.Standalone
 			Console.WriteLine(JsonSerializer.Serialize(inMemoryConfig.Value, jsonConfig));
 			Console.WriteLine("Redis Cache Configuration:");
 			Console.WriteLine(JsonSerializer.Serialize(redisConfig.Value, jsonConfig));
-#pragma warning restore IL2026, IL3050
+#pragma warning restore IL2026, IL3050, CA1869 // requires unreferenced code; reuse JsonSerializerOptions
 
 			Console.WriteLine();
 			Console.Write("Selected cache implementation: ");
