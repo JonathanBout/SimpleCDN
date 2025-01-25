@@ -10,7 +10,7 @@ permissions:
   actions: write
 
 env:
-  BRANCH: ${{ github.event_type == 'pull_request' && 'refs/pull/${{ github.event.pull_request.number }}/merge' || github.event.ref }}
+  BRANCH: ${{ github.event_name == 'pull_request' && 'refs/pull/${{ github.event.pull_request.number }}/merge' || github.event.ref }}
 
 jobs:
   cleanup:
