@@ -26,11 +26,23 @@ jobs:
           ## Setting this to not fail the workflow while deleting cache keys.
           set +e
           echo "Deleting caches..."
+          deletedAny=0
           for cacheKey in $cacheKeysForPR
           do
+              deletedAny=1
               gh cache delete $cacheKey
+              exitCode="$?"
+              if [ "$exitCode" -eq 0 ]; then
+                  echo "deleted cache entry $cacheKey"
+              else
+                  echo "failed to delete cache entry $cacheKey - exited with code $exitCode"
+              fi
           done
-          echo "Done"
+          if [ "$deletedAny" -eq 0 ]; then
+              echo "No cache entries found"
+          else
+              echo "Done"
+          fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
