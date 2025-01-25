@@ -10,11 +10,11 @@ permissions:
   actions: write
 
 env:
-  BRANCH: ${{ github.event_name == 'pull_request' && 'refs/pull/${{ github.event.pull_request.number }}/merge' || github.event.ref }}
+    BRANCH: ${{ github.event_name == 'pull_request' && format('refs/pull/{0}/merge', github.event.pull_request.number) || github.event.ref }}
 
 jobs:
   cleanup:
-    name: Cleanup at event ${{ github.event_name }} for branch ${{ github.event_type == 'pull_request' && 'refs/pull/${{ github.event.pull_request.number }}/merge' || github.event.ref }}
+    name: Cleanup at event ${{ github.event_name }} for branch ${{ github.event_name == 'pull_request' && format('refs/pull/{0}/merge', github.event.pull_request.number) || github.event.ref }}
     if: github.event.ref_type == 'branch' || github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request'
     runs-on: ubuntu-24.04
     steps:
