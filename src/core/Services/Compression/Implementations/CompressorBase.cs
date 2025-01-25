@@ -10,6 +10,13 @@ namespace SimpleCDN.Services.Compression.Implementations
 
 		public bool Compress(Span<byte> data, out int newLength)
 		{
+			if (data.Length < MinimumSize)
+			{
+				// the data is too small to be compressed
+				newLength = data.Length;
+				return false;
+			}
+
 			using var outputStream = new MemoryStream();
 			using (Stream compressorStream = Compress(outputStream))
 			{
@@ -18,6 +25,8 @@ namespace SimpleCDN.Services.Compression.Implementations
 
 			if (outputStream.Length >= data.Length)
 			{
+				// the compressed data is not smaller than the original data,
+				// so we return with the unchanged input data
 				newLength = data.Length;
 				return false;
 			}
