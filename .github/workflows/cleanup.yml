@@ -6,12 +6,15 @@ on:
     types:
       - closed
 
+permissions:
+  actions: write
+
 env:
   BRANCH: ${{ github.event_type == 'pull_request' && 'refs/pull/${{ github.event.pull_request.number }}/merge' || github.event.ref }}
 
 jobs:
   cleanup:
-    name: Cleanup at event ${{ github.event_name }} for branch ${{ env.BRANCH }}
+    name: Cleanup at event ${{ github.event_name }} for branch ${{ github.event_type == 'pull_request' && 'refs/pull/${{ github.event.pull_request.number }}/merge' || github.event.ref }}
     if: github.event.ref_type == 'branch' || github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request'
     runs-on: ubuntu-24.04
     steps:
@@ -23,11 +26,23 @@ jobs:
           ## Setting this to not fail the workflow while deleting cache keys.
           set +e
           echo "Deleting caches..."
+          deletedAny=0
           for cacheKey in $cacheKeysForPR
           do
+              deletedAny=1
               gh cache delete $cacheKey
+              exitCode="$?"
+              if [ "$exitCode" -eq 0 ]; then
+                  echo "deleted cache entry $cacheKey"
+              else
+                  echo "failed to delete cache entry $cacheKey - exited with code $exitCode"
+              fi
           done
-          echo "Done"
+          if [ "$deletedAny" -eq 0 ]; then
+              echo "No cache entries found"
+          else
+              echo "Done"
+          fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
