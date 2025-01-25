@@ -2,10 +2,13 @@ name: Cleanup
 on:
   delete:
   workflow_dispatch:
+  pull_request:
+    types:
+      - closed
 
 jobs:
   cleanup:
-    if: github.event.ref_type == 'branch'
+    if: github.event.ref_type == 'branch' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
     steps:
       - name: Branch Caches
@@ -24,4 +27,4 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
-          BRANCH: ${{ github.event.ref }}
+          BRANCH: ${{ github.event_type == 'pull_request' && 'refs/pull/${{ github.event.pull_request.number }}/merge' || github.event.ref }}
