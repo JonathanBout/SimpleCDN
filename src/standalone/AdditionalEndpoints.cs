@@ -52,12 +52,8 @@ namespace SimpleCDN.Standalone
 			{
 				ResponseWriter = async (ctx, health) =>
 				{
-					JsonOptions jsonOptions = ctx.RequestServices.GetRequiredService<IOptionsSnapshot<JsonOptions>>().Value;
 					ctx.Response.ContentType = MediaTypeNames.Application.Json;
-#pragma warning disable IL2026, IL3050 // it thinks it requires unreferenced code,
-					// but the TypeInfoResolverChain actually provides the necessary context
-					await ctx.Response.WriteAsJsonAsync(health);
-#pragma warning restore IL2026, IL3050
+					await ctx.Response.WriteAsJsonAsync(CustomHealthReport.FromHealthReport(health), ExtraSourceGenerationContext.Default.CustomHealthReport);
 				}
 			});
 

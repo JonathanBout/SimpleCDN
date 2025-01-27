@@ -11,11 +11,20 @@ public static class SimpleCDNBuilderExtensions
 {
     public static ISimpleCDNBuilder AddSomeCachingProvider(this ISimpleCDNBuilder builder)
     {
+    // === 1. Using the backing type ===
         // register the service as a singleton
         builder.Services.AddSingleton<IDistributedCache, MyCachingProvider>();
         
         // tell SimpleCDN what the service implementation type is
         builder.UseCacheImplementation<MyCachingProvider>();
+
+    // === 2. Using the public-facing type ===
+        builder.Services.AddSingleton<IMyCachingProvider, MyCachingProvider>();
+        builder.UseCachingImplementation<IMyCachingProvider>();
+
+    // === 3. Using a resolver delegate ===
+        builder.Services.AddSingleton<MyCachingProviderWrapper>();
+        builder.UseCachingImplementation(sp => sp.GetRequiredService<MyCachingProviderWrapper>().GetMyCachingProvider());
 
         return builder;
     }

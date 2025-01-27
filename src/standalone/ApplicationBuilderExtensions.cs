@@ -33,7 +33,7 @@ namespace SimpleCDN.Standalone
 						}
 					});
 					builder.Services.AddHealthChecks()
-						.AddRedis(sp => sp.GetRequiredService<CustomRedisCacheService>().GetRedisConnection(), "Redis");
+						.AddRedis(sp => sp.GetRequiredService<IRedisCacheService>().GetRedisConnection(), "Redis");
 					break;
 				case CacheType.InMemory:
 					builder.AddInMemoryCache(config =>

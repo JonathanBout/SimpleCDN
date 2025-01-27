@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Caching.Distributed;
+﻿using Microsoft.AspNetCore.Http.Json;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using SimpleCDN.Services;
 using SimpleCDN.Services.Caching;
 using SimpleCDN.Services.Caching.Implementations;
@@ -6,13 +8,14 @@ using SimpleCDN.Services.Compression;
 using SimpleCDN.Services.Compression.Implementations;
 using SimpleCDN.Services.Implementations;
 using System.ComponentModel;
+using System.Text.Json;
 
 namespace SimpleCDN.Configuration
 {
 	/// <summary>
 	/// Provides extension methods for configuring SimpleCDN.
 	/// </summary>
-	public static class ConfigurationExtensions
+	public static class CDNBuilderExtensions
 	{
 		const string InvalidConfigurationMessage = "See the log meessages for details.";
 
@@ -53,15 +56,13 @@ namespace SimpleCDN.Configuration
 
 		private class SimpleCDNBuilder : ISimpleCDNBuilder
 		{
-			private Type _cacheImplementationType = typeof(DisabledCache);
-
 			public SimpleCDNBuilder(IServiceCollection services)
 			{
 				Services = services;
 
 				Services.AddSingleton<IDistributedCache, DisabledCache>();
 				Services.AddSingleton<ICacheManager, CacheManager>();
-				Services.AddSingleton<ICacheImplementationResolver>(sp => new CacheImplementationResolver(sp, _cacheImplementationType));
+				UseCacheImplementation<DisabledCache>();
 				Services.ConfigureHttpJsonOptions(options => options.SerializerOptions.TypeInfoResolverChain.Add(SourceGenerationContext.Default));
 			}
 
@@ -79,28 +80,32 @@ namespace SimpleCDN.Configuration
 				return this;
 			}
 
+			public ISimpleCDNBuilder DisableCaching() => UseCacheImplementation<DisabledCache>();
+
+			private void RemoveCacheImplementations()
+			{
+				Services.RemoveAll<ICacheImplementationResolver>();
+			}
+
 			public ISimpleCDNBuilder UseCacheImplementation<TImplementation>() where TImplementation : IDistributedCache
 			{
-				/*
-				 * - if the service is registered as IDistributedCache
-				 *	- and
-				 *		| the implementation type is the specified type
-				 *		| or the implementation instance is the specified type
-				 *		| or the implementation factory is not null (we can't check the type)
-				 *	
-				 *	then we can use the specified cache implementation.
-				 */
-				if (!Services.Any(s => s.ServiceType == typeof(IDistributedCache)
-										&& (s.ImplementationType == typeof(TImplementation)
-											|| s.ImplementationInstance?.GetType() == typeof(TImplementation)
-											|| s.ImplementationFactory is not null)))
-				{
-					throw new InvalidOperationException("The specified cache implementation is not registered.");
-				}
+				RemoveCacheImplementations();
 
-				_cacheImplementationType = typeof(TImplementation);
-
+				Services.AddSingleton<ICacheImplementationResolver>(sp => new CacheImplementationResolver(sp, typeof(TImplementation)));
 				return this;
+			}
+
+			public ISimpleCDNBuilder UseCacheImplementation<TImplementation>(Func<IServiceProvider, TImplementation> resolve) where TImplementation : IDistributedCache
+			{
+				RemoveCacheImplementations();
+
+				Services.AddSingleton<ICacheImplementationResolver>(sp => new CacheImplementationResolver(resolve(sp)));
+				return this;
+			}
+
+			public ISimpleCDNBuilder UseCacheImplementation<TImplementation>(TImplementation implementation) where TImplementation : IDistributedCache
+			{
+				return UseCacheImplementation(_ => implementation);
 			}
 		}
 	}
@@ -126,10 +131,32 @@ namespace SimpleCDN.Configuration
 		ISimpleCDNBuilder ConfigureCaching(Action<CacheConfiguration> configure);
 
 		/// <summary>
+		/// Disables caching. This may be overridden again when you register a cache implementation afterwards.
+		/// </summary>
+		ISimpleCDNBuilder DisableCaching();
+
+		/// <summary>
+		/// Configures SimpleCDN to use the specified cache implementation. This should be used when a custom cache implementation is used.
+		/// </summary>
+		/// <typeparam name="TImplementation">
+		/// The serivce type to use as the cache implementation. Must implement <see cref="IDistributedCache"/>.
+		/// </typeparam>
+		[Browsable(false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		ISimpleCDNBuilder UseCacheImplementation<TImplementation>() where TImplementation : IDistributedCache;
+
+		/// <summary>
 		/// Configures SimpleCDN to use the specified cache implementation. This should be used when a custom cache implementation is used.
 		/// </summary>
 		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
-		ISimpleCDNBuilder UseCacheImplementation<TImplementation>() where TImplementation : IDistributedCache;
+		ISimpleCDNBuilder UseCacheImplementation<TImplementation>(Func<IServiceProvider, TImplementation> provider) where TImplementation : IDistributedCache;
+
+		/// <summary>
+		/// Configures SimpleCDN to use the specified cache implementation. This should be used when a custom cache implementation is used.
+		/// </summary>
+		[Browsable(false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		ISimpleCDNBuilder UseCacheImplementation<TImplementation>(TImplementation implementation) where TImplementation : IDistributedCache;
 	}
 }

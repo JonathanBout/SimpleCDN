@@ -10,12 +10,12 @@
 		<Authors>JonathanBout</Authors>
 		<Company>SimpleCDN</Company>
 		<Description>A simple CDN server for serving static files, with a local in-memory cache.</Description>
-		<Copyright>Contributors of SimpleCDN</Copyright>
+		<Copyright>© 2025 Contributors of SimpleCDN</Copyright>
 		<PackageProjectUrl>https://github.com/JonathanBout/SimpleCDN</PackageProjectUrl>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/JonathanBout/SimpleCDN.git</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
-		<PackageTags>cdn;static files;cache;aspnetcore</PackageTags>
+		<PackageTags>CDN;static files;cache;ASP.NET Core</PackageTags>
 		<IsPackable>true</IsPackable>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<OutputType>Library</OutputType>

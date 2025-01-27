@@ -16,9 +16,7 @@ namespace SimpleCDN.Configuration
 			if (configure is not null)
 				builder.Services.Configure(configure);
 
-			builder.Services.AddSingleton<InMemoryCache>()
-				.AddHostedService(sp => sp.GetRequiredService<InMemoryCache>())
-				.AddSingleton<IDistributedCache>(sp => sp.GetRequiredService<InMemoryCache>());
+			builder.Services.AddSingleton<IDistributedCache, InMemoryCache>();
 			builder.UseCacheImplementation<InMemoryCache>();
 			return builder;
 		}

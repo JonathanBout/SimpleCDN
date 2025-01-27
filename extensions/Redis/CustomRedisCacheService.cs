@@ -6,8 +6,8 @@ using StackExchange.Redis.KeyspaceIsolation;
 
 namespace SimpleCDN.Extensions.Redis
 {
-	public sealed class CustomRedisCacheService(IOptionsMonitor<RedisCacheConfiguration> options, IOptionsMonitor<CacheConfiguration> cacheOptions)
-		: IDistributedCache, IAsyncDisposable, IDisposable
+	internal sealed class CustomRedisCacheService(IOptionsMonitor<RedisCacheConfiguration> options, IOptionsMonitor<CacheConfiguration> cacheOptions)
+		: IRedisCacheService, IAsyncDisposable, IDisposable
 	{
 		private readonly IOptionsMonitor<RedisCacheConfiguration> options = options;
 		private readonly IOptionsMonitor<CacheConfiguration> cacheOptions = cacheOptions;

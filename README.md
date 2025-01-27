@@ -73,7 +73,6 @@ dotnet run --property:PublishAot=false -- --CDN:DataRoot <your_cdn_data>
 | `Cache:Type` | `InMemory`, `Redis` or `Disabled` | `InMemory`, or if Redis has been configured, `Redis` | What cache provider to use, if any. |
 | **In-Memory Options** |
 | `Cache:InMemory:MaxSize` | A size in kB | `500_000` | How big the cache may grow. When an entry is added, the oldest entries will be removed until this limit is met. |
-| `Cache:InMemory:PurgeInterval` | A TimeSpan | 5 minutes | How often the purge loop should wake up, to remove stale items older than `Cache:MaxAge` |
 | **Redis Options** |
 | `Cache:Redis:ConnectionString` | A redis connection string | None. Required when using Redis | How SimpleCDN should connect to your Redis instance. |
 | `Cache:Redis:ClientName` | A string, without spaces | `SimpleCDN` | How SimpleCDN should identify itself to Redis. |

@@ -18,15 +18,13 @@ namespace SimpleCDN.Extensions.Redis
 		/// </summary>
 		public static ISimpleCDNBuilder AddRedisCache(this ISimpleCDNBuilder builder, Action<RedisCacheConfiguration> configure)
 		{
-			builder.Services.AddSingleton<CustomRedisCacheService>();
-
-			builder.Services.AddSingleton<IDistributedCache>(sp => sp.GetRequiredService<CustomRedisCacheService>());
+			builder.Services.AddSingleton<IRedisCacheService, CustomRedisCacheService>();
 
 			builder.Services.AddOptionsWithValidateOnStart<RedisCacheConfiguration>()
 				.Configure(configure)
 				.Validate<ILogger<RedisCacheConfiguration>>((config, logger) => config.Validate(logger), InvalidConfigurationMessage);
 
-			builder.UseCacheImplementation<CustomRedisCacheService>();
+			builder.UseCacheImplementation<IRedisCacheService>();
 
 			return builder;
 		}

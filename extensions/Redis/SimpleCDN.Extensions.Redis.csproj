@@ -2,24 +2,28 @@
 
 	<PropertyGroup>
 		<TargetFrameworks>net9.0;net8.0</TargetFrameworks>
+		<LangVersion>latest</LangVersion>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<Title>SimpleCDN Redis Extension</Title>
-		<Description>An extension for using Redis with SimpleCDN, the static file server.</Description>
-		<PackageIcon>logo.png</PackageIcon>
-		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<Authors>JonathanBout</Authors>
 		<Company>SimpleCDN</Company>
-		<Copyright>Contributors of SimpleCDN</Copyright>
+		<Description>An extension for using Redis with SimpleCDN, the static file server.</Description>
+		<Copyright>© 2025 Contributors of SimpleCDN</Copyright>
 		<PackageProjectUrl>https://github.com/JonathanBout/SimpleCDN</PackageProjectUrl>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/JonathanBout/SimpleCDN.git</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
-		<PackageTags>simplecdn-extension;redis</PackageTags>
+		<PackageTags>SimpleCDN Extension;Redis;ASP.NET Core</PackageTags>
 		<IsPackable>true</IsPackable>
-		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<IncludeSymbols>True</IncludeSymbols>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<OutputType>Library</OutputType>
+		<PackageIcon>logo.png</PackageIcon>
+		<IncludeSymbols>true</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<IsAotCompatible>true</IsAotCompatible>
+		<EnableRequestDelegateGenerator>true</EnableRequestDelegateGenerator>
 		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 	</PropertyGroup>
 

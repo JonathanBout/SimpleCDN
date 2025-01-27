@@ -14,8 +14,10 @@ namespace SimpleCDN.Tests.Unit
 		[TestCase(1_000_000_000_000, "1TB")]
 		[TestCase(-1, "-1B")]
 		[TestCase(-1000, "-1kB")]
-		[TestCase(1_000_000_000_000_000, "1000TB")]
-		[TestCase(123_456_789_012_345, "123.46TB")]
+		[TestCase(1_000_000_000_000_000, "1PB")]
+		[TestCase(1_000_000_000_000_000_000, "1EB")]
+		[TestCase(long.MaxValue, "9.22EB")]
+		[TestCase(long.MinValue, "-9.22EB")]
 		public void TestByteCountFormatting(long input, string expectedOutput)
 		{
 			Assert.That(input.FormatByteCount(), Is.EqualTo(expectedOutput));
