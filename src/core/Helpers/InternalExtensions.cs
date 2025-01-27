@@ -18,13 +18,13 @@ namespace SimpleCDN.Helpers
 			int sizeNameIndex = 0;
 			double result = double.Abs(number);
 
-			while (result >= 1000 && sizeNameIndex < sizeNames.Length - 1)
+			while (result >= 1000 && sizeNameIndex < sizeNames.Length)
 			{
 				result /= 1000;
 				sizeNameIndex++;
 			}
 
-			return $"{(number < 0 ? "-": "")}{result:0.##}{sizeNames[sizeNameIndex]}B";
+			return $"{(number < 0 ? "-": "")}{result:0.##}{sizeNames[sizeNameIndex - 1]}B";
 		}
 
 		/// <summary>
