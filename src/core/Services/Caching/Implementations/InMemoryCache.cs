@@ -11,8 +11,8 @@ namespace SimpleCDN.Services.Caching.Implementations
 	/// A local, in-memory cache that limits the total size of the stored values. When the size of the cache exceeds the specified limit, the oldest (least recently accessed) values are removed.<br/>
 	/// Implements <see cref="IDistributedCache"/> for compatibility with the <see cref="CacheManager"/>. It is not actually distributed.
 	/// </summary>
-	internal class InMemoryCache(IOptionsMonitor<InMemoryCacheConfiguration> options, IOptionsMonitor<CacheConfiguration> cacheOptions, ILogger<InMemoryCache> logger)
-		: IDistributedCache, IHostedService, ICacheDebugInfoProvider
+	internal partial class InMemoryCache(IOptionsMonitor<InMemoryCacheConfiguration> options, IOptionsMonitor<CacheConfiguration> cacheOptions, ILogger<InMemoryCache> logger)
+		: IDistributedCache, IDisposable
 	{
 		private readonly IOptionsMonitor<InMemoryCacheConfiguration> _options = options;
 		private readonly IOptionsMonitor<CacheConfiguration> _cacheOptions = cacheOptions;
@@ -41,8 +41,16 @@ namespace SimpleCDN.Services.Caching.Implementations
 			return token.IsCancellationRequested ? Task.FromCanceled<byte[]?>(token) : Task.FromResult(Get(key));
 		}
 
-		public void Refresh(string key) { }
-		public Task RefreshAsync(string key, CancellationToken token = default) => token.IsCancellationRequested ? Task.FromCanceled(token) : Task.CompletedTask;
+		public void Refresh(string key)
+		{
+			if (_dictionary.TryGetValue(key, out ValueWrapper? wrapper))
+			{
+				wrapper.Refresh();
+			}
+		}
+
+		public Task RefreshAsync(string key, CancellationToken token = default)
+			=> token.IsCancellationRequested ? Task.FromCanceled(token) : Task.CompletedTask;
 		public void Remove(string key) => _dictionary.TryRemove(key, out _);
 		public Task RemoveAsync(string key, CancellationToken token = default)
 		{
@@ -56,23 +64,8 @@ namespace SimpleCDN.Services.Caching.Implementations
 		public void Set(string key, byte[] value, DistributedCacheEntryOptions options)
 		{
 			_dictionary[key] = new ValueWrapper(value);
-
-			IEnumerable<KeyValuePair<string, ValueWrapper>> byOldest = _dictionary.OrderBy(wrapper => wrapper.Value.AccessedAt).AsEnumerable();
-
-			// remove the oldest items until the size is within the limit
-			while (Size > MaxSize)
-			{
-				try
-				{
-					((var oldestKey, _), byOldest) = byOldest.RemoveFirst();
-					_dictionary.TryRemove(oldestKey, out _);
-				} catch (ArgumentOutOfRangeException)
-				{
-					// code should never reach this point, but just in case as a safety net
-					_logger.LogWarning("Cache size exceeded the limit, but no more items could be removed to bring it back within the limit.");
-					break;
-				}
-			}
+			Compact();
+			Purge();
 		}
 
 		public Task SetAsync(string key, byte[] value, DistributedCacheEntryOptions options, CancellationToken token = default)
@@ -84,83 +77,10 @@ namespace SimpleCDN.Services.Caching.Implementations
 			return Task.CompletedTask;
 		}
 
-		internal void Clear()
+		public void Dispose()
 		{
-			_dictionary.Clear();
-		}
-
-		#region Automated Purging
-		private CancellationTokenSource? _backgroundCTS;
-		private IDisposable? _optionsOnChange;
-
-		private void Purge()
-		{
-			_dictionary.RemoveWhere(kvp => Stopwatch.GetElapsedTime(kvp.Value.AccessedAt) < _cacheOptions.CurrentValue.MaxAge);
-		}
-
-		private async Task PurgeLoop()
-		{
-			while (_backgroundCTS?.Token.IsCancellationRequested is false)
-			{
-				await Task.Delay(_options.CurrentValue.PurgeInterval, _backgroundCTS.Token);
-
-				if (_backgroundCTS.Token.IsCancellationRequested)
-					break;
-
-				_logger.LogDebug("Purging expired cache items");
-
-				Purge();
-			}
-		}
-
-		public Task StartAsync(CancellationToken cancellationToken)
-		{
-			// register the options change event to restart the background task
-			_optionsOnChange ??= _options.OnChange(_ => StartAsync(default));
-
-			if (_cacheOptions.CurrentValue.MaxAge == TimeSpan.Zero || _options.CurrentValue.PurgeInterval == TimeSpan.Zero)
-			{
-				// automatic expiration and purging are disabled.
-				// stop the background task if it's running and return
-				_backgroundCTS?.Dispose();
-				_backgroundCTS = null;
-				return Task.CompletedTask;
-			}
-
-			if (_backgroundCTS is not null)
-			{
-				// background task is already running, no need to start another
-				return Task.CompletedTask;
-			}
-
-			_backgroundCTS = new CancellationTokenSource();
-
-			_backgroundCTS.Token.Register(() =>
-			{
-				// if the token is cancelled, dispose the token source and set it to null
-				// so that the next time StartAsync is called it may be recreated
-				_backgroundCTS?.Dispose();
-				_backgroundCTS = null;
-			});
-
-			// The background task will run in the background until the token is cancelled
-			// execution of the current method will continue immediately
-			Task.Run(PurgeLoop,
-				CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _backgroundCTS.Token).Token);
-
-			return Task.CompletedTask;
-		}
-
-		public Task StopAsync(CancellationToken cancellationToken)
-		{
-			_optionsOnChange?.Dispose();
-			return _backgroundCTS?.CancelAsync() ?? Task.CompletedTask;
-		}
-		#endregion
-
-		public object GetDebugInfo()
-		{
-			return new SizeLimitedCacheDebugView(Size, MaxSize, Count, [.. Keys], FillPercentage: (double)Size / MaxSize);
+			DisposeCompacting();
+			DisposePurging();
 		}
 
 		class ValueWrapper(byte[] value)
@@ -168,7 +88,7 @@ namespace SimpleCDN.Services.Caching.Implementations
 			private byte[] _value = value;
 
 			/// <summary>
-			/// The value stored in the cache. Accessing this property will update the last accessed timestamp.
+			/// The value stored in the cache. Accessing this property will update <see cref="AccessedAt"/> to the current time.
 			/// </summary>
 			public byte[] Value
 			{
@@ -183,11 +103,13 @@ namespace SimpleCDN.Services.Caching.Implementations
 					AccessedAt = Stopwatch.GetTimestamp();
 				}
 			}
+
+			public void Refresh() => AccessedAt = Stopwatch.GetTimestamp();
+
 			public int Size => _value.Length;
 			public long AccessedAt { get; private set; } = Stopwatch.GetTimestamp();
 
 			public static implicit operator byte[](ValueWrapper wrapper) => wrapper.Value;
 		}
 	}
-	internal record SizeLimitedCacheDebugView(long Size, long MaxSize, int Count, string[] Keys, double FillPercentage);
 }

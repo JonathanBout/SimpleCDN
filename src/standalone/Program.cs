@@ -31,11 +31,8 @@ namespace SimpleCDN.Standalone
 			builder.Services.AddSimpleCDN()
 				.MapConfiguration(builder.Configuration);
 
-			builder.Services.ConfigureHttpJsonOptions(options =>
-			{
-				options.SerializerOptions.TypeInfoResolverChain.Add(ExtraSourceGenerationContext.Default);
-				options.SerializerOptions.Converters.Add(new JsonStringEnumConverter<HealthStatus>());
-			});
+			builder.Services.ConfigureHttpJsonOptions(options
+				=> options.SerializerOptions.TypeInfoResolverChain.Add(ExtraSourceGenerationContext.Default));
 
 			builder.Services.AddHealthChecks()
 				.AddCheck("Self", () => HealthCheckResult.Healthy());

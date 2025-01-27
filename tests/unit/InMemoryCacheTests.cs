@@ -57,12 +57,14 @@ namespace SimpleCDN.Tests.Unit
 		[TestCase(1000, true)]
 		[TestCase(1001, false)]
 		[TestCase(10000, false)]
-		public void Test_AddedFile_TooLarge(int size, bool shouldPass)
+		public async Task Test_AddedFile_TooLarge(int size, bool shouldPass)
 		{
 			InMemoryCache cache = CreateCache(options => options.MaxSize = 1);
 			const string TEST_PATH = "/hello.txt";
 			string testData = new string('*', size);
 			cache.Set(TEST_PATH, Encoding.UTF8.GetBytes(testData), new DistributedCacheEntryOptions());
+
+			await Task.Delay(100); // give the compacting task enough time to finish
 
 			if (shouldPass)
 			{
@@ -88,8 +90,8 @@ namespace SimpleCDN.Tests.Unit
 		[Test]
 		public async Task Test_OldItems_AreEvicted()
 		{
-			var purgeInterval = TimeSpan.FromSeconds(1);
-			InMemoryCache cache = CreateCache(options => options.PurgeInterval = purgeInterval);
+			var maxAge = TimeSpan.FromSeconds(1);
+			InMemoryCache cache = CreateCache(configureCache: options => options.MaxAge = maxAge);
 
 			const string TEST_PATH = "/hello.txt";
 			const string TEST_DATA = "Hello, World!";
@@ -104,9 +106,7 @@ namespace SimpleCDN.Tests.Unit
 
 			Assert.That(cache.Get(TEST_PATH), Is.Not.Null);
 
-			await cache.StartAsync(CancellationToken.None);
-
-			await Task.Delay(purgeInterval + TimeSpan.FromSeconds(1)); // wait for the purge interval with a small margin
+			await Task.Delay(maxAge + TimeSpan.FromSeconds(1)); // wait for the purge interval with a small margin
 			Assert.That(cache.Get(TEST_PATH), Is.Null);
 
 #if RELEASE
@@ -117,8 +117,6 @@ namespace SimpleCDN.Tests.Unit
 
 			Assert.That(weakRef.IsAlive, Is.False);
 #endif
-
-			await cache.StopAsync(CancellationToken.None);
 		}
 	}
 }

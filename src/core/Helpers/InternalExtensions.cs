@@ -2,36 +2,29 @@
 
 namespace SimpleCDN.Helpers
 {
-	internal static partial class InternalExtensions
+	internal static class InternalExtensions
 	{
-		static readonly string[] sizeNames = ["", "k", "M", "G", "T"];
+		// only up to exabytes, because 1 yottabyte doesn't even fit in a ulong
+		// (I also don't think we are going to need it anytime soon)
+		static readonly string[] sizeNames = ["k", "M", "G", "T", "P", "E"];
 
 		public static string FormatByteCount(this long number)
 		{
-			var isNegative = false;
-			if (number < 0)
+			if (number is < 1000 and > -1000)
 			{
-				isNegative = true;
-				number = -number;
+				return number + "B";
 			}
 
-			var sizeNameIndex = 0;
+			int sizeNameIndex = 0;
+			double result = double.Abs(number);
 
-			double result = number;
-
-			for (; sizeNameIndex < sizeNames.Length - 1; sizeNameIndex++)
+			while (result >= 1000 && sizeNameIndex < sizeNames.Length - 1)
 			{
-				var div = result / 1000;
-				if (div < 1)
-					break;
-
-				result = div;
+				result /= 1000;
+				sizeNameIndex++;
 			}
 
-			if (isNegative)
-				result = -result;
-
-			return $"{result:0.##}{sizeNames[sizeNameIndex]}B";
+			return $"{(number < 0 ? "-": "")}{result:0.##}{sizeNames[sizeNameIndex]}B";
 		}
 
 		/// <summary>
@@ -142,22 +135,6 @@ namespace SimpleCDN.Helpers
 				}
 			}
 			return builder.ToString();
-		}
-
-		public static bool HasAnyFlag<T>(this T enumValue, T flag) where T : Enum, IConvertible
-		{
-			var intValue = enumValue.ToInt64(null);
-			var intFlag = flag.ToInt64(null);
-
-			return (intValue & intFlag) != 0;
-		}
-
-		public static bool DoesNotHaveFlag<T>(this T enumValue, T flag) where T : Enum, IConvertible
-		{
-			var intValue = enumValue.ToInt64(null);
-			var intFlag = flag.ToInt64(null);
-
-			return (intValue & intFlag) == 0;
 		}
 
 		public static void RemoveWhere<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, Func<KeyValuePair<TKey, TValue>, bool> predicate)

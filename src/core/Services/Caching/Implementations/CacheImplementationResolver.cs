@@ -5,20 +5,23 @@ namespace SimpleCDN.Services.Caching.Implementations
 	/// <summary>
 	/// Resolves the selected cache implementation from the registered services.
 	/// </summary>
-	internal class CacheImplementationResolver(IServiceProvider services, Type implementationType) : ICacheImplementationResolver
+	internal class CacheImplementationResolver : ICacheImplementationResolver
 	{
-		private IDistributedCache? _impl;
-		public IDistributedCache Implementation
+		public CacheImplementationResolver(IServiceProvider services, Type implementationType)
 		{
-			get
+			var resolved = services.GetService(implementationType)
+							?? services.GetServices<IDistributedCache>().FirstOrDefault(s => s.GetType() == implementationType);
+
+			if (resolved is not IDistributedCache dc)
 			{
-				_impl ??= services.GetServices<IDistributedCache>().FirstOrDefault(s => s.GetType() == implementationType);
-
-				if (_impl is null)
-					throw new InvalidOperationException($"The specified cache implementation ({implementationType.Name}) is not registered.");
-
-				return _impl;
+				throw new InvalidOperationException($"The specified cache implementation type '{implementationType}' is not registered.");
 			}
+
+			Implementation = dc;
 		}
+
+		public CacheImplementationResolver(IDistributedCache implementation) => Implementation = implementation;
+
+		public IDistributedCache Implementation { get; }
 	}
 }
