@@ -6,6 +6,9 @@ in for example a kubernetes cluster.
 
 [The SimpleCDN Docker Image](https://ghcr.io/jonathanbout/simplecdn) comes with Redis support by default.
 
+After registering the extension, the connection with Redis is accesible by injecting `IRedisCacheService` in your services.
+For typical usage, you don't need to interact with this service directly, as SimpleCDN will handle this for you.
+
 ## Features
 - Redis caching
 
