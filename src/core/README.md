@@ -62,6 +62,3 @@ cdnBuilder.AddInMemoryCache(options => { ... });
 ```
 - `options.MaxSize`: The maximum size of the cache in kB. Default is `500_000` (500MB). When this limit
   is passed, the least recently used files are removed from the cache until the size is below the limit.
-- `options.PurgeInterval`: The interval at which the cache is purged of unused files, in minutes.
-  Default is `5`. Set to `0` to disable purging. Note that disabling purging means the MaxAge cache
-  configuration property will not be respected.
