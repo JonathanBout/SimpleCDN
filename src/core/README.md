@@ -19,10 +19,7 @@ This will map the SimpleCDN endpoint to `/cdn` and serve files from `/var/www/st
 - In-memory caching
 - Redis caching, with the
   [SimpleCDN.Extensions.Redis](https://www.nuget.org/packages/SimpleCDN.Extensions.Redis/) package.
-  Although it's a few milliseconds slower than the in-memory cache, it saves a load of memory with multiple instances.
-> [!WARNING]  
-> **While Redis support is available, it may be unstable**, especially in high-load scenario's (tens of requests per second). By implementing a custom connection manager,
-> it's brought down to a minimum but failures still happen. In such cases, SimpleCDN will load the data from disk directly instead of using the cache.
+  Although it's a few milliseconds slower than the in-memory cache, it saves you from having files in memory multiple times with multiple instances.
 
 SimpleCDN is also available as a standalone application with a docker container: [ghcr.io/jonathanbout/simplecdn](https://ghcr.io/jonathanbout/simplecdn).
 
@@ -62,6 +59,3 @@ cdnBuilder.AddInMemoryCache(options => { ... });
 ```
 - `options.MaxSize`: The maximum size of the cache in kB. Default is `500_000` (500MB). When this limit
   is passed, the least recently used files are removed from the cache until the size is below the limit.
-- `options.PurgeInterval`: The interval at which the cache is purged of unused files, in minutes.
-  Default is `5`. Set to `0` to disable purging. Note that disabling purging means the MaxAge cache
-  configuration property will not be respected.

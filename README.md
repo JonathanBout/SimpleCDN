@@ -3,10 +3,6 @@
 
 SimpleCDN is, well, a simple CDN server. Built with relatively high r/w latency in mind (think NAS mount), it provides efficiënt ways to cache files, either using the built-in in-memory cache, or the Redis extension.
 
-> [!WARNING]  
-> **While Redis support is available, it is not very stable**, especially in high-load scenario's (tens of requests per second). By implementing a custom connection manager,
-> it's brought down to a minimum but failures still happen. In such cases, SimpleCDN will load the data from disk instead of using the cache.
-
 ![image](https://github.com/user-attachments/assets/8749c243-3396-455c-bc95-d99084477279)
 
 ## How to use this in an existing project?
