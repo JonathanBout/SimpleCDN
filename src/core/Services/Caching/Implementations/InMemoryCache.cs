@@ -11,7 +11,10 @@ namespace SimpleCDN.Services.Caching.Implementations
 	/// A local, in-memory cache that limits the total size of the stored values. When the size of the cache exceeds the specified limit, the oldest (least recently accessed) values are removed.<br/>
 	/// Implements <see cref="IDistributedCache"/> for compatibility with the <see cref="CacheManager"/>. It is not actually distributed.
 	/// </summary>
-	internal partial class InMemoryCache(IOptionsMonitor<InMemoryCacheConfiguration> options, IOptionsMonitor<CacheConfiguration> cacheOptions, ILogger<InMemoryCache> logger)
+	internal partial class InMemoryCache(
+		IOptionsMonitor<InMemoryCacheConfiguration> options,
+		IOptionsMonitor<CacheConfiguration> cacheOptions,
+		ILogger<InMemoryCache> logger)
 		: IDistributedCache, IDisposable
 	{
 		private readonly IOptionsMonitor<InMemoryCacheConfiguration> _options = options;

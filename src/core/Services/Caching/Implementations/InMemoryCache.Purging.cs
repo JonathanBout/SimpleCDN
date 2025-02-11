@@ -142,7 +142,10 @@ namespace SimpleCDN.Services.Caching.Implementations
 
 		private void DisposePurging()
 		{
-			_purgeTask?.Dispose();
+			_purgeCTS?.Dispose();
+			// Wait 10 ms for the task to finish gracefully
+			_purgeTask?.Wait(10);
+			_purgeCTS?.Dispose();
 		}
 	}
 }
