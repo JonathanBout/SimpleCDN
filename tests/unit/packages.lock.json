@@ -18,6 +18,12 @@
           "Microsoft.TestPlatform.TestHost": "17.13.0"
         }
       },
+      "NaughtyStrings": {
+        "type": "Direct",
+        "requested": "[2.4.1, )",
+        "resolved": "2.4.1",
+        "contentHash": "6A5+iqfKHkhtoCEqsZKjbj/q9jssEs5K3taCUNBnlTTZd7hR9FUrLY47+cNjfoI3zsrONJaDf8ZBYWIeXe+Y4Q=="
+      },
       "NUnit": {
         "type": "Direct",
         "requested": "[4.3.2, )",
@@ -159,6 +165,12 @@
           "Microsoft.CodeCoverage": "17.13.0",
           "Microsoft.TestPlatform.TestHost": "17.13.0"
         }
+      },
+      "NaughtyStrings": {
+        "type": "Direct",
+        "requested": "[2.4.1, )",
+        "resolved": "2.4.1",
+        "contentHash": "6A5+iqfKHkhtoCEqsZKjbj/q9jssEs5K3taCUNBnlTTZd7hR9FUrLY47+cNjfoI3zsrONJaDf8ZBYWIeXe+Y4Q=="
       },
       "NUnit": {
         "type": "Direct",
