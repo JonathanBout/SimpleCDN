@@ -9,12 +9,12 @@ updates:
     directories: # Location of package manifests
     - "/"
     schedule:
-      interval: "daily"
+      interval: "monthly"
   - package-ecosystem: "docker"
     directory: "/src/standalone"
     schedule:
-      interval: "daily"
+      interval: "monthly"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "monthly"
