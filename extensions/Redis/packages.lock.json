@@ -4,9 +4,9 @@
     "net8.0": {
       "Microsoft.NET.ILLink.Tasks": {
         "type": "Direct",
-        "requested": "[8.0.11, )",
-        "resolved": "8.0.11",
-        "contentHash": "zk5lnZrYJgtuJG8L4v17Ej8rZ3PUcR2iweNV08BaO5LbYHIi2wNaVNcJoLxvqgQdnjLlKnCCfVGLDr6QHeAarQ=="
+        "requested": "[8.0.15, )",
+        "resolved": "8.0.15",
+        "contentHash": "s4eXlcRGyHeCgFUGQnhq0e/SCHBPp0jOHgMqZg3fQ2OCHJSm1aOUhI6RFWuVIcEb9ig2WgI2kWukk8wu72EbUQ=="
       },
       "Roslynator.Analyzers": {
         "type": "Direct",
@@ -16,9 +16,9 @@
       },
       "StackExchange.Redis": {
         "type": "Direct",
-        "requested": "[2.8.24, )",
-        "resolved": "2.8.24",
-        "contentHash": "GWllmsFAtLyhm4C47cOCipGxyEi1NQWTFUHXnJ8hiHOsK/bH3T5eLkWPVW+LRL6jDiB3g3izW3YEHgLuPoJSyA==",
+        "requested": "[2.8.31, )",
+        "resolved": "2.8.31",
+        "contentHash": "RCHVQa9Zke8k0oBgJn1Yl6BuYy8i6kv+sdMObiH60nOwD6QvWAjxdDwOm+LO78E8WsGiPqgOuItkz98fPS6haQ==",
         "dependencies": {
           "Microsoft.Extensions.Logging.Abstractions": "6.0.0",
           "Pipelines.Sockets.Unofficial": "2.2.8"
@@ -49,9 +49,9 @@
     "net9.0": {
       "Microsoft.NET.ILLink.Tasks": {
         "type": "Direct",
-        "requested": "[9.0.0, )",
-        "resolved": "9.0.0",
-        "contentHash": "zAwp213evC3UkimtVXRb+Dlgc/40QG145nmZDtp2LO9zJJMfrp+i/87BnXN7tRXEA4liyzdFkjqG1HE8/RPb4A=="
+        "requested": "[9.0.4, )",
+        "resolved": "9.0.4",
+        "contentHash": "xUdlUxiFwXhTYhB4VxKg/IA0+jlZXJPo70LYuMryWbJHdonIpZjw+7DO2B0pWwpXIOs6MlH5WVXPEtfrGEcVZA=="
       },
       "Roslynator.Analyzers": {
         "type": "Direct",
@@ -61,9 +61,9 @@
       },
       "StackExchange.Redis": {
         "type": "Direct",
-        "requested": "[2.8.24, )",
-        "resolved": "2.8.24",
-        "contentHash": "GWllmsFAtLyhm4C47cOCipGxyEi1NQWTFUHXnJ8hiHOsK/bH3T5eLkWPVW+LRL6jDiB3g3izW3YEHgLuPoJSyA==",
+        "requested": "[2.8.31, )",
+        "resolved": "2.8.31",
+        "contentHash": "RCHVQa9Zke8k0oBgJn1Yl6BuYy8i6kv+sdMObiH60nOwD6QvWAjxdDwOm+LO78E8WsGiPqgOuItkz98fPS6haQ==",
         "dependencies": {
           "Microsoft.Extensions.Logging.Abstractions": "6.0.0",
           "Pipelines.Sockets.Unofficial": "2.2.8"

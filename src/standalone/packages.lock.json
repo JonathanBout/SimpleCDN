@@ -14,15 +14,15 @@
       },
       "Microsoft.DotNet.ILCompiler": {
         "type": "Direct",
-        "requested": "[9.0.0, )",
-        "resolved": "9.0.0",
-        "contentHash": "bbnlV2PbUmCQ8Ndpx0kJaicLyV28IU+4IzyctQLL57+DxrHurYr2qsJrC8+yD44Q0DyPfv2oM168c1Tk6Bxbmg=="
+        "requested": "[9.0.4, )",
+        "resolved": "9.0.4",
+        "contentHash": "G85txKEuQ8s64BG9Pk3TbmE+cDgKReepnIPNfC1lNks4u2v5SkQhjCuuSAep+H2xtgFpYU7w9LFOF+vVtJZguA=="
       },
       "Microsoft.NET.ILLink.Tasks": {
         "type": "Direct",
-        "requested": "[9.0.2, )",
-        "resolved": "9.0.2",
-        "contentHash": "+KFnCLVPicEq99ko0tq+ycTvNLXHw0tImmTZjPloB/DOFLPT56KLfk5aS7wbgXRPzYhXTTBYLGaABea5mke77w=="
+        "requested": "[9.0.4, )",
+        "resolved": "9.0.4",
+        "contentHash": "xUdlUxiFwXhTYhB4VxKg/IA0+jlZXJPo70LYuMryWbJHdonIpZjw+7DO2B0pWwpXIOs6MlH5WVXPEtfrGEcVZA=="
       },
       "Microsoft.VisualStudio.Azure.Containers.Tools.Targets": {
         "type": "Direct",
@@ -126,8 +126,8 @@
       },
       "StackExchange.Redis": {
         "type": "Transitive",
-        "resolved": "2.8.24",
-        "contentHash": "GWllmsFAtLyhm4C47cOCipGxyEi1NQWTFUHXnJ8hiHOsK/bH3T5eLkWPVW+LRL6jDiB3g3izW3YEHgLuPoJSyA==",
+        "resolved": "2.8.31",
+        "contentHash": "RCHVQa9Zke8k0oBgJn1Yl6BuYy8i6kv+sdMObiH60nOwD6QvWAjxdDwOm+LO78E8WsGiPqgOuItkz98fPS6haQ==",
         "dependencies": {
           "Microsoft.Extensions.Logging.Abstractions": "6.0.0",
           "Pipelines.Sockets.Unofficial": "2.2.8"
@@ -145,7 +145,7 @@
         "type": "Project",
         "dependencies": {
           "SimpleCDN": "[1.0.0, )",
-          "StackExchange.Redis": "[2.8.24, )"
+          "StackExchange.Redis": "[2.8.31, )"
         }
       }
     }
