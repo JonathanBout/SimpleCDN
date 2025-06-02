@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Globalization;
+using System.Text;
 
 namespace SimpleCDN.Helpers
 {
@@ -8,7 +9,7 @@ namespace SimpleCDN.Helpers
 		// (I also don't think we are going to need it anytime soon)
 		static readonly string[] sizeNames = ["k", "M", "G", "T", "P", "E"];
 
-		public static string FormatByteCount(this long number)
+		public static string FormatByteCount(this long number, CultureInfo? culture = null)
 		{
 			if (number is < 1000 and > -1000)
 			{
@@ -24,7 +25,9 @@ namespace SimpleCDN.Helpers
 				sizeNameIndex++;
 			}
 
-			return $"{(number < 0 ? "-": "")}{result:0.##}{sizeNames[sizeNameIndex - 1]}B";
+			culture ??= CultureInfo.InvariantCulture;
+
+			return string.Create(culture, $"{(number < 0 ? "-" : "")}{result:0.##}{sizeNames[sizeNameIndex - 1]}B");
 		}
 
 		/// <summary>
