@@ -1,10 +1,13 @@
 ﻿using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Jobs;
 using SimpleCDN.Helpers;
 using System.Text;
 
 namespace SimpleCDN.Benchmarks
 {
 	[MemoryDiagnoser(false)]
+	[SimpleJob(RuntimeMoniker.Net90, baseline: true)]
+	[SimpleJob(RuntimeMoniker.Net80)]
 	public class StringBuilderConversionBenchmarks
 	{
 		public StringBuilder[] GetData()

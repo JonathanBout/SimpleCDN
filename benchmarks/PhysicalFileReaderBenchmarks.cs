@@ -1,4 +1,5 @@
 ﻿using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Jobs;
 using SimpleCDN.Configuration;
 using SimpleCDN.Services.Implementations;
 using SimpleCDN.Tests.Mocks;
@@ -6,6 +7,8 @@ using SimpleCDN.Tests.Mocks;
 namespace SimpleCDN.Benchmarks
 {
 	[MemoryDiagnoser]
+	[SimpleJob(RuntimeMoniker.Net90, baseline: true)]
+	[SimpleJob(RuntimeMoniker.Net80)]
 	public class PhysicalFileReaderBenchmarks
 	{
 		private PhysicalFileReader reader = null!;

@@ -1,4 +1,5 @@
 ﻿using SimpleCDN.Helpers;
+using System.Globalization;
 
 namespace SimpleCDN.Tests.Unit
 {
@@ -18,9 +19,12 @@ namespace SimpleCDN.Tests.Unit
 		[TestCase(1_000_000_000_000_000_000, "1EB")]
 		[TestCase(long.MaxValue, "9.22EB")]
 		[TestCase(long.MinValue, "-9.22EB")]
-		public void TestByteCountFormatting(long input, string expectedOutput)
+		[TestCase(long.MinValue, "-9,22EB", "nl-NL")]
+		public void TestByteCountFormatting(long input, string expectedOutput, string? culture = null)
 		{
-			Assert.That(input.FormatByteCount(), Is.EqualTo(expectedOutput));
+			CultureInfo targetCulture = culture is null ? CultureInfo.InvariantCulture : CultureInfo.GetCultureInfo(culture);
+
+			Assert.That(input.FormatByteCount(targetCulture), Is.EqualTo(expectedOutput));
 		}
 	}
 }

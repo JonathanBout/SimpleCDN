@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections.Frozen;
+using System.Diagnostics.CodeAnalysis;
 
 namespace SimpleCDN.Helpers
 {
@@ -20,12 +21,19 @@ namespace SimpleCDN.Helpers
 		/// <summary>
 		/// Represents the Brotli compression algorithm.
 		/// </summary>
-		public static readonly CompressionAlgorithm Brotli = new("br", ".br", 2, sizeGrade: 10, speedGrade: 6);
+		public static readonly CompressionAlgorithm Brotli = new("br", ".br", 2, sizeGrade: 10, speedGrade: 5);
 
 		/// <summary>
 		/// Represents the Deflate compression algorithm.
 		/// </summary>
 		public static readonly CompressionAlgorithm Deflate = new("deflate", ".zz", 3, sizeGrade: 8, speedGrade: 7);
+
+		private static readonly FrozenDictionary<string, CompressionAlgorithm> algorithmsByName = new Dictionary<string, CompressionAlgorithm>(StringComparer.OrdinalIgnoreCase)
+		{
+			{ GZip.HttpName, GZip },
+			{ Brotli.HttpName, Brotli },
+			{ Deflate.HttpName, Deflate }
+		}.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
 
 		/// <summary>
 		/// The name of the compression algorithm as used in HTTP headers.
@@ -106,13 +114,34 @@ namespace SimpleCDN.Helpers
 		/// </summary>
 		public static CompressionAlgorithm FromName(string name)
 		{
-			return name.ToLower() switch
-			{
-				"gzip" => GZip,
-				"br" or "brotli" => Brotli,
-				"deflate" => Deflate,
-				_ => None
-			};
+
+#if NET9_0_OR_GREATER
+			// in NET 9.0 and later, we can use spans with alternate lookups for better performance
+			return FromName(name.AsSpan());
+#else
+			// in NET 8.0 and earlier, we use a simple dictionary lookup
+			name = name.Trim();
+			return algorithmsByName.TryGetValue(name, out CompressionAlgorithm algorithm) ? algorithm : None;
+#endif
+		}
+
+		/// <summary>
+		/// Returns the compression algorithm with the given <see cref="HttpName"/>, or <see cref="None"/> if no algorithm matches.
+		/// </summary>
+		public static CompressionAlgorithm FromName(ReadOnlySpan<char> name)
+		{
+			name = name.Trim();
+
+#if !NET9_0_OR_GREATER
+			// in NET 8.0 and earlier we use a simple dictionary lookup
+			return FromName(name.ToString());
+#else
+			// in NET 9.0 and later, we can use alternate lookups for better performance
+			FrozenDictionary<string, CompressionAlgorithm>.AlternateLookup<ReadOnlySpan<char>> alternateLookup
+				= algorithmsByName.GetAlternateLookup<ReadOnlySpan<char>>();
+
+			return alternateLookup.TryGetValue(name, out CompressionAlgorithm res) ? res : None;
+#endif
 		}
 
 		/// <summary>

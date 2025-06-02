@@ -75,7 +75,7 @@ namespace SimpleCDN.Tests.Load
 					Console.WriteLine("Average request duration: {0:0.##} ms          ", average);
 					Console.WriteLine("Max request duration: {0:0.##} ms          ", max);
 					Console.WriteLine("Min request duration: {0:0.##} ms          ", min);
-					Console.WriteLine("Total requests: {0}          ", durations.Count);
+					Console.WriteLine("Total requests:  {0}          ", durations.Count);
 					Console.WriteLine("Failed requests: {0}          ", errors);
 					Console.WriteLine("                                                                    ");
 
