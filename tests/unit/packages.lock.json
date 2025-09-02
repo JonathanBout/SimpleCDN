@@ -32,9 +32,9 @@
       },
       "NUnit.Analyzers": {
         "type": "Direct",
-        "requested": "[4.9.2, )",
-        "resolved": "4.9.2",
-        "contentHash": "4OjmtBP57N7bZc36Ej1dlvshxbkXf4VSgNMWjYjN/TqXVGtUaT/GSXa+CCqK178gbrnTKJSLrKl2AYdh1fbcAg=="
+        "requested": "[4.10.0, )",
+        "resolved": "4.10.0",
+        "contentHash": "w0DLq/bYgjUOugReSDJEOC3E9gOtVw85AJhVQoMk06+Kas2HdJMX0ojMjt+FoN8+38FIKlAppNOuHacIBkXJTQ=="
       },
       "NUnit3TestAdapter": {
         "type": "Direct",
@@ -188,9 +188,9 @@
       },
       "NUnit.Analyzers": {
         "type": "Direct",
-        "requested": "[4.9.2, )",
-        "resolved": "4.9.2",
-        "contentHash": "4OjmtBP57N7bZc36Ej1dlvshxbkXf4VSgNMWjYjN/TqXVGtUaT/GSXa+CCqK178gbrnTKJSLrKl2AYdh1fbcAg=="
+        "requested": "[4.10.0, )",
+        "resolved": "4.10.0",
+        "contentHash": "w0DLq/bYgjUOugReSDJEOC3E9gOtVw85AJhVQoMk06+Kas2HdJMX0ojMjt+FoN8+38FIKlAppNOuHacIBkXJTQ=="
       },
       "NUnit3TestAdapter": {
         "type": "Direct",
