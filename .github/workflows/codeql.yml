@@ -53,7 +53,7 @@ jobs:
         build-mode: ${{ matrix.build-mode }}
 
     - name: Setup .NET Core SDK
-      uses: actions/setup-dotnet@v4.1.0
+      uses: actions/setup-dotnet@v5
       if: ${{ matrix.language == 'csharp' }}
       with:
         cache: true
