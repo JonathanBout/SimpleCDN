@@ -126,7 +126,7 @@ jobs:
         with:
           cosign-release: 'v2.2.4'
       - name: Download digests
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           path: /tmp/digests
           pattern: digests-*
