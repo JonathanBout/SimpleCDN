@@ -14,21 +14,21 @@
       },
       "Microsoft.DotNet.ILCompiler": {
         "type": "Direct",
-        "requested": "[9.0.7, )",
-        "resolved": "9.0.7",
-        "contentHash": "FpvJ2rCpj2CB/4hZt0cmB3hCPMNZV2vrisQis3hR9itTEjLzeggi0AShrgJIZ5+3Y7433K7ESSsJ6+8T+nE2nQ=="
+        "requested": "[9.0.13, )",
+        "resolved": "9.0.13",
+        "contentHash": "HjOJCDy5GcOzkOeQuBLgbu8nUBvoZIZ+yA8SkDbb00PLAtYlRyZyfjjyNuhj3C0k+aliAV1oUCzVXqRQFxeI8g=="
       },
       "Microsoft.NET.ILLink.Tasks": {
         "type": "Direct",
-        "requested": "[9.0.7, )",
-        "resolved": "9.0.7",
-        "contentHash": "SZ1brSGoLnhLbE8QUZrtN6YwzN2gDT1wbx9qDBEfFFJcstiDTjJ6ygNuTPBV/K7SjGfx2YNbcJi5+ygbPOZpDg=="
+        "requested": "[9.0.13, )",
+        "resolved": "9.0.13",
+        "contentHash": "f7t15I9ZXV7fNk3FIzPAlkJNG1A1tkSeDpRh+TFWEToGGqA+uj6uqU15I8YOkkYICNY2tqOVm2CMe6ScPFPwEg=="
       },
       "Microsoft.VisualStudio.Azure.Containers.Tools.Targets": {
         "type": "Direct",
-        "requested": "[1.21.1, )",
-        "resolved": "1.21.1",
-        "contentHash": "uOr+MTuP+/RccXnWptvh7D34GVWMsRPC/qRnEm38xsdMGZnWU7oWgJi+m4sIWLa5l5PHTcXuhMY/sT+UO/BKRw=="
+        "requested": "[1.23.0, )",
+        "resolved": "1.23.0",
+        "contentHash": "2wDnb4umupJZ/1ikgWozFVpggH1mlHQFc0odXVv2ZagL3RYwXgW9zmC15fiqIBzmaC0vLZUnLGwDY+p8ZR7Syw=="
       },
       "TomLonghurst.ReadableTimeSpan": {
         "type": "Direct",
@@ -126,12 +126,18 @@
       },
       "StackExchange.Redis": {
         "type": "Transitive",
-        "resolved": "2.8.58",
-        "contentHash": "0XGRE2UoF/n2/qhCpcyBBZovpGhHu4hRtkdsx4fZFu1H5Q/Z8Q+U/z/nWwnosWDRJnEasntNatd9Mf+Isc8plg==",
+        "resolved": "2.10.1",
+        "contentHash": "se08WZvD42H3bV4XBW07pupTiE2/72qStKyi/lRqqcijksFWfRtwLTuhFtZ4OX19f4+we/2qruFZBXYJBFc8PQ==",
         "dependencies": {
           "Microsoft.Extensions.Logging.Abstractions": "8.0.0",
-          "Pipelines.Sockets.Unofficial": "2.2.8"
+          "Pipelines.Sockets.Unofficial": "2.2.8",
+          "System.IO.Hashing": "9.0.10"
         }
+      },
+      "System.IO.Hashing": {
+        "type": "Transitive",
+        "resolved": "9.0.10",
+        "contentHash": "9gv5z71xaWWmcGEs4bXdreIhKp2kYLK2fvPK5gQkgnWMYvZ8ieaxKofDjxL3scZiEYfi/yW2nJTiKV2awcWEdA=="
       },
       "System.IO.Pipelines": {
         "type": "Transitive",
@@ -145,7 +151,7 @@
         "type": "Project",
         "dependencies": {
           "SimpleCDN": "[1.0.0, )",
-          "StackExchange.Redis": "[2.8.58, )"
+          "StackExchange.Redis": "[2.10.1, )"
         }
       }
     }
