@@ -38,15 +38,13 @@ namespace SimpleCDN.Helpers
 		/// <param name="path">The path to normalize in-place.</param>
 		public static void Normalize(ref this Span<char> path)
 		{
-			IEnumerable<Range> segments = path.SplitToPathSegments();
-
 			var rangesToRemove = new List<Range>();
 
 			var resultRanges = new Stack<Range>();
 
 			var originalLength = path.Length;
 
-			foreach (Range segment in segments)
+			foreach (Range segment in path.SplitToPathSegments())
 			{
 				if (path[segment] is "..")
 				{

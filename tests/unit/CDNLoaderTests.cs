@@ -3,6 +3,9 @@ using SimpleCDN.Services;
 using SimpleCDN.Services.Implementations;
 using SimpleCDN.Tests.Mocks;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using static SimpleCDN.Services.Implementations.IndexGenerator;
 
 namespace SimpleCDN.Tests.Unit
 {
@@ -88,12 +91,12 @@ namespace SimpleCDN.Tests.Unit
 			CDNLoader loader = CreateLoader();
 			CDNFile? file = loader.GetFile(name);
 			Assert.That(file, Is.Not.Null);
-			Assert.Multiple(() =>
+			using (Assert.EnterMultipleScope())
 			{
 				Assert.That(file!.Content, Is.Not.Null);
 				Assert.That(Encoding.UTF8.GetString(file.Content), Is.EqualTo(content));
 				Assert.That(file.MediaType, Is.EqualTo(mediaType));
-			});
+			}
 		}
 	}
 }

@@ -5,7 +5,7 @@ namespace SimpleCDN.Tests.Unit
 {
 	public class StringBuilderExtensionTests
 	{
-		public record TestInput(string[] Parts, (string, object[])[] formattedParts, Encoding Encoding)
+		public record TestInput(string[] Parts, (string, object[])[] FormattedPaths, Encoding Encoding)
 		{
 			public override string ToString() => $"{Parts.Length} parts, {Encoding.EncodingName}";
 		}

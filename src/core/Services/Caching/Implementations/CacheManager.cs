@@ -63,12 +63,14 @@ namespace SimpleCDN.Services.Caching.Implementations
 #endif
 			if (bytes is null || bytes.Length == 0)
 			{
-				_logger.LogInformation("Cache MISS for {Key} in {Duration:0} ms", key, elapsed.TotalMilliseconds);
+				if (_logger.IsEnabled(LogLevel.Information))
+					_logger.LogInformation("Cache MISS for {Key} in {Duration:0} ms", key, elapsed.TotalMilliseconds);
 				value = null;
 				return false;
 			}
 
-			_logger.LogDebug("Cache HIT for {Key} in {Duration:0} ms", key, elapsed.TotalMilliseconds);
+			if (_logger.IsEnabled(LogLevel.Debug))
+				_logger.LogDebug("Cache HIT for {Key} in {Duration:0} ms", key, elapsed.TotalMilliseconds);
 
 			value = CachedFile.FromBytes(bytes);
 

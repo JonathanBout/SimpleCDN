@@ -20,7 +20,7 @@ namespace SimpleCDN.Tests.Mocks
 			return false;
 		}
 
-		public bool CanLoadIntoArray(long size) => size <= ARRAY_SIZE_THRESHOLD;
+		public static bool CanLoadIntoArray(long size) => size <= ARRAY_SIZE_THRESHOLD;
 
 		public bool DirectoryExists(string path)
 		{

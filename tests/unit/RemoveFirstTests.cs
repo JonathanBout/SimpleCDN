@@ -16,11 +16,11 @@ namespace SimpleCDN.Tests.Unit
 		{
 			IEnumerable<int> source = [1];
 			(int left, IEnumerable<int> right) = source.RemoveFirst();
-			Assert.Multiple(() =>
+			using (Assert.EnterMultipleScope())
 			{
 				Assert.That(left, Is.EqualTo(1));
 				Assert.That(right, Is.Empty);
-			});
+			}
 		}
 
 		[Test]
@@ -28,11 +28,11 @@ namespace SimpleCDN.Tests.Unit
 		{
 			IEnumerable<int> source = [1, 2];
 			(int left, IEnumerable<int> right) = source.RemoveFirst();
-			Assert.Multiple(() =>
+			using (Assert.EnterMultipleScope())
 			{
 				Assert.That(left, Is.EqualTo(1));
 				Assert.That(right, Is.EqualTo([2]));
-			});
+			}
 		}
 
 		[Test]
@@ -40,11 +40,11 @@ namespace SimpleCDN.Tests.Unit
 		{
 			IEnumerable<int> source = [1, 2, 3];
 			(int left, IEnumerable<int> right) = source.RemoveFirst();
-			Assert.Multiple(() =>
+			using (Assert.EnterMultipleScope())
 			{
 				Assert.That(left, Is.EqualTo(1));
 				Assert.That(right, Is.EqualTo([2, 3]));
-			});
+			}
 		}
 	}
 }

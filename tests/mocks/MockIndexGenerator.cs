@@ -9,5 +9,10 @@ namespace SimpleCDN.Tests.Mocks
 		{
 			return Encoding.UTF8.GetBytes("Mock index");
 		}
+
+		public byte[]? GenerateIndexJson(string absolutePath, string requestPathString)
+		{
+			return Encoding.UTF8.GetBytes("""{ "items": [], "name": "directory", "lastModified": "never" }""");
+		}
 	}
 }

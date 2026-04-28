@@ -42,7 +42,7 @@ namespace SimpleCDN
 		public const string CDNRouteValueKey = "cdnRoute";
 	}
 
-	[JsonSourceGenerationOptions(Converters = [typeof(JsonStringEnumConverter<HealthStatus>)])]
+	[JsonSourceGenerationOptions(Converters = [typeof(JsonStringEnumConverter<HealthStatus>)], PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
 #if DEBUG // only generate serializers for debug views in debug mode
 	[JsonSerializable(typeof(SizeLimitedCacheDebugView))]
 	[JsonSerializable(typeof(BasicDebugView))]
@@ -50,5 +50,7 @@ namespace SimpleCDN
 	[JsonSerializable(typeof(DetailedDebugView))]
 #endif
 	[JsonSerializable(typeof(object))]
+	[JsonSerializable(typeof(IndexGenerator.JsonIndexModel))]
+	[JsonSerializable(typeof(IndexGenerator.JsonIndexItemModel))]
 	internal partial class SourceGenerationContext : JsonSerializerContext;
 }

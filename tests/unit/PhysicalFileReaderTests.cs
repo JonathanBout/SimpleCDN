@@ -39,7 +39,7 @@ namespace SimpleCDN.Tests.Unit
 			Directory.CreateDirectory(nonDotDirectoryPath);
 			File.CreateText(nonDotDirectoryFilePath).Close();
 
-			Assert.Multiple(() =>
+			using (Assert.EnterMultipleScope())
 			{
 				Assert.That(reader.IsDotFile(dotFilePath), Is.True);
 				Assert.That(reader.IsDotFile(dotDirectoryPath), Is.True);
@@ -48,7 +48,7 @@ namespace SimpleCDN.Tests.Unit
 				Assert.That(reader.IsDotFile(nonDotFilePath), Is.False);
 				Assert.That(reader.IsDotFile(nonDotDirectoryPath), Is.False);
 				Assert.That(reader.IsDotFile(nonDotDirectoryFilePath), Is.False);
-			});
+			}
 		}
 
 		[Test]
@@ -62,11 +62,11 @@ namespace SimpleCDN.Tests.Unit
 			var file = reader.LoadIntoArray(filePath);
 			var actualContent = Encoding.ASCII.GetString(file);
 
-			Assert.Multiple(() =>
+			using (Assert.EnterMultipleScope())
 			{
 				Assert.That(file, Is.Not.Null);
 				Assert.That(actualContent, Is.EqualTo(fileContent));
-			});
+			}
 		}
 
 		[Test]
@@ -75,11 +75,11 @@ namespace SimpleCDN.Tests.Unit
 			string filePath = Path.Combine(fileRoot, "file.txt");
 			File.CreateText(filePath).Close();
 
-			Assert.Multiple(() =>
+			using (Assert.EnterMultipleScope())
 			{
 				Assert.That(reader.FileExists(filePath), Is.True);
 				Assert.That(reader.FileExists(filePath + "x"), Is.False);
-			});
+			}
 		}
 
 		[Test]
@@ -87,11 +87,11 @@ namespace SimpleCDN.Tests.Unit
 		{
 			string directoryPath = Path.Combine(fileRoot, "directory");
 			Directory.CreateDirectory(directoryPath);
-			Assert.Multiple(() =>
+			using (Assert.EnterMultipleScope())
 			{
 				Assert.That(reader.DirectoryExists(directoryPath), Is.True);
 				Assert.That(reader.DirectoryExists(directoryPath + "x"), Is.False);
-			});
+			}
 		}
 
 		[Test]
@@ -107,13 +107,13 @@ namespace SimpleCDN.Tests.Unit
 			File.CreateText(filePath3).Close();
 			var files = reader.GetFiles(directoryPath).ToList();
 
-			Assert.Multiple(() =>
+			using (Assert.EnterMultipleScope())
 			{
 				Assert.That(files, Has.Count.EqualTo(3));
 				Assert.That(files, Contains.Item(filePath1));
 				Assert.That(files, Contains.Item(filePath2));
 				Assert.That(files, Contains.Item(filePath3));
-			});
+			}
 		}
 
 		[TearDown]

@@ -21,8 +21,6 @@
 		/// </summary>
 		public string PageTitle { get; set; } = "SimpleCDN";
 
-		private bool _showDotFiles;
-
 		/// <summary>
 		/// Whether to show files starting with a dot (e.g. .gitignore) in the index. Default is false.
 		/// This is only relevant if <see cref="AllowDotFileAccess"/> is set to true.
@@ -31,8 +29,8 @@
 		/// </summary>
 		public bool ShowDotFiles
 		{
-			get => _showDotFiles && AllowDotFileAccess;
-			set => _showDotFiles = value;
+			get => field && AllowDotFileAccess;
+			set => field = value;
 		}
 
 		/// <summary>
@@ -45,6 +43,11 @@
 		/// <br/>On Windows, this setting also affects files with the <see cref="FileAttributes.Hidden"/> attribute.
 		/// </summary>
 		public bool AllowDotFileAccess { get; set; }
+
+		/// <summary>
+		/// Whether a index.json file should be made available.
+		/// </summary>
+		public bool GenerateIndexJson { get; set; }
 
 		/// <summary>
 		/// Validates the configuration. Logs to the provided logger with loglevel 'critical' if any validation fails.

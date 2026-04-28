@@ -21,7 +21,8 @@ namespace SimpleCDN.Services.Implementations
 
 			var cacheKey = CacheKeyPrefix + requestPathString;
 
-			_logger.LogDebug("Requesting system file '{path}'", requestPathString.ForLog());
+			if (_logger.IsEnabled(LogLevel.Debug))
+				_logger.LogDebug("Requesting system file '{path}'", requestPathString.ForLog());
 
 			IFileInfo fileInfo = _systemFilesProvider.GetFileInfo(requestPathString);
 
@@ -29,14 +30,16 @@ namespace SimpleCDN.Services.Implementations
 			{
 				_cache.TryRemove(cacheKey);
 
-				_logger.LogDebug("System file '{path}' does not exist", requestPathString);
+				if (_logger.IsEnabled(LogLevel.Debug))
+					_logger.LogDebug("System file '{path}' does not exist", requestPathString);
 
 				return null;
 			}
 
 			if (_cache.TryGetValue(cacheKey, out CachedFile? cachedFile) && cachedFile.LastModified >= fileInfo.LastModified)
 			{
-				_logger.LogDebug("Serving system file '{path}' from cache", requestPathString);
+				if (_logger.IsEnabled(LogLevel.Debug))
+					_logger.LogDebug("Serving system file '{path}' from cache", requestPathString);
 				return new CDNFile(cachedFile.Content, cachedFile.MimeType.ToContentTypeString(), cachedFile.LastModified, cachedFile.Compression);
 			}
 
