@@ -1,7 +1,7 @@
 # SimpleCDN
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/JonathanBout/SimpleCDN/dotnet.yml?style=flat-square&logo=.net&label=tests&labelColor=%23512BD4&link=https%3A%2F%2Fgithub.com%2FJonathanBout%2FSimpleCDN%2Factions%2Fworkflows%2Fdotnet.yml)
 
-SimpleCDN is, well, a simple CDN server. Built with relatively high r/w latency in mind (think NAS mount), it provides efficiënt ways to cache files, either using the built-in in-memory cache, or the Redis extension.
+SimpleCDN is, well, a simple CDN server. Built with relatively high r/w latency in mind (think NAS mount), it provides efficient ways to cache files, either using the built-in in-memory cache, or the Redis extension.
 
 ![image](https://github.com/user-attachments/assets/8749c243-3396-455c-bc95-d99084477279)
 
@@ -60,6 +60,7 @@ dotnet run --property:PublishAot=false -- --CDN:DataRoot <your_cdn_data>
 | `CDN:BlockRobots` | `true` or `false` | `true` | Whether to request robots to not index CDN files. Its still up to the robots to adhere to this rule. |
 | `CDN:Footer` | Any HTML | `Powered by SimpleCDN` (with a link to this GitHub repo) | The text to place at the bottom of generated index files. |
 | `CDN:PageTitle` | Any `<title>` compatible string | `SimpleCDN` | The text to display in the browser's title bar. |
+| `CDN:GenerateIndexJson` | `true` or `false` | `false` | Whether to generate `index.json` files, just like `index.html` files but easier to read for machines. |
 
 #### Caching
 | key | value type | default value | description |
