@@ -27,12 +27,12 @@ namespace SimpleCDN.Tests.Unit
 		{
 			InMemoryCache cache = CreateCache();
 
-			Assert.Multiple(() =>
+			using (Assert.EnterMultipleScope())
 			{
 				Assert.That(cache.Count, Is.Zero);
 				Assert.That(cache.Size, Is.Zero);
 				Assert.That(cache.Keys, Is.Empty);
-			});
+			}
 			Assert.That(cache.Get("/hello.txt"), Is.Null);
 		}
 
@@ -43,12 +43,12 @@ namespace SimpleCDN.Tests.Unit
 			const string TEST_DATA = "Hello, World!";
 			const string TEST_PATH = "/hello.txt";
 			cache.Set(TEST_PATH, Encoding.UTF8.GetBytes(TEST_DATA), new DistributedCacheEntryOptions());
-			Assert.Multiple(() =>
+			using (Assert.EnterMultipleScope())
 			{
 				Assert.That(cache.Count, Is.EqualTo(1));
 				Assert.That(cache.Size, Is.EqualTo(TEST_DATA.Length));
 				Assert.That(cache.Keys, Is.EquivalentTo([TEST_PATH]));
-			});
+			}
 			Assert.That(cache.Get(TEST_PATH), Is.EqualTo(Encoding.UTF8.GetBytes(TEST_DATA)));
 		}
 
@@ -68,21 +68,21 @@ namespace SimpleCDN.Tests.Unit
 
 			if (shouldPass)
 			{
-				Assert.Multiple(() =>
+				using (Assert.EnterMultipleScope())
 				{
 					Assert.That(cache.Count, Is.EqualTo(1));
 					Assert.That(cache.Size, Is.EqualTo(testData.Length));
 					Assert.That(cache.Keys, Is.EquivalentTo([TEST_PATH]));
-				});
+				}
 				Assert.That(cache.Get(TEST_PATH), Is.Not.Null);
 			} else
 			{
-				Assert.Multiple(() =>
+				using (Assert.EnterMultipleScope())
 				{
 					Assert.That(cache.Count, Is.Zero);
 					Assert.That(cache.Size, Is.Zero);
 					Assert.That(cache.Keys, Is.Empty);
-				});
+				}
 				Assert.That(cache.Get(TEST_PATH), Is.Null);
 			}
 		}

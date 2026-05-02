@@ -29,14 +29,14 @@ namespace SimpleCDN.Benchmarks
 
 			reader = new PhysicalFileReader(new MockLogger<PhysicalFileReader>(), new OptionsMock<CDNConfiguration>(new CDNConfiguration { DataRoot = dataRoot }));
 
-			Directory.CreateDirectory(Path.Combine(dataRoot, DOT_DIRECTORY));
-			Directory.CreateDirectory(Path.Combine(dataRoot, DIRECTORY));
+			Directory.CreateDirectory(Path.Join(dataRoot, DOT_DIRECTORY));
+			Directory.CreateDirectory(Path.Join(dataRoot, DIRECTORY));
 
-			File.OpenWrite(Path.Combine(dataRoot, DOTFILE)).Close();
-			File.OpenWrite(Path.Combine(dataRoot, FILE)).Close();
+			File.OpenWrite(Path.Join(dataRoot, DOTFILE)).Dispose();
+			File.OpenWrite(Path.Join(dataRoot, FILE)).Dispose();
 
-			File.OpenWrite(Path.Combine(dataRoot, DOT_DIRECTORY_FILE)).Close();
-			File.OpenWrite(Path.Combine(dataRoot, DIRECTORY_FILE)).Close();
+			File.OpenWrite(Path.Join(dataRoot, DOT_DIRECTORY_FILE)).Dispose();
+			File.OpenWrite(Path.Join(dataRoot, DIRECTORY_FILE)).Dispose();
 		}
 
 		[Benchmark]

@@ -1,14 +1,23 @@
 ﻿using Microsoft.Extensions.Options;
 using SimpleCDN.Configuration;
 using SimpleCDN.Helpers;
+using System.Diagnostics.CodeAnalysis;
 using System.Security;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 using System.Web;
+using System.Xml.Linq;
 
 namespace SimpleCDN.Services.Implementations
 {
+
 	internal class IndexGenerator(IOptionsMonitor<CDNConfiguration> options, ILogger<IndexGenerator> logger, ICDNContext context) : IIndexGenerator
 	{
+		internal record JsonIndexItemModel(string Name, DateTimeOffset LastModified, long? Size, bool IsDirectory);
+		internal record JsonIndexModel(IList<JsonIndexItemModel> Items, string Name, DateTimeOffset LastModified);
+
 		const string ROBOTS_META = "<meta name=\"robots\" content=\"noindex, nofollow\">";
 
 		private readonly IOptionsMonitor<CDNConfiguration> _options = options;
@@ -137,6 +146,27 @@ namespace SimpleCDN.Services.Implementations
 			index.AppendFormat("""<td class="col-size">{0}</td>""", size < 0 ? "-" : size.FormatByteCount());
 			index.AppendFormat("""<td class="col-date">{0}</td>""", lastModified.ToString("dd/MM/yyyy HH:mm"));
 			index.Append("</tr>");
+		}
+
+		public byte[]? GenerateIndexJson(string absolutePath, string requestPathString)
+		{
+			var info = new DirectoryInfo(absolutePath);
+			if (!info.Exists)
+			{
+				return null;
+			}
+
+			DateTime lastModified = info.LastWriteTimeUtc;
+			var directoryListing = new JsonIndexModel([], requestPathString, lastModified);
+			foreach (FileSystemInfo item in info.GetFileSystemInfos().OrderBy(i => i.LastWriteTimeUtc).ThenBy(i => i is FileInfo))
+			{
+				if (item.Name.StartsWith('.') && !_options.CurrentValue.ShowDotFiles)
+					continue;
+
+				directoryListing.Items.Add(new JsonIndexItemModel(item.Name, item.LastWriteTimeUtc, (item as FileInfo)?.Length, item is DirectoryInfo));
+			}
+
+			return Encoding.UTF8.GetBytes(JsonSerializer.Serialize(directoryListing, typeof(JsonIndexModel), SourceGenerationContext.Default));
 		}
 	}
 }

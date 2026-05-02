@@ -41,6 +41,7 @@ cdnBuilder.Configure(options => { ... });
 - `options.ShowDotFiles`: Whether to show files starting with a dot. Default is `false`.
   If `options.AllowDotfileAccess` is `false`, this option is ignored.
 - `options.BlockRobots`: Whether to block robots from indexing the CDN. Default is `true`.
+- `options.GenerateIndexJson`: Whether to generate `index.json` files when requested, just like the standard `index.json`. For every directory an `index.json` will be available, unless one exists on disk already. Default is `false`.
 
 ### General caching configuration
 This configuration is used by the Cache Manager and uses it to configure the caching provider.

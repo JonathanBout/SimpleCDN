@@ -24,14 +24,14 @@ namespace SimpleCDN.Tests.Unit
 
 			Assert.That(newFile, Is.Not.Null);
 
-			Assert.Multiple(() =>
+			using (Assert.EnterMultipleScope())
 			{
 				Assert.That(newFile!.Content, Is.EqualTo(file.Content));
 				Assert.That(newFile.Compression, Is.EqualTo(file.Compression));
 				Assert.That(newFile.MimeType, Is.EqualTo(file.MimeType));
 				Assert.That(newFile.LastModified, Is.EqualTo(file.LastModified));
 				Assert.That(newFile.Size, Is.EqualTo(file.Size));
-			});
+			}
 		}
 	}
 }

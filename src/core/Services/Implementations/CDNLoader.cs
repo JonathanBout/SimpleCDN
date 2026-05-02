@@ -3,6 +3,7 @@ using SimpleCDN.Cache;
 using SimpleCDN.Configuration;
 using SimpleCDN.Helpers;
 using SimpleCDN.Services.Caching;
+using System.Net.Mime;
 
 namespace SimpleCDN.Services.Implementations
 {
@@ -21,8 +22,6 @@ namespace SimpleCDN.Services.Implementations
 		private readonly ILogger<CDNLoader> _logger = logger;
 
 		private readonly IOptionsMonitor<CDNConfiguration> _options = options;
-
-		string DataRoot => _options.CurrentValue.DataRoot;
 
 		public CDNFile? GetFile(string path, params IEnumerable<CompressionAlgorithm> acceptedCompression)
 		{
@@ -43,21 +42,48 @@ namespace SimpleCDN.Services.Implementations
 				return GetSystemFile(pathSpan[GlobalConstants.SystemFilesRelativePath.Length..], acceptedCompression);
 			}
 
-			var filesystemPath = Path.Join(DataRoot.AsSpan(), pathSpan);
+			var filesystemPath = Path.Join(_options.CurrentValue.DataRoot.AsSpan(), pathSpan);
 
 			if (!_options.CurrentValue.AllowDotFileAccess && _fs.IsDotFile(filesystemPath))
 			{
-				_logger.LogDebug("Denying access to dotfile or directory '{dotfile}'.", filesystemPath.ForLog());
+				if (_logger.IsEnabled(LogLevel.Debug))
+					_logger.LogDebug("Denying access to dotfile or directory '{dotfile}'.", filesystemPath.ForLog());
 				return null;
 			}
 
 			// if the path is not a file, we attempt to serve an index file
 			if (!_fs.FileExists(filesystemPath))
 			{
+				if (_options.CurrentValue.GenerateIndexJson && (pathSpan.EndsWith("/index.json") || pathSpan.SequenceEqual("index.json")))
+				{
+					filesystemPath = Path.GetDirectoryName(filesystemPath);
+					if (filesystemPath is null) return null;
+					return GetJsonIndexFile(filesystemPath, pathSpan);
+				}
 				return GetIndexFile(filesystemPath, pathSpan);
 			}
 
 			return GetRegularFile(filesystemPath, pathSpan);
+		}
+
+		private CDNFile? GetJsonIndexFile(string absolutePath, ReadOnlySpan<char> requestPath)
+		{
+			var requestPathString = requestPath.ToString();
+			DateTimeOffset lastModified = _fs.GetLastModified(absolutePath);
+
+			if (_cache.TryGetValue(requestPathString, out CachedFile? cachedFile) && cachedFile.LastModified > lastModified)
+				return new CDNFile(cachedFile.Content, MediaTypeNames.Application.Json, cachedFile.LastModified, cachedFile.Compression);
+
+			var index = _indexGenerator.GenerateIndexJson(absolutePath, requestPathString);
+
+			if (index is null)
+			{
+				return null;
+			}
+
+			_cache.CacheFile(Path.Combine(requestPathString, "index.json"), index, index.Length, lastModified, MimeType.JSON, CompressionAlgorithm.None);
+
+			return new CDNFile(index, MimeType.JSON.ToContentTypeString(), lastModified, CompressionAlgorithm.None);
 		}
 
 		/// <summary>
@@ -129,7 +155,8 @@ namespace SimpleCDN.Services.Implementations
 
 			if (!canLoadIntoArray)
 			{
-				_logger.LogDebug("File '{path}' is too big to load into memory, streaming instead", requestPath.ForLog());
+				if (_logger.IsEnabled(LogLevel.Debug))
+					_logger.LogDebug("File '{path}' is too big to load into memory, streaming instead", requestPath.ForLog());
 				return new BigCDNFile(absolutePath, mediaType.ToContentTypeString(), _fs.GetLastModified(absolutePath), CompressionAlgorithm.None);
 			}
 

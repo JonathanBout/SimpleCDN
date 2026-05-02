@@ -45,11 +45,11 @@ namespace SimpleCDN.Tests.Unit
 			cache.CacheFile(TEST_PATH, file);
 
 			Assert.That(cacheImplementation.Values, Has.Count.EqualTo(1));
-			Assert.Multiple(() =>
+			using (Assert.EnterMultipleScope())
 			{
 				Assert.That(cacheImplementation.Values.Single().Key, Is.EqualTo(TEST_PATH));
 				Assert.That(cacheImplementation.Values.Single().Value, Is.EqualTo(file.GetBytes()));
-			});
+			}
 		}
 
 		[TestCase(TEST_DATA_1)]

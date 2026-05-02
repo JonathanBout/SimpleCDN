@@ -43,7 +43,8 @@ namespace SimpleCDN.Configuration
 
 			if (MaxItemSize < 1 || MaxItemSize > Array.MaxLength)
 			{
-				logger.LogCritical("MaxCachedItemSize must be greater than 0 and smaller than Array.MaxLength ({max array length} in this case)", Array.MaxLength);
+				if (logger.IsEnabled(LogLevel.Critical))
+					logger.LogCritical("MaxCachedItemSize must be greater than 0 and smaller than Array.MaxLength ({max array length} in this case)", Array.MaxLength);
 				isValid = false;
 			}
 

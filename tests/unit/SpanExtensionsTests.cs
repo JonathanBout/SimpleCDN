@@ -55,11 +55,11 @@ namespace SimpleCDN.Tests.Unit
 				Range[] result = [.. span.SplitToPathSegments()];
 
 				Assert.That(result, Has.Length.EqualTo(2), $"Path: '{path}' of length {path.Length}");
-				Assert.Multiple(() =>
+				using (Assert.EnterMultipleScope())
 				{
 					Assert.That(path[result[0]], Is.EqualTo(TheNaughtyStrings.All[i].Trim()));
 					Assert.That(path[result[1]], Is.EqualTo(TheNaughtyStrings.All[i + 1].Trim()));
-				});
+				}
 			}
 		}
 	}

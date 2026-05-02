@@ -17,5 +17,6 @@ namespace SimpleCDN.Services
 		/// or <see langword="null"/> if the directory does not exist or is inaccesible.
 		/// </returns>
 		byte[]? GenerateIndex(string absolutePath, string rootRelativePath);
+		byte[]? GenerateIndexJson(string absolutePath, string requestPathString);
 	}
 }
