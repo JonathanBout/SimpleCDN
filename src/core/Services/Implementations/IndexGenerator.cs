@@ -157,7 +157,7 @@ namespace SimpleCDN.Services.Implementations
 			}
 
 			DateTime lastModified = info.LastWriteTimeUtc;
-			var directoryListing = new JsonIndexModel([], requestPathString, lastModified);
+			var directoryListing = new JsonIndexModel([], Path.GetDirectoryName(requestPathString) ?? "/", lastModified);
 			foreach (FileSystemInfo item in info.GetFileSystemInfos().OrderBy(i => i.LastWriteTimeUtc).ThenBy(i => i is FileInfo))
 			{
 				if (item.Name.StartsWith('.') && !_options.CurrentValue.ShowDotFiles)
