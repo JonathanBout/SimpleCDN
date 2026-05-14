@@ -27,6 +27,7 @@ jobs:
       with:
         cache-dependency-path: '**/packages.lock.json'
         dotnet-version: |
+          10.0.x
           9.0.x
           8.0.x
         cache: true
@@ -49,7 +50,7 @@ jobs:
       uses: actions/setup-dotnet@v5
       with:
         cache-dependency-path: '**/packages.lock.json'
-        dotnet-version: 9.0.x
+        dotnet-version: 10.0.x
         cache: true
     - name: Restore dependencies
       run: dotnet restore tests/integration/SimpleCDN.Tests.Integration.csproj
