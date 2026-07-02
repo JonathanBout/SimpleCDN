@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-24.04
     name: Unit Tests
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - name: Setup .NET
       uses: actions/setup-dotnet@v5
       with:
@@ -45,7 +45,7 @@ jobs:
     runs-on: ubuntu-24.04
     name: Integration Tests
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - name: Setup .NET
       uses: actions/setup-dotnet@v5
       with:
