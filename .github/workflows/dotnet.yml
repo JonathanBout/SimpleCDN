@@ -23,7 +23,7 @@ jobs:
     steps:
     - uses: actions/checkout@v7
     - name: Setup .NET
-      uses: actions/setup-dotnet@v5
+      uses: actions/setup-dotnet@v6
       with:
         cache-dependency-path: '**/packages.lock.json'
         dotnet-version: |
@@ -47,7 +47,7 @@ jobs:
     steps:
     - uses: actions/checkout@v7
     - name: Setup .NET
-      uses: actions/setup-dotnet@v5
+      uses: actions/setup-dotnet@v6
       with:
         cache-dependency-path: '**/packages.lock.json'
         dotnet-version: 10.0.x
